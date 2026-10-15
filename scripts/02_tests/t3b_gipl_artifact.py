@@ -2,6 +2,7 @@
 SNAP's CKAN archive).
 
   ingest   - are the GeoTIFFs identical to what Rasdaman served (grid + values at the pilot cells)?
+  replot   - redraw the region figures from the saved grids.
   region   - 100 x 100 km around the Fairbanks pilot window: per-cell diagnostics + maps
              (5ModelAvg; magt1m change, surface year-to-year std, permafrost top, talik; terrain).
 """
@@ -19,6 +20,7 @@ import rasterio
 import xarray as xr
 from matplotlib.colors import LightSource, LinearSegmentedColormap
 from rasterio.enums import Resampling
+from pyproj import Transformer
 from rasterio.windows import from_bounds
 
 from composite_indexing import config as C
@@ -35,6 +37,7 @@ INK, INK2 = "#0b0b0b", "#52514e"
 SEQ = LinearSegmentedColormap.from_list("blue", ["#e8f1fc", "#86b6ef", "#3987e5", "#1c5cab", "#0d366b"])
 SEQ.set_bad("#d9d8d4")
 HALF = 50_000  # region half-width, m
+FAIRBANKS = Transformer.from_crs("EPSG:4326", C.CRS, always_xy=True).transform(-147.72, 64.84)  # city, x/y 3338
 
 
 def tif(var, year, model="5ModelAvg", scen="rcp85"):
@@ -139,6 +142,15 @@ def region():
     plot_region(d, dem, bounds, pilot)
 
 
+def replot():
+    """Redraw the region figures from the saved grids (no GIPL re-read)."""
+    g = dict(np.load(OUT / "fairbanks100_grids.npz"))
+    bounds = tuple(g.pop("bounds"))
+    _, _, _, pilot = region_window()
+    dem, _, _ = terrain(bounds, g["magt1m_range"].shape)
+    plot_region(g, dem, bounds, pilot)
+
+
 def plot_region(d, dem, bounds, pilot):
     ext = (bounds[0], bounds[2], bounds[1], bounds[3])
     hs = LightSource(azdeg=315, altdeg=45).hillshade(np.nan_to_num(dem, nan=np.nanmean(dem)), dx=125, dy=125)
@@ -161,6 +173,9 @@ def plot_region(d, dem, bounds, pilot):
             im = ax.imshow(grid, extent=ext, cmap=cmap, vmin=lim[0], vmax=lim[1], alpha=0.85)
             fig.colorbar(im, ax=ax, shrink=0.75)
         ax.add_patch(plt.Rectangle((pilot["x0"], pilot["y0"]), 10_000, 10_000, fill=False, ec=INK, lw=1.2))
+        ax.plot(*FAIRBANKS, "o", mfc="white", mec=INK, ms=6, mew=1.2)
+        ax.annotate("Fairbanks", FAIRBANKS, xytext=(6, -10), textcoords="offset points", fontsize=9, color=INK,
+                    bbox=dict(fc="white", ec="none", alpha=0.8, pad=1))
         ax.set_title(title, loc="left", color=INK, fontsize=10)
         ax.set_xticks([]); ax.set_yticks([])
     axs[0, 0].text(0.01, 0.01, "orange outline = stuck cells (1 m change < 0.1 °C)", transform=axs[0, 0].transAxes,
@@ -181,5 +196,5 @@ def plot_region(d, dem, bounds, pilot):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", choices=["ingest", "region"])
-    {"ingest": ingest, "region": region}[ap.parse_args().mode]()
+    ap.add_argument("mode", choices=["ingest", "region", "replot"])
+    {"ingest": ingest, "region": region, "replot": replot}[ap.parse_args().mode]()
