@@ -4,12 +4,10 @@
 That question defines the index. It describes the permafrost **in a 1 km cell, if permafrost is there**: how close
 the ground is to thawing today and how much it is projected to warm.
 
-This document describes the recommended way to compute the index.
-
 ---
 
 **BLUF:**
-- **The index comes from a simple two-way table:** how warm the ground surface is today (ESA) and how much it is
+- **The index comes from a simple two-way table:** how warm the ground surface is today and how much it is
   projected to warm. Each cell's class can be explained in one sentence ("surface near 0 °C today, projected to warm
   +3.3 °C: High").
 - **Why a table:** a scale based only on future temperature asks just one question: how warm will this place be? That
