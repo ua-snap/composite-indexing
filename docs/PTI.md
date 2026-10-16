@@ -47,7 +47,7 @@ Section 5 of this document has example data sentences for 3 test areas.
 
 ---
 
-## Key terms, in plain language
+## Key terms
 
 - **PTI class:** one of five classes, coloured as in the table: ![Very low](figures/badges/pti_very_low.svg)
   ![Low](figures/badges/pti_low.svg) ![Moderate](figures/badges/pti_moderate.svg) ![High](figures/badges/pti_high.svg)
