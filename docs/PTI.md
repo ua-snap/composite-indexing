@@ -26,7 +26,7 @@ the ground is to thawing today and how much it is projected to warm.
 
 ---
 
-## Caveats:
+## Caveats
 
 It is important to note that our 1km resolution datasets cannot disambiguate permafrost vs non-permafrost areas within the same cell. Every value (e.g. MAAT, MAGT) is therefore some combination of permafrost and non-permafrost areas, where they exist.
 
