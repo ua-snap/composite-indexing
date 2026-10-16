@@ -1,4 +1,4 @@
-# GIPL 2.0 (1 km): 0.5 m and 1 m ground temperature that does not respond to warming
+# GIPL 2.0 (1 km): "stuck" cells — frozen subsurface, drifting surface
 
 **Dataset:** SNAP GIPL 2.0 permafrost model output, 1 km, 2021–2120, 3 runs (5ModelAvg, GFDL-CM3, NCAR-CCSM4) ×
 RCP 4.5 / 8.5. Same values in the Rasdaman coverage `crrel_gipl_outputs_nc` and in the source GeoTIFFs.
@@ -6,7 +6,8 @@ RCP 4.5 / 8.5. Same values in the Rasdaman coverage `crrel_gipl_outputs_nc` and 
 **Issue:** across ~46,000 km² of Alaska, GIPL's mean annual ground temperature at 1 m (MAGT 1 m) stays fixed for
 the entire century while the ground surface above it warms by several °C. These cells are called "stuck" below
 (1 m MAGT changes by **< 0.1 °C** between 2021 and 2120). In the same cells, MAGT at 0.5 m is nearly flat
-(**~0.4 °C** change over the century vs ~5 °C elsewhere).
+(**~0.4 °C** change over the century vs ~5 °C elsewhere), and MAGT at the surface pulls away from neighbouring cells
+(**+1.5 to +3.5 °C** by 2081–2100, against a ~0.2 °C difference observed today).
 
 ---
 
@@ -42,7 +43,38 @@ patches):
 At 0.5 m the cells drift slowly instead of staying exactly constant, so only 30 cells statewide fall under the
 < 0.1 °C threshold; the affected area is the same as at 1 m (NCAR-CCSM4 RCP 4.5: 0.32 vs 5.1 °C).
 
-## 4. How much of Alaska
+## 4. Surface: the same cells drift away from their neighbours
+
+![Surface MAGT, stuck vs border vs neighbouring cells, six runs](figures/t3h_surface_series.png)
+
+Statewide group medians: stuck cells, border cells (within 2 km of a stuck cell) and good permafrost cells within
+10 km of a stuck cell ("neighbours"). Stuck cells warm faster than their neighbours in every run; their series is
+smooth in 5ModelAvg and GFDL-CM3 (year-to-year std 0.03–0.11 °C vs 0.6–1.2 °C) and saw-toothed in NCAR-CCSM4.
+
+![Surface MAGT residual after MAAT, 2081–2100](figures/t3h_surface_residuals.png)
+
+Residuals after a surface-MAGT-vs-MAAT fit on the neighbours (5ModelAvg, RCP 8.5): the neighbours centre on 0, the
+stuck cells sit +2.8 °C (level) and +1.3 °C (warming) away, the border cells in between.
+
+Stuck minus neighbours, surface temperature, after accounting for MAAT (5ModelAvg):
+
+| | RCP 4.5 | RCP 8.5 |
+|---|---|---|
+| ESA CCI GST 2000–2020 (observation-based, today) | +0.17 °C | +0.17 °C |
+| GIPL 2026–2035 | +0.16 °C | +1.44 °C |
+| GIPL 2081–2100 | **+3.43 °C** | **+2.81 °C** |
+
+Stuck minus neighbours, all runs, 2081–2100 (RCP 4.5 / RCP 8.5):
+
+| | 5ModelAvg | GFDL-CM3 | NCAR-CCSM4 |
+|---|---|---|---|
+| Surface MAGT level | +3.5 / +2.8 °C | +2.4 / +1.5 °C | +3.2 / +2.1 °C |
+| Surface warming since 2026–2035 | +3.2 / +1.2 °C | +2.0 / +0.7 °C | +3.1 / +1.6 °C |
+
+Neighbours are the reference; there are no observations for 2081–2100. Border cells sit about halfway
+(5ModelAvg RCP 8.5, 2081–2100: +1.0 °C level, +0.4 °C warming).
+
+## 5. How much of Alaska
 
 ![Statewide map of stuck cells](figures/t3c_statewide_map.png)
 
@@ -56,7 +88,7 @@ At 0.5 m the cells drift slowly instead of staying exactly constant, so only 30 
   north of Fort Yukon (4,568 km²), Copper River Basin (3,410 km²), Yukon Flats, lowlands west of Nenana.
 - Each stuck cell holds its own constant value (−5.0 to −1.1 °C, 1st–99th percentile), not one common temperature.
 
-## 5. Around Fairbanks (100 × 100 km)
+## 6. Around Fairbanks (100 × 100 km)
 
 ![Fairbanks 100 km](figures/t3b_fairbanks100_map.png)
 
@@ -69,7 +101,7 @@ At 0.5 m the cells drift slowly instead of staying exactly constant, so only 30 
 | Surface MAGT change, 2081–2100 vs 2026–2035 | +6.0 °C | +5.1 °C |
 | Elevation | 333 m | 464 m |
 
-## 6. An independent product sees nothing unusual in these cells
+## 7. An independent product sees nothing unusual in these cells
 
 ![ESA CCI vs GIPL in stuck and responsive cells](figures/t3_stuck_cells.png)
 
@@ -83,7 +115,7 @@ ESA CCI Permafrost v5 (2000–2023), Fairbanks pilot window, 20 stuck vs 80 othe
 | Permafrost fraction 2020 | 43 % | 33 % |
 | Active layer thickness | 1.38 m | 1.45 m |
 
-## 7. The pattern is not explained by available soil or land-cover maps
+## 8. The pattern is not explained by available soil or land-cover maps
 
 ![SSURGO soils vs stuck cells, Fairbanks](figures/t3e_ssurgo_fairbanks.png)
 
@@ -108,26 +140,22 @@ NLCD Alaska (30 m, aggregated to the GIPL 1 km cells); stuck cells vs other perm
 
 Stuck cells lean towards black-spruce forest and woody wetlands, but most of that land cover is not stuck.
 
-## 8. What we know about the cause
+## 9. What we know about the cause
 
 - The values are in the **source GeoTIFFs** (SNAP CKAN archive), identical to Rasdaman (max difference 0.0000 over
   18,000 checked values). It is not an ingest or service problem.
 - **No documentation** exists for this 1 km CMIP5 run. The only method reference (Marchenko, Romanovsky & Tipenko
   2008, NICOP) describes an earlier 0.5° run. The cause therefore cannot be identified or verified without more information.
 
-## 9. Other GIPL 1 m behaviour seen in the same tests
-
-![ESA CCI → GIPL continuity](figures/t3_continuity.png)
-
-- **Offset from ESA CCI:** in the 2021–2023 overlap, GIPL 1 m MAGT is 1.4–1.8 °C colder than ESA CCI T1m (median,
-  all three pilot windows: Brooks Range, Fairbanks, Denali).
-- **Start-up drift:** the first ~5 years drift strongly (Denali: 1 m MAGT from −4.4 °C in 2021 to about −1 °C by 2026).
+Other GIPL behaviour seen in the same tests (start-up drift, offsets from ESA CCI) is described in
+[ESA_GIPL_SPLICING.md](ESA_GIPL_SPLICING.md).
 
 ---
 
 <sub>Methods: stuck = max − min of annual 1 m MAGT over 2021–2120 < 0.1 °C; the 0.5 m comparison uses the same
-max − min. Permafrost area = ESA CCI Permafrost
+max − min. Surface comparison: good permafrost cells within 10 km of a stuck cell; MAAT = SNAP 2 km
+5modelAvg / CRU TS 4.08. Permafrost area = ESA CCI Permafrost
 v5.0 PFR > 0 (2020) sampled at GIPL cell centres. Scripts in `scripts/02_tests/` (`t3_esa_gipl_continuity.py`,
 `t3b_gipl_artifact.py`, `t3c_gipl_statewide.py`, `t3d_statsgo_overlay.py`, `t3e_ssurgo_fairbanks.py`,
-`t3f_landcover.py`, `t3g_gipl_0p5m.py`) and
+`t3f_landcover.py`, `t3g_gipl_0p5m.py`, `t3h_surface_mask_test.py`) and
 `scripts/03_report/gipl_issue_figures.py`.</sub>
