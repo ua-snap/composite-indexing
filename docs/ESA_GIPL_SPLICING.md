@@ -169,7 +169,7 @@ For each 1 km cell, model and scenario:
 
 - **What we keep from GIPL:** how much the ground surface warms. This trend includes information about vegetation, snow, and soil characteristics that have been "baked in" to the GIPL model.
 - **What we drop:** GIPL's own temperature levels. They run about
-  1.2 °C colder than ESA (section 2), so we needed to adjust them to avoid having the future ground surface temperature be colder than the observed (not realistic).
+  1.2 °C colder than ESA (section 2), so using them would show the future ground surface temperature be colder than the observed (not realistic).
 - **Where it cannot be used:** GIPL stuck cells and the 2 km border around them (~9 % of permafrost cells). These areas need to be interpolated, filled with values from a similar dataset, or flagged as NA.
 
 
@@ -182,5 +182,5 @@ For each 1 km cell, model and scenario:
 
 <sub>Methods: 1 km GIPL grid; ESA sampled at cell centres; air temperature = SNAP 2 km 5-model average (parent cell).
 Jumps measured after removing the model air warming between the two reference periods. Scripts:
-`scripts/02_tests/t3_esa_gipl_continuity.py` (test areas), `scripts/02_tests/t3_surface_splice.py` (statewide), `scripts/03_report/splice_schematic.py` (example-cell schematic), `scripts/03_report/splice_levels_vs_changes.py` (levels vs warming figure);
+`scripts/02_tests/t3_esa_gipl_continuity.py` (test areas), `scripts/02_tests/t3_surface_splice.py` (statewide), `scripts/03_report/splice_schematic.py` (example-cell schematic);
 tables in `<data>/results/t3/splice_methods.csv`.</sub>
