@@ -4,9 +4,8 @@
 observation-based, 2000–2023) into the future (GIPL 2.0 projections, 2021–2120). The two datasets come from different
 models and inputs. How should they be joined?
 
-**Answer:** use the **delta change method** (SNAP's "delta method"): keep ESA's level for today and add only the
-*change* projected by the models. GIPL's own temperature levels do not line up with ESA's, and no single correction
-fixes that cell by cell.
+**Answer:** use the **delta change method** (SNAP's "delta method"), plus a "bridge" derived from the climate change signal. This keeps ESA's level for today and adds only the
+*change* projected by the models.
 
 ---
 
@@ -56,7 +55,7 @@ Medians of 100 cells in each of three 10 × 10 km test areas (Brooks Range, Fair
   GIPL's start-up period. Section 2 compares them fairly instead: GIPL 2026–2035 against ESA 2014–2023, after allowing
   for the warming expected between those periods.
 
-## 2. GIPL and ESA levels do not match, and not in a fixable way
+## 2. GIPL and ESA levels do not match
 
 ### Comparing two different decades
 
@@ -168,12 +167,11 @@ For each 1 km cell, model and scenario:
 >   supply this itself because of its start-up period.
 > - **GIPL change:** GIPL surface temperature in the era minus GIPL 2026–2035.
 
-- **What we keep from GIPL:** how much the ground surface warms, which is the part that adds information beyond air
-  temperature ([CORRELATION.md](CORRELATION.md)).
-- **What we drop:** GIPL's own temperature levels, which repeat air temperature and disagree with ESA.
-- **Where it cannot be used:** GIPL stuck cells and the 2 km border around them (~9 % of permafrost cells).
-- In the Permafrost Thaw Index ([PTI.md](PTI.md)), this recipe gives the projected warming for version V2; version
-  V1 uses air-temperature warming instead (no GIPL).
+- **What we keep from GIPL:** how much the ground surface warms. This trend includes information about vegetation, snow, and soil characteristics that have been "baked in" to the GIPL model.
+- **What we drop:** GIPL's own temperature levels. They run about
+  1.2 °C colder than ESA (section 2), so we needed to adjust them to avoid having the future ground surface temperature be colder than the observed (not realistic).
+- **Where it cannot be used:** GIPL stuck cells and the 2 km border around them (~9 % of permafrost cells). These areas need to be interpolated, filled with values from a similar dataset, or flagged as NA.
+
 
 ## Caveats
 
@@ -184,5 +182,5 @@ For each 1 km cell, model and scenario:
 
 <sub>Methods: 1 km GIPL grid; ESA sampled at cell centres; air temperature = SNAP 2 km 5-model average (parent cell).
 Jumps measured after removing the model air warming between the two reference periods. Scripts:
-`scripts/02_tests/t3_esa_gipl_continuity.py` (test areas), `scripts/02_tests/t3_surface_splice.py` (statewide), `scripts/03_report/splice_schematic.py` (example-cell schematic);
+`scripts/02_tests/t3_esa_gipl_continuity.py` (test areas), `scripts/02_tests/t3_surface_splice.py` (statewide), `scripts/03_report/splice_schematic.py` (example-cell schematic), `scripts/03_report/splice_levels_vs_changes.py` (levels vs warming figure);
 tables in `<data>/results/t3/splice_methods.csv`.</sub>
