@@ -10,7 +10,7 @@ removing expected warming): (a) none; (b) one statewide median offset; (c) regio
 (d) change-only = ESA GST + (GIPL era - GIPL 2026-2035): GIPL contributes only its change ("delta change method").
 Recommended form (D25): ESA GST 2014-2023 + bridge + GIPL change, where bridge = model MAAT 2026-2035 - 2014-2023 (the
 warming between the ESA and GIPL reference periods, which GIPL cannot supply because of its start-up drift).
-Plus a pilot-window time series (ESA annual 2000-2023, GIPL raw, GIPL change-only joined).
+Plus a test-area (pilot-window) time series (ESA annual 2000-2023, GIPL raw, GIPL change-only joined).
 Outputs: <data>/results/t3/splice_*.csv; docs/figures/t3_splice_{map,dist,pilots}.png
 """
 import sys
@@ -150,13 +150,14 @@ def plot_pilots():
         ax.plot(esa.year, np.nanmedian(esa.GST.values[m], 0), color=INK2, lw=2, label="ESA GST (observation-based)")
         ax.plot(years, np.nanmedian(g[m], 0), color="#2a78d6", lw=1.4, alpha=0.8, label="GIPL surface, raw")
         joined = e_rec[m, None] + bridge[m, None] + (g[m] - base[m, None])
+        joined[:, years < 2026] = np.nan  # GIPL start-up period (2021-2025): not used
         ax.plot(years, np.nanmedian(joined, 0), color="#eb6834", lw=2, label="Delta change method (ESA + bridge + GIPL change)")
         ax.axvspan(2026, 2035, color="#e4e3df", alpha=0.6, lw=0)
-        ax.set_title(f"{label} pilot window ({int(m.sum())} cells)", loc="left", fontsize=10)
+        ax.set_title(f"{label} test area ({int(m.sum())} cells)", loc="left", fontsize=10)
         ax.set_ylabel("°C")
     h, l = axs[0].get_legend_handles_labels()
     fig.legend(h, l, frameon=False, fontsize=9, loc="upper center", ncol=3, bbox_to_anchor=(0.5, 1.0))
-    fig.suptitle("Surface temperature, median of window cells (5ModelAvg RCP 8.5; grey band = 2026–2035 reference)",
+    fig.suptitle("Surface temperature, median of test-area cells (5ModelAvg RCP 8.5; grey band = 2026–2035 reference)",
                  fontsize=10.5, y=1.08)
     fig.tight_layout()
     fig.savefig(FIG / "t3_splice_pilots.png", dpi=150, bbox_inches="tight")

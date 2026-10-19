@@ -137,7 +137,7 @@ def main():
     handles = [plt.Line2D([], [], color=ESA_C, lw=2, label="ESA CCI v5 (2000–2023)")] + [
         plt.Line2D([], [], color=c, lw=2, label=f"GIPL 5ModelAvg {s}") for s, c in RCP_C.items()]
     fig.legend(handles=handles, loc="upper center", ncol=3, frameon=False, bbox_to_anchor=(0.5, 1.0))
-    fig.text(0.5, -0.01, "Lines: median of the 100 cells in each 10 × 10 km window; bands: 10th–90th percentile.",
+    fig.text(0.5, -0.01, "Lines: median of the 100 cells in each 10 × 10 km test area; bands: 10th–90th percentile.",
              ha="center", color=INK2, fontsize=8)
     fig.tight_layout(rect=(0, 0, 1, 0.97))
     fig.savefig(FIG / "t3_continuity.png", dpi=150, bbox_inches="tight")
