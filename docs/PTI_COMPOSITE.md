@@ -279,6 +279,11 @@ breaks.*
 Generated from V2 (2051–2080, RCP 8.5) for the 1 km cell at the centre of each 10 × 10 km test area (map in
 [PTI.md](PTI.md), section 5). The breakdown shows each input's weighted contribution.
 
+![PTI-C classes around the three test areas](figures/ptic_test_area_maps.png)
+
+*PTI-C classes (V2, RCP 8.5, 2051–2080) in a 40 × 40 km area around each test area. Black square: the 10 × 10 km
+test area; small outlined cell: the centre cell described by the data sentence below.*
+
 > **Brooks Range test area:** PTI-C: ![Low](figures/badges/pti_low.svg) 0.39 (2051–2080, RCP 8.5): surface cool
 > today (−3.9 °C), projected to warm +3.4 °C; 4 % of the cell flat; 51 % permafrost-favourable cover. Permafrost
 > extent: continuous (PFR 100 %). *Score = 0.11 (today) + 0.23 (warming) + 0.00 (flat) + 0.05 (cover).*
@@ -324,5 +329,5 @@ surface temperature 2014–2023; warming V1 / V2 as in [PTI.md](PTI.md) (`<data>
 % favourable cover = share of a cell's NLCD 2016 pixels in classes 42, 90, 95, 72, 51, 74. Correlations in section 1
 from `<data>/results/t2/spearman_*.csv` and `vif_*.csv` ([CORRELATION.md](CORRELATION.md)); correlations of the new
 terms in `<data>/results/t5/ptic_terms_corr.csv`. Script: `scripts/02_tests/t5_composite.py` (`W`, `BREAKS`,
-`COVER`; slurm/16); per-cell scores and classes in `<data>/results/t5/ptic.nc`, summaries in
+`COVER`; slurm/16), test-area maps `scripts/03_report/test_area_maps.py`; per-cell scores and classes in `<data>/results/t5/ptic.nc`, summaries in
 `ptic_area_summary.csv` and `ptic_test_areas.csv`.</sub>

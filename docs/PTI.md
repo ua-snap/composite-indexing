@@ -351,6 +351,11 @@ the centre of each of three 10 × 10 km test areas: Brooks Range (Arctic), Fairb
 
 <img src="figures/pti_test_areas.png" alt="Where the three test areas are" width="55%">
 
+![PTI classes around the three test areas](figures/pti_test_area_maps.png)
+
+*PTI classes (V2, RCP 8.5, 2051–2080) in a 40 × 40 km area around each test area. Black square: the 10 × 10 km test
+area; small outlined cell: the centre cell described by the data sentence below.*
+
 > **Brooks Range test area:** PTI: ![Moderate](figures/badges/pti_moderate.svg) (2051–2080, RCP 8.5): surface cool
 > today (−3.9 °C), projected to warm +3.4 °C. Permafrost extent: continuous (PFR 100 %). Terrain: 78 % shaded slopes,
 > which favour permafrost. Land cover: 0 % black spruce / wetland; mostly shrub, tundra or open ground.
@@ -409,6 +414,6 @@ in each of the six scenario × era combinations, on permafrost cells where V2 us
 at the centre of each test area; class badges in `docs/figures/badges/`. Terrain from the 32 m terrain insolation
 index; land cover from NLCD 2016 (30 m). Scripts: `scripts/02_tests/t4_index_variants.py` (`TABLE`, `TODAY_EDGES`,
 `WARM_EDGES`; data sentences), `scripts/03_report/pti_results_figures.py` (section 3),
-`scripts/03_report/pti_extra_figures.py` (section 4 and the test-area map); per-cell results and summary tables
+`scripts/03_report/pti_extra_figures.py` (section 4 and the test-area map), `scripts/03_report/test_area_maps.py` (test-area class maps); per-cell results and summary tables
 (`pti_area_summary.csv`, `v1_v2_differences.csv`, `sentences.csv`) in `<data>/results/t4/`. Alternatives that were
 tested and set aside are archived in [PTI_EXPERIMENTS.md](PTI_EXPERIMENTS.md).</sub>

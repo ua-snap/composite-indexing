@@ -12,3 +12,4 @@ set -euo pipefail
 cd "${SLURM_SUBMIT_DIR}"
 RUN="${MAMBA_EXE:-$HOME/.local/bin/micromamba} run -n arcticdem-pisr python -I"
 $RUN scripts/02_tests/t5_composite.py
+$RUN scripts/03_report/test_area_maps.py  # test-area maps for PTI.md and PTI_COMPOSITE.md
