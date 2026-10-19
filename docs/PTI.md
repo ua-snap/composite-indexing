@@ -353,8 +353,10 @@ the centre of each of three 10 × 10 km test areas: Brooks Range (Arctic), Fairb
 
 ![PTI classes around the three test areas](figures/pti_test_area_maps.png)
 
-*PTI classes (V2, RCP 8.5, 2051–2080) in a 40 × 40 km area around each test area. Black square: the 10 × 10 km test
-area; small outlined cell: the centre cell described by the data sentence below.*
+*PTI classes (V2, RCP 8.5, 2051–2080) in a 40 × 40 km area around each test area, drawn semi-transparent over
+an ArcticDEM hillshade (lit from the south, so north-facing slopes are in shadow); lakes and rivers in blue.
+Black square: the 10 × 10 km test area; small outlined cell: the centre cell described by the data sentence
+below.*
 
 > **Brooks Range test area:** PTI: ![Moderate](figures/badges/pti_moderate.svg) (2051–2080, RCP 8.5): surface cool
 > today (−3.9 °C), projected to warm +3.4 °C. Permafrost extent: continuous (PFR 100 %). Terrain: 78 % shaded slopes,
