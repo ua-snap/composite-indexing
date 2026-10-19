@@ -37,11 +37,17 @@ Our 1 km datasets cannot separate permafrost from non-permafrost ground within a
 shares describe how much of a cell is the kind of ground where permafrost is likely, but they do not say where the
 permafrost is or how much of the cell it covers.
 
+The land-cover layer is a single snapshot (NLCD 2016) and is the same in every era and scenario. The land-cover term
+therefore mostly informs the "is there permafrost in this cell?" part of the question; it says nothing about how
+ecosystems will change over time (vegetation shifts, shrub expansion, fire), or how those changes would affect the
+permafrost.
+
 What PTI-C **cannot** answer:
 - "how much of the cell has permafrost?" (permafrost fraction is reported, but not used in the score)
 - "where in the cell is the permafrost?"
 - "what specific hazards could result from permafrost thaw in this cell (e.g. thermokarst)?"
 - "what is the temperature of the permafrost in this cell?"
+- "how will vegetation change or fire affect the permafrost in this cell?"
 
 Section 6 has example data sentences for three test areas.
 
@@ -320,7 +326,7 @@ below.*
 - **The cover term partly overlaps with warming:** the Arctic tundra both warms most and has the most favourable
   cover (ρ 0.54 between the two), so part of the cover term repeats the warming signal there. % flat overlaps less
   (ρ 0.35).
-- Land cover is from 2016 and does not change with time; fire and vegetation change are not included.
+- Land cover is a 2016 snapshot used unchanged for every era (see Caveats).
 - 170 permafrost cells (< 0.03 %) have no terrain or land-cover values and get no score.
 - 5-model average only; V1, and V2 where GIPL is unavailable, use air warming as a stand-in for ground-surface
   warming.
