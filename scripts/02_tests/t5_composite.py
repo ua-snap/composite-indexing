@@ -5,7 +5,7 @@ Question: "Does this cell contain permafrost that is susceptible to thaw?"
   s_today   = clip((ESA GST 2014-2023 + 6) / 8, 0, 1)                   (-6 degC -> 0, +2 degC -> 1)
   s_warming = clip(warming / 6, 0, 1)                                   (0 -> 0, 6 degC -> 1); warming as in PTI.md:
               V1 air (T_N2 - today), V2 GIPL via the delta change method, air where GIPL is masked (T_G2 - today)
-  s_flat    = share of the cell's land that is flat (32 m TII within +-0.1; 1 - sun_share - shade_share)
+  s_flat    = share of the cell's land that is flat or shaded (32 m TII <= 0.1, i.e. not sunlit; 1 - sun_share)
   s_cover   = share of the cell in permafrost-favourable NLCD 2016 classes {42, 90, 95, 72, 51, 74}
 Classes on the score: Very low < 0.2 <= Low < 0.4 <= Moderate < 0.6 <= High < 0.8 <= Very high.
 Domain = PTI.md's (ESA PFR 2023 > 0, GIPL grid); PFR is the gate only.
@@ -43,7 +43,7 @@ BREAKS = [0.2, 0.4, 0.6, 0.8]
 COVER = [42, 90, 95, 72, 51, 74]  # evergreen forest, woody + herbaceous wetland, sedge/herbaceous, dwarf scrub, moss
 INK, INK2, GRID, CONTEXT = "#0b0b0b", "#52514e", "#e4e3df", "#e4e3df"
 TERM_C = {"today": "#0d366b", "warming": "#3987e5", "flat": "#9ec5f4", "cover": "#c9c7c1"}
-TERM_N = {"today": "today's surface temperature", "warming": "projected warming", "flat": "% flat",
+TERM_N = {"today": "today's surface temperature", "warming": "projected warming", "flat": "% flat or shaded",
           "cover": "% favourable cover"}
 CMAP = ListedColormap(CLASS_C)
 CMAP.set_bad((0, 0, 0, 0))
@@ -76,7 +76,7 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     today, warm, _, reg, dom = load()
     f = xr.open_dataset(C.DATA / "features/features_1km.nc")
-    flat = 1.0 - f.sun_share.values - f.shade_share.values
+    flat = 1.0 - f.sun_share.values  # flat or shaded: TII <= 0.1 (the pixels thaw_score maps to 0)
     z = np.load(C.DATA / "landcover/agg/nlcd2016_counts.npz")
     cnt, codes = z["counts"].astype(np.float32), list(z["codes"])
     tot = cnt[..., :-1].sum(-1)
@@ -94,7 +94,7 @@ def main():
 
     # correlations of the new terms with the others (for the doc)
     i = np.flatnonzero(ok)[::5]
-    lay = {"ESA surface temp (today)": today, "PFR 2023": f.pfr_2023.values, "% flat": flat,
+    lay = {"ESA surface temp (today)": today, "PFR 2023": f.pfr_2023.values, "% flat or shaded": flat,
            "% favourable cover": cover, "warming V1 RCP 8.5 2051-2080": warm[("V1", "rcp85", "2051_2080")]}
     names = list(lay)
     corr = pd.DataFrame([[spearmanr(lay[a].ravel()[i], lay[b].ravel()[i], nan_policy="omit").statistic
@@ -129,7 +129,7 @@ def main():
         ds[f"score_{ver}_{scen}_{era}"] = (("y", "x"), sc.astype("float32"))
         ds[f"class_{ver}_{scen}_{era}"] = (("y", "x"), cls[(ver, scen, era)].astype("float32"))
     ds["s_today"] = (("y", "x"), np.where(ok, st, np.nan).astype("float32"))
-    ds["flat_share"] = (("y", "x"), np.where(ok, flat, np.nan).astype("float32"))
+    ds["flat_shaded_share"] = (("y", "x"), np.where(ok, flat, np.nan).astype("float32"))
     ds["cover_share"] = (("y", "x"), np.where(ok, cover, np.nan).astype("float32"))
     ds.to_netcdf(OUT / "ptic.nc")
 
@@ -162,7 +162,7 @@ def fig_scaling():
     fig, axs = plt.subplots(1, 4, figsize=(15, 3.2))
     specs = [("today", np.linspace(-10, 5, 200), s_today, "ESA surface temperature, 2014–2023 (°C)", (-6, 2)),
              ("warming", np.linspace(0, 8, 200), s_warm, "projected warming (°C)", (0, 6)),
-             ("flat", np.linspace(0, 100, 200), lambda x: x / 100, "% of cell flat", None),
+             ("flat", np.linspace(0, 100, 200), lambda x: x / 100, "% of cell flat or shaded", None),
              ("cover", np.linspace(0, 100, 200), lambda x: x / 100, "% of cell favourable cover", None)]
     for ax, (t, x, fn, xl, b) in zip(axs, specs):
         ax.plot(x, fn(x), color=INK, lw=2)
@@ -187,7 +187,7 @@ def fig_terms(ok, today, warm, flat, cover):
     seq.set_bad((0, 0, 0, 0))
     maps = [("a. today's surface temperature term", s_today(today)),
             ("b. projected warming term (V2, RCP 8.5, 2051–2080)", s_warm(warm[("V2", "rcp85", "2051_2080")])),
-            ("c. % of cell flat", flat), ("d. % of cell favourable cover", cover)]
+            ("c. % of cell flat or shaded", flat), ("d. % of cell favourable cover", cover)]
     fig, axs = plt.subplots(2, 2, figsize=(13, 10.5), constrained_layout=True)
     for ax, (t, v) in zip(axs.ravel(), maps):
         im = ax.imshow(np.where(ok, v, np.nan)[r0:r1, c0:c1], cmap=seq, vmin=0, vmax=1, interpolation="nearest")
