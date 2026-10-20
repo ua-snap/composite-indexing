@@ -47,7 +47,7 @@ def class_map(ax, c, area, dom, crop, title):
     r0, r1, c0, c1 = crop
     ctx = np.where(dom & ~area, 1.0, np.nan)[r0:r1, c0:c1]
     ax.imshow(ctx, cmap=ListedColormap([CONTEXT]), vmin=0, vmax=2, interpolation="nearest")
-    ax.imshow(np.where(area, c, np.nan)[r0:r1, c0:c1], cmap=CMAP, vmin=-0.5, vmax=4.5, interpolation="nearest")
+    ax.imshow(np.where(area, c, np.nan)[r0:r1, c0:c1], cmap=CMAP, vmin=-0.5, vmax=len(CLASSES) - 0.5, interpolation="nearest")
     ax.set_xticks([]); ax.set_yticks([])
     for sp in ax.spines.values():
         sp.set_visible(False)

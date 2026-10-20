@@ -82,7 +82,7 @@ def draw(cls, wins, title_prefix, out):
         ax.imshow(np.where(d["water"], 1.0, np.nan), cmap=ListedColormap([WATER]), vmin=0, vmax=2, extent=ext,
                   interpolation="nearest")
         sub = cls[rc - HALF:rc + HALF, cc - HALF:cc + HALF]
-        ax.imshow(sub, cmap=CMAP, vmin=-0.5, vmax=4.5, extent=ext, alpha=ALPHA, interpolation="nearest")
+        ax.imshow(sub, cmap=CMAP, vmin=-0.5, vmax=len(CLASSES) - 0.5, extent=ext, alpha=ALPHA, interpolation="nearest")
         ax.add_patch(plt.Rectangle((w["x0"], w["y0"]), w["x1"] - w["x0"], w["y1"] - w["y0"], fill=False, ec=INK,
                                    lw=2))
         cx0, cy1 = tr * (cc, rc)
