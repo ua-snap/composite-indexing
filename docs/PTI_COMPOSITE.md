@@ -117,11 +117,21 @@ Each input is first scaled to 0–1, then weighted and added:
 
 ![PTI-C = 0.4 · s(today) + 0.4 · s(warming) + 0.1 · (% flat or shaded) + 0.1 · (% favorable cover)](figures/ptic_equation.svg)
 
-> - **s(today) = (surface temperature + 6) / 8**, capped at 0 and 1: −6 °C and colder → 0; +2 °C and warmer → 1.
-> - **s(warming) = warming / 6**, capped at 0 and 1: no warming → 0; 6 °C or more → 1.
-> - **% flat or shaded** and **% favorable cover** are already 0–1 (0 % → 0, 100 % → 1).
+Weights can be adjusted, but they must always add up to 1. This will need to be tested and tuned. 
 
-**Where the bounds come from:** the two temperature inputs are scaled to **the range of the data in the permafrost
+Then the score is classified. This will also need to be tested and tuned. Classes do not need to be equal divisions of the PTI-C score.
+
+| Class | PTI-C Score |
+|---|---|
+| ![Very low](figures/badges/pti_very_low.svg) | below 0.2 |
+| ![Low](figures/badges/pti_low.svg) | 0.2 to 0.4 |
+| ![Moderate](figures/badges/pti_moderate.svg) | 0.4 to 0.6 |
+| ![High](figures/badges/pti_high.svg) | 0.6 to 0.8 |
+| ![Very high](figures/badges/pti_very_high.svg) | 0.8 and above |
+
+### Notes on inputs
+
+The two temperature inputs are scaled to **the range of the data in the permafrost
 cells**, rounded to whole degrees. The low bound becomes 0, the high bound 1, and the few cells outside the range are
 capped.
 
@@ -155,14 +165,6 @@ capped.
 
 *Each input before weighting (0–1). The warming term (b) is shown for V2, RCP 8.5, 2051–2080; it changes with
 version, scenario and era, the others do not.*
-
-| Class | PTI-C Score |
-|---|---|
-| ![Very low](figures/badges/pti_very_low.svg) | below 0.2 |
-| ![Low](figures/badges/pti_low.svg) | 0.2 to 0.4 |
-| ![Moderate](figures/badges/pti_moderate.svg) | 0.4 to 0.6 |
-| ![High](figures/badges/pti_high.svg) | 0.6 to 0.8 |
-| ![Very high](figures/badges/pti_very_high.svg) | 0.8 and above |
 
 ## 3. Two versions: V1 and V2
 
