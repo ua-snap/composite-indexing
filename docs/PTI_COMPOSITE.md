@@ -115,8 +115,8 @@ is therefore used to select the cells that get a score, and reported in the data
 
 Each input is first scaled to 0–1, then weighted and added:
 
-> **PTI-C = 0.4 · s(today) + 0.4 · s(warming) + 0.1 · (% flat or shaded) + 0.1 · (% favourable cover)**
->
+![PTI-C = 0.4 · s(today) + 0.4 · s(warming) + 0.1 · (% flat or shaded) + 0.1 · (% favourable cover)](figures/ptic_equation.svg)
+
 > - **s(today) = (surface temperature + 6) / 8**, capped at 0 and 1: −6 °C and colder → 0; +2 °C and warmer → 1.
 > - **s(warming) = warming / 6**, capped at 0 and 1: no warming → 0; 6 °C or more → 1.
 > - **% flat or shaded** and **% favourable cover** are already 0–1 (0 % → 0, 100 % → 1).
@@ -156,7 +156,7 @@ capped.
 *Each input before weighting (0–1). The warming term (b) is shown for V2, RCP 8.5, 2051–2080; it changes with
 version, scenario and era, the others do not.*
 
-| Class | Score |
+| Class | PTI-C Score |
 |---|---|
 | ![Very low](figures/badges/pti_very_low.svg) | below 0.2 |
 | ![Low](figures/badges/pti_low.svg) | 0.2 to 0.4 |

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="170" viewBox="0 0 1100 170" font-family="Helvetica, Arial, sans-serif" role="img" aria-label="PTI-C = 0.4 × s(today) + 0.4 × s(warming) + 0.1 × % flat or shaded + 0.1 × % favourable cover">
+  <rect width="1100" height="170" rx="10" fill="#ffffff"/>
+
+  <!-- equation -->
+  <text x="20" y="68" font-size="24" font-weight="bold" fill="#0b0b0b">PTI-C =</text>
+
+  <rect x="120" y="15" width="220" height="90" rx="8" fill="#0d366b"/>
+  <text x="230" y="45" text-anchor="middle" font-size="22" font-weight="bold" fill="#ffffff">0.4 ×</text>
+  <text x="230" y="70" text-anchor="middle" font-size="14.5" fill="#ffffff">today's surface temperature</text>
+  <text x="230" y="93" text-anchor="middle" font-size="12" fill="#ffffff" fill-opacity="0.85">−6 °C → 0 · +2 °C → 1</text>
+
+  <text x="357" y="68" text-anchor="middle" font-size="26" font-weight="bold" fill="#52514e">+</text>
+
+  <rect x="374" y="15" width="220" height="90" rx="8" fill="#3987e5"/>
+  <text x="484" y="45" text-anchor="middle" font-size="22" font-weight="bold" fill="#ffffff">0.4 ×</text>
+  <text x="484" y="70" text-anchor="middle" font-size="14.5" fill="#ffffff">projected warming</text>
+  <text x="484" y="93" text-anchor="middle" font-size="12" fill="#ffffff" fill-opacity="0.9">0 °C → 0 · 6 °C → 1</text>
+
+  <text x="611" y="68" text-anchor="middle" font-size="26" font-weight="bold" fill="#52514e">+</text>
+
+  <rect x="628" y="15" width="220" height="90" rx="8" fill="#9ec5f4"/>
+  <text x="738" y="45" text-anchor="middle" font-size="22" font-weight="bold" fill="#0b0b0b">0.1 ×</text>
+  <text x="738" y="70" text-anchor="middle" font-size="14.5" fill="#0b0b0b">% flat or shaded</text>
+  <text x="738" y="93" text-anchor="middle" font-size="12" fill="#52514e">0 % → 0 · 100 % → 1</text>
+
+  <text x="865" y="68" text-anchor="middle" font-size="26" font-weight="bold" fill="#52514e">+</text>
+
+  <rect x="882" y="15" width="200" height="90" rx="8" fill="#c9c7c1"/>
+  <text x="982" y="45" text-anchor="middle" font-size="22" font-weight="bold" fill="#0b0b0b">0.1 ×</text>
+  <text x="982" y="70" text-anchor="middle" font-size="14.5" fill="#0b0b0b">% favourable cover</text>
+  <text x="982" y="93" text-anchor="middle" font-size="12" fill="#52514e">0 % → 0 · 100 % → 1</text>
+
+  <!-- share of the score, drawn to scale (962 px = 1.0) -->
+  <text x="20" y="143" font-size="13" fill="#52514e">share of</text>
+  <text x="20" y="159" font-size="13" fill="#52514e">the score</text>
+  <rect x="120" y="128" width="382.8" height="30" rx="4" fill="#0d366b"/>
+  <text x="311.4" y="148" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">40 %</text>
+  <rect x="504.8" y="128" width="382.8" height="30" rx="4" fill="#3987e5"/>
+  <text x="696.2" y="148" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">40 %</text>
+  <rect x="889.6" y="128" width="94.2" height="30" rx="4" fill="#9ec5f4"/>
+  <text x="936.7" y="148" text-anchor="middle" font-size="13" font-weight="bold" fill="#0b0b0b">10 %</text>
+  <rect x="985.8" y="128" width="96.2" height="30" rx="4" fill="#c9c7c1"/>
+  <text x="1033.9" y="148" text-anchor="middle" font-size="13" font-weight="bold" fill="#0b0b0b">10 %</text>
+</svg>
