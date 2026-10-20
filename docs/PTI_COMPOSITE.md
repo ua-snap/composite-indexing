@@ -7,13 +7,13 @@ covered by vegetation associated with permafrost) and combines all four into one
 
 That changes the question slightly. PTI asks how susceptible the permafrost is *if it is there*; PTI-C also asks
 how much of the cell is the kind of ground where permafrost sits. Given the same temperature today and the same
-projected warming, a cell scores higher when more of it is flat or shaded, or covered by permafrost-favourable vegetation.
+projected warming, a cell scores higher when more of it is flat or shaded, or covered by permafrost-favorable vegetation.
 
 ---
 
 **BLUF:**
 - **One score from four inputs:** PTI-C = 0.4 × today's ground surface temperature + 0.4 × projected warming +
-  0.1 × % of the cell that is flat or shaded + 0.1 × % covered by permafrost-favourable vegetation, each first
+  0.1 × % of the cell that is flat or shaded + 0.1 × % covered by permafrost-favorable vegetation, each first
   scaled to 0–1. The score is cut into five classes at 0.2, 0.4, 0.6 and 0.8.
 - **Why only these inputs:** most gridded permafrost and climate layers measure the same thing (see section 1), so
   adding them would count the same information several times. Terrain and land cover are the exceptions, which is
@@ -28,7 +28,7 @@ projected warming, a cell scores higher when more of it is flat or shaded, or co
 - **Permafrost fraction (PFR) is the gate, not a term:** only cells where ESA shows permafrost get a score (section
   2 explains why).
 - **Decisions needed:** the weights, the scaling bounds, the class breaks, and which vegetation classes count as
-  permafrost-favourable.
+  permafrost-favorable.
 
 ---
 
@@ -71,7 +71,7 @@ Section 6 has example data sentences for three test areas.
 - **% flat or shaded:** share of the cell's land that is flat or on a shaded (mostly north-facing) slope, from the
   32 m terrain insolation index (TII of +0.1 or less, i.e. receiving no more sun than level ground). Only sunlit
   slopes are left out. These are the same pixels that the TII thaw transform (ArcticDEM-PISR) scores as 0.
-- **% favourable cover:** share of the cell in vegetation associated with permafrost (NLCD 2016 classes: evergreen
+- **% favorable cover:** share of the cell in vegetation associated with permafrost (NLCD 2016 classes: evergreen
   forest, woody wetlands, emergent herbaceous wetlands, sedge/herbaceous, dwarf scrub, moss).
 - **Weight:** how much each input counts in the score. The four weights must add up to 1.
 - **Percentile:** the value below which that share of cells falls. For example, the 95th percentile of today's
@@ -100,7 +100,7 @@ used.
 | **GIPL ground surface temperature, *warming*** | weakest overlap of all layers (VIF 1.2) | **Yes: "warming" term, V2** |
 | GIPL 0.5 m and 1 m temperature, permafrost top, talik | stuck cells ([GIPL_ISSUE.md](GIPL_ISSUE.md)) | No: unusable in parts of the Interior |
 | **Terrain (32 m terrain insolation index): % flat or shaded** | ρ −0.11 with ESA surface temperature; 0.30 with warming | **Yes: "% flat or shaded" term** |
-| **Land cover (NLCD 2016, 30 m): % favourable cover** | ρ −0.26 with ESA surface temperature; 0.54 with warming | **Yes: "% favourable cover" term** |
+| **Land cover (NLCD 2016, 30 m): % favorable cover** | ρ −0.26 with ESA surface temperature; 0.54 with warming | **Yes: "% favorable cover" term** |
 
 Statewide, permafrost cells; correlations from [CORRELATION.md](CORRELATION.md), and for the two new terms from this
 analysis (warming = V1, RCP 8.5, 2051–2080). VIF: variance inflation factor, how much a layer is predicted by all
@@ -115,11 +115,11 @@ is therefore used to select the cells that get a score, and reported in the data
 
 Each input is first scaled to 0–1, then weighted and added:
 
-![PTI-C = 0.4 · s(today) + 0.4 · s(warming) + 0.1 · (% flat or shaded) + 0.1 · (% favourable cover)](figures/ptic_equation.svg)
+![PTI-C = 0.4 · s(today) + 0.4 · s(warming) + 0.1 · (% flat or shaded) + 0.1 · (% favorable cover)](figures/ptic_equation.svg)
 
 > - **s(today) = (surface temperature + 6) / 8**, capped at 0 and 1: −6 °C and colder → 0; +2 °C and warmer → 1.
 > - **s(warming) = warming / 6**, capped at 0 and 1: no warming → 0; 6 °C or more → 1.
-> - **% flat or shaded** and **% favourable cover** are already 0–1 (0 % → 0, 100 % → 1).
+> - **% flat or shaded** and **% favorable cover** are already 0–1 (0 % → 0, 100 % → 1).
 
 **Where the bounds come from:** the two temperature inputs are scaled to **the range of the data in the permafrost
 cells**, rounded to whole degrees. The low bound becomes 0, the high bound 1, and the few cells outside the range are
@@ -146,7 +146,7 @@ capped.
   very large warming would look safe).
 - **Weights:** today's temperature and warming carry the index (0.4 each, equal because there is no basis to favour
   either); terrain and land cover adjust it (0.1 each), so together they can move a cell by at most 0.2.
-- **Direction:** more flat or shaded ground and more permafrost-favourable cover raise the score. Shaded slopes get
+- **Direction:** more flat or shaded ground and more permafrost-favorable cover raise the score. Shaded slopes get
   little sun and stay cold, so permafrost is likely there; flat lowlands are often ice-rich and prone to thermokarst
   when they thaw; the vegetation classes mark ground where permafrost is likely.
   Either term can be dropped (weight 0) or reversed (use 1 − share) later.
@@ -181,7 +181,7 @@ grey. Each table gives the median score and the share of the area's permafrost c
 
 ### 4.1 Statewide
 
-799,499 permafrost cells; medians: today's surface temperature −0.1 °C, 83 % flat or shaded, 54 % favourable cover.
+799,499 permafrost cells; medians: today's surface temperature −0.1 °C, 83 % flat or shaded, 54 % favorable cover.
 
 ![PTI-C statewide](figures/ptic_statewide.png)
 
@@ -203,7 +203,7 @@ grey. Each table gives the median score and the share of the area's permafrost c
 
 ### 4.2 Arctic
 
-319,629 permafrost cells; medians: today −4.5 °C, 88 % flat or shaded, 82 % favourable cover (tundra and wetland).
+319,629 permafrost cells; medians: today −4.5 °C, 88 % flat or shaded, 82 % favorable cover (tundra and wetland).
 
 ![PTI-C Arctic](figures/ptic_arctic.png)
 
@@ -217,7 +217,7 @@ grey. Each table gives the median score and the share of the area's permafrost c
 | 2081–2100, RCP 8.5 | 0.63 / 0.61 | 0 / 0 % | 0 / 0 % | 36 / 47 % | 51 / 45 % | 12 / 8 % |
 
 - **Through 2050, mostly Low (64 %).** The cold surface keeps the "today" term small (about 0.11 of the score).
-- **Terrain and land cover matter most here:** the Arctic has the most flat or shaded ground and favourable cover,
+- **Terrain and land cover matter most here:** the Arctic has the most flat or shaded ground and favorable cover,
   and the two terms add about 0.15 to its scores, more than today's temperature does.
 - **2081–2100, RCP 8.5:** warming of +5.5 to +6.1 °C (median) lifts 53–64 % of the cells to High or Very high;
   the rest stay Moderate.
@@ -225,7 +225,7 @@ grey. Each table gives the median score and the share of the area's permafrost c
 
 ### 4.3 Interior
 
-347,050 permafrost cells; medians: today +0.7 °C, 80 % flat or shaded, 30 % favourable cover. V2 uses GIPL in 81 % of
+347,050 permafrost cells; medians: today +0.7 °C, 80 % flat or shaded, 30 % favorable cover. V2 uses GIPL in 81 % of
 cells; the rest use air warming and are flagged.
 
 ![PTI-C Interior](figures/ptic_interior.png)
@@ -242,11 +242,11 @@ cells; the rest use air warming and are flagged.
 - **Through 2050, mostly Moderate (70–75 %):** a warm surface today, but little warming yet.
 - **2051–2080:** High for 46–57 % of cells under RCP 4.5 and 70 % under RCP 8.5.
 - **2081–2100, RCP 8.5:** 90–94 % High or Very high.
-- Nearly as much flat or shaded ground as the Arctic, but much less favourable cover, so the two terms add about 0.11.
+- Nearly as much flat or shaded ground as the Arctic, but much less favorable cover, so the two terms add about 0.11.
 
 ### 4.4 West
 
-106,702 permafrost cells; medians: today +0.9 °C, 83 % flat or shaded, 69 % favourable cover.
+106,702 permafrost cells; medians: today +0.9 °C, 83 % flat or shaded, 69 % favorable cover.
 
 ![PTI-C West](figures/ptic_west.png)
 
@@ -260,14 +260,14 @@ cells; the rest use air warming and are flagged.
 | 2081–2100, RCP 8.5 | 0.85 / 0.79 | 0 / 0 % | 0 / 0 % | 0 / 0 % | 19 / 54 % | 81 / 46 % |
 
 - **The highest scores of any region:** a warm surface today combined with plenty of flat or shaded ground and
-  favourable cover.
+  favorable cover.
 - **From 2051 on, mostly High** (82–96 %).
 - **2081–2100, RCP 8.5: the only large Very high share** (V1 81 %, V2 46 %). V1 warms more here (+5.6 vs +4.8 °C),
   which puts more cells over the 0.8 break.
 
 ### 4.5 South
 
-26,118 permafrost cells (the smallest region); medians: today +0.4 °C, 60 % flat or shaded, 10 % favourable cover.
+26,118 permafrost cells (the smallest region); medians: today +0.4 °C, 60 % flat or shaded, 10 % favorable cover.
 
 ![PTI-C South](figures/ptic_south.png)
 
@@ -281,7 +281,7 @@ cells; the rest use air warming and are flagged.
 | 2081–2100, RCP 8.5 | 0.69 / 0.65 | 0 / 0 % | 0 / 0 % | 7 / 23 % | 80 / 68 % | 13 / 8 % |
 
 - **Mostly Moderate until late century:** mountainous ground with sunlit slopes (the least flat or shaded ground of
-  any region) and little favourable cover; the two terms add about 0.08, the least of any region.
+  any region) and little favorable cover; the two terms add about 0.08, the least of any region.
 - **2081–2100, RCP 8.5:** High for 68–80 % of cells; V1 warms more (+4.6 vs +4.0 °C).
 
 ## 5. What drives the score
@@ -319,16 +319,16 @@ below.*
 
 > **Brooks Range test area:** PTI-C: ![Moderate](figures/badges/pti_moderate.svg) 0.47 (2051–2080, RCP 8.5):
 > surface cool today (−3.9 °C), projected to warm +3.4 °C; 82 % of the cell flat or shaded; 51 %
-> permafrost-favourable cover. Permafrost extent: continuous (PFR 100 %). *Score = 0.11 (today) + 0.23 (warming) +
+> permafrost-favorable cover. Permafrost extent: continuous (PFR 100 %). *Score = 0.11 (today) + 0.23 (warming) +
 > 0.08 (flat or shaded) + 0.05 (cover).*
 
 > **Fairbanks test area:** PTI-C: ![High](figures/badges/pti_high.svg) 0.69 (2051–2080, RCP 8.5): surface above
-> 0 °C today (+1.7 °C), projected to warm +3.1 °C; 30 % of the cell flat or shaded; 65 % permafrost-favourable
+> 0 °C today (+1.7 °C), projected to warm +3.1 °C; 30 % of the cell flat or shaded; 65 % permafrost-favorable
 > cover. Permafrost extent: sparse (PFR 14 %). Note: GIPL unavailable here; air-temperature warming used instead.
 > *Score = 0.38 + 0.21 + 0.03 + 0.06.*
 
 > **Denali test area:** PTI-C: ![Moderate](figures/badges/pti_moderate.svg) 0.58 (2051–2080, RCP 8.5): surface
-> above 0 °C today (+0.2 °C), projected to warm +2.8 °C; 88 % of the cell flat or shaded; 0 % permafrost-favourable
+> above 0 °C today (+0.2 °C), projected to warm +2.8 °C; 88 % of the cell flat or shaded; 0 % permafrost-favorable
 > cover. Permafrost extent: extensive (PFR 71 %). *Score = 0.31 + 0.18 + 0.09 + 0.00.*
 
 ## Open questions
@@ -339,7 +339,7 @@ below.*
    capped in 2081–2100 under RCP 8.5, but would lower every other score.
 3. **Class breaks:** equal steps of 0.2 leave Very low and Very high nearly empty until late century. Keep them, or
    set breaks that spread the classes more evenly?
-4. **Favourable vegetation:** which NLCD classes count (shrub/scrub and deciduous forest are left out), and whether
+4. **favorable vegetation:** which NLCD classes count (shrub/scrub and deciduous forest are left out), and whether
    they should raise the score at all (insulating cover protects permafrost, but its ground is often ice-rich and
    vulnerable once disturbed).
 5. **Terrain:** flat ground and shaded slopes now count together (both are ground where permafrost is likely).
@@ -353,7 +353,7 @@ below.*
 
 - ⚠️ Weights, bounds and class breaks are judgement calls; none can be checked against observations of future thaw.
 - ⚠️ Surface temperature is not permafrost temperature (as in PTI.md).
-- **The cover term partly overlaps with warming:** the Arctic tundra both warms most and has the most favourable
+- **The cover term partly overlaps with warming:** the Arctic tundra both warms most and has the most favorable
   cover (ρ 0.54 between the two), so part of the cover term repeats the warming signal there. % flat or shaded
   overlaps less (ρ 0.30).
 - Land cover is a 2016 snapshot used unchanged for every era (see Caveats).
@@ -365,7 +365,7 @@ below.*
 surface temperature 2014–2023; warming V1 / V2 as in [PTI.md](PTI.md) (`<data>/results/t4/index_variants.nc`).
 % flat or shaded = share of a cell's 32 m land pixels with terrain insolation index of +0.1 or less (water
 excluded; `1 − sun_share`, `<data>/tii/tii_1km.npz`);
-% favourable cover = share of a cell's NLCD 2016 pixels in classes 42, 90, 95, 72, 51, 74. Scaling bounds checked
+% favorable cover = share of a cell's NLCD 2016 pixels in classes 42, 90, 95, 72, 51, 74. Scaling bounds checked
 against the percentiles of today and warming over the 799,669 permafrost cells (warming pooled over V1/V2, both
 scenarios and the three eras). Correlations in section 1
 from `<data>/results/t2/spearman_*.csv` and `vif_*.csv` ([CORRELATION.md](CORRELATION.md)); correlations of the new
