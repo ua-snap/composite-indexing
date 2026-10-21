@@ -147,8 +147,8 @@ Stuck cells lean towards black-spruce forest and woody wetlands, but most of tha
 - **No documentation** exists for this 1 km CMIP5 run. The only method reference (Marchenko, Romanovsky & Tipenko
   2008, NICOP) describes an earlier 0.5° run. The cause therefore cannot be identified or verified without more information.
 
-Other GIPL behaviour seen in the same tests (start-up period, offsets from ESA CCI) is described in
-[ESA_GIPL_SPLICING.md](ESA_GIPL_SPLICING.md).
+Other GIPL behaviour seen in the same tests (start-up period, cold bias against ESA CCI and field data) is described in
+[GIPL_ISSUE_2.md](GIPL_ISSUE_2.md) and [ESA_GIPL_SPLICING.md](ESA_GIPL_SPLICING.md).
 
 ---
 

@@ -69,7 +69,7 @@ significant", and neighbouring cells are not independent anyway. What matters is
 | Land cover | Share of forest, shrub, herbaceous/moss, wetland | NLCD Alaska 2016 (30 m) |
 
 All inputs are on the same 1 km grid. Cells: everywhere ESA shows permafrost (≈ 800,000 cells). GIPL values are used
-only where GIPL behaves normally (≈ 724,000 cells; see [GIPL_ISSUE.md](GIPL_ISSUE.md)).
+only where GIPL behaves normally (≈ 724,000 cells; see [GIPL_ISSUE_1.md](GIPL_ISSUE_1.md)).
 
 ---
 
@@ -163,7 +163,7 @@ ground temperature and permafrost fraction; air temperature joins it strongly on
 
 - ESA CCI ground temperature and permafrost fraction are model products (satellite land surface temperature driving a
   permafrost model), not direct measurements, so part of their agreement comes from shared inputs.
-- GIPL values exclude the ~9 % of permafrost cells affected by the stuck-cell problem ([GIPL_ISSUE.md](GIPL_ISSUE.md)).
+- GIPL values exclude the ~9 % of permafrost cells affected by the stuck-cell problem ([GIPL_ISSUE_1.md](GIPL_ISSUE_1.md)).
 - Projections are the 5-model average only; single models will differ.
 - Land cover is a single year (NLCD 2016).
 - The South region is small (≈ 26,000 permafrost cells).

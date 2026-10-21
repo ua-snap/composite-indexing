@@ -98,7 +98,7 @@ used.
 | **Air temperature, projected, *warming*** | ρ −0.64 with air temperature level (colder places warm more) | **Yes: "warming" term, V1** |
 | GIPL ground surface temperature, *level* | ρ 0.95 with air temperature | No: same information, and ~1.2 °C colder than ESA |
 | **GIPL ground surface temperature, *warming*** | weakest overlap of all layers (VIF 1.2) | **Yes: "warming" term, V2** |
-| GIPL 0.5 m and 1 m temperature, permafrost top, talik | stuck cells ([GIPL_ISSUE.md](GIPL_ISSUE.md)) | No: unusable in parts of the Interior |
+| GIPL 0.5 m and 1 m temperature, permafrost top, talik | stuck cells ([GIPL_ISSUE_1.md](GIPL_ISSUE_1.md)) | No: unusable in parts of the Interior |
 | **Terrain (32 m terrain insolation index): % flat or shaded** | ρ −0.11 with ESA surface temperature; 0.30 with warming | **Yes: "% flat or shaded" term** |
 | **Land cover (NLCD 2016, 30 m): % favorable cover** | ρ −0.26 with ESA surface temperature; 0.54 with warming | **Yes: "% favorable cover" term** |
 

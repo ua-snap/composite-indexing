@@ -62,7 +62,7 @@ Section 5 of this document has example data sentences for 3 test areas.
   its change ([ESA_GIPL_SPLICING.md](ESA_GIPL_SPLICING.md)).
 - **V1:** projected warming = air-temperature warming (SNAP 2 km downscaled climate). No GIPL.
 - **V2:** projected warming = GIPL ground-surface warming (delta change method). Where GIPL has no usable values
-  ([GIPL_ISSUE.md](GIPL_ISSUE.md)), V1's air warming is used and the cell is flagged.
+  ([GIPL_ISSUE_1.md](GIPL_ISSUE_1.md)), V1's air warming is used and the cell is flagged.
 - **Context layers:** permafrost extent (ESA PFR), terrain (share of sun-facing and shaded slopes) and land cover
   (share of black spruce / wetland). Shown in the data sentence, not used in the class.
 
@@ -101,7 +101,7 @@ weakness:
   stand-in for ground-surface warming. **V1** uses air warming.
 - **GIPL** is a permafrost model that turns air temperature and snow into ground temperatures, so its surface
   temperature is closer to what the ground itself experiences. But it has areas with unusable values
-  ([GIPL_ISSUE.md](GIPL_ISSUE.md)), and its temperature levels do not match today's observation-based values, so only
+  ([GIPL_ISSUE_1.md](GIPL_ISSUE_1.md)), and its temperature levels do not match today's observation-based values, so only
   its *change* is used ([ESA_GIPL_SPLICING.md](ESA_GIPL_SPLICING.md)). **V2** uses GIPL's warming where it is usable
   and air warming elsewhere (flagged).
 
@@ -227,7 +227,7 @@ south). V2 uses GIPL in 99 % of cells.
 ### 3.3 Interior
 
 347,086 permafrost cells; today's surface temperature: median +0.7 °C (mostly warm surface and near 0 °C). V2 uses
-GIPL in 81 % of cells; the other 19 % (GIPL's unusable areas, [GIPL_ISSUE.md](GIPL_ISSUE.md)) use air warming and
+GIPL in 81 % of cells; the other 19 % (GIPL's unusable areas, [GIPL_ISSUE_1.md](GIPL_ISSUE_1.md)) use air warming and
 are flagged.
 
 ![Interior, RCP 4.5](figures/pti_interior_rcp45.png)
@@ -380,7 +380,7 @@ Draft wording rules:
 | Permafrost extent | ESA PFR 2023 (comes in steps of ~14 %) | sparse (≤ 29 %), patchy (43–57 %), extensive (71–86 %), continuous (100 %) |
 | Terrain | share of the cell with sun-facing (TII > 0.1) or shaded (TII < −0.1) slopes | ≥ 40 % sun-facing: "permafrost likely limited to shaded and flat ground"; ≥ 40 % shaded: "favour permafrost"; else "mostly flat or gentle" |
 | Land cover | NLCD 2016 evergreen forest + woody and herbaceous wetland | ≥ 50 %: "insulating organic layer"; else "mostly shrub, tundra or open ground" |
-| GIPL flag (V2) | GIPL mask ([GIPL_ISSUE.md](GIPL_ISSUE.md)) | "GIPL unavailable here; air-temperature warming used instead." |
+| GIPL flag (V2) | GIPL mask ([GIPL_ISSUE_1.md](GIPL_ISSUE_1.md)) | "GIPL unavailable here; air-temperature warming used instead." |
 
 ## Open questions
 
@@ -409,7 +409,7 @@ Draft wording rules:
 <sub>Methods: 1 km GIPL grid; permafrost cells = ESA CCI Permafrost v5 PFR 2023 > 0; today = ESA ground surface
 temperature 2014–2023 (sampled at cell centres); air temperature = SNAP 2 km 5-model average (parent cell); V2 warming
 = model air warming 2014–2023 → 2026–2035 ("bridge") + GIPL surface change from 2026–2035 (delta change method), on
-cells where GIPL is usable ([GIPL_ISSUE.md](GIPL_ISSUE.md)). Seasonal air warming (section 2): December–February and
+cells where GIPL is usable ([GIPL_ISSUE_1.md](GIPL_ISSUE_1.md)). Seasonal air warming (section 2): December–February and
 June–August means, era minus 2014–2023, on cells where GIPL is usable (`scripts/02_tests/t4b_seasonal_warming.py`).
 Table breaks: today −4 / −2 / 0 °C; warming 2 / 3 / 4 / 5 °C. V1 vs V2 (section 4): classes compared cell by cell
 in each of the six scenario × era combinations, on permafrost cells where V2 uses GIPL. Data sentences: the 1 km cell

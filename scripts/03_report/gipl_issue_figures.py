@@ -1,4 +1,4 @@
-"""Figures for docs/GIPL_ISSUE.md (local GIPL source GeoTIFFs; window reads only).
+"""Figures for docs/GIPL_ISSUE_1.md (local GIPL source GeoTIFFs; window reads only).
 
   gipl_issue_one_cell.png  - a stuck cell vs its nearest normal neighbour, all 6 runs: MAAT (the SNAP 2 km air
                              temperature for the same model/scenario, 2021-2100), surface MAGT, permafrost-top depth,

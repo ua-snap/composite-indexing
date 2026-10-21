@@ -36,7 +36,7 @@ models and inputs. How should they be joined?
 | Basis | satellite land surface temperature + permafrost model | climate projections (5-model average, RCP 4.5 / 8.5) + permafrost model |
 
 Cells: everywhere ESA shows permafrost and GIPL behaves normally (≈ 724,000 cells; stuck cells excluded, see
-[GIPL_ISSUE.md](GIPL_ISSUE.md)).
+[GIPL_ISSUE_1.md](GIPL_ISSUE_1.md)).
 
 ---
 
@@ -54,6 +54,8 @@ Medians of 100 cells in each of three 10 × 10 km test areas (Brooks Range, Fair
 - **This rules out a direct comparison with ESA:** the only years the two datasets share (2021–2023) fall inside
   GIPL's start-up period. Section 2 compares them fairly instead: GIPL 2026–2035 against ESA 2014–2023, after allowing
   for the warming expected between those periods.
+- A closer look at the start-up period (all four depths, all three runs, and the 2021–2035 stretch in which the runs
+  share one weather sequence) is in [GIPL_ISSUE_2.md](GIPL_ISSUE_2.md), section 1.
 
 ## 2. GIPL and ESA levels do not match
 
@@ -104,6 +106,8 @@ RCP 8.5 shown; RCP 4.5 is within 0.1 °C.
 - GIPL is about **1.2 °C colder** than ESA would lead us to expect.
 - The difference **varies a lot from cell to cell** (a 3 °C range between the 10th and 90th percentiles).
 - In the **Interior and South**, the two datasets even disagree on *which places* are warmer (ρ 0.43 and 0.34).
+- The same comparison at 1 m and 2 m, and independent checks against boreholes and field records, are in
+  [GIPL_ISSUE_2.md](GIPL_ISSUE_2.md), sections 2–3: GIPL is about 2 °C too cold below the surface.
 
 ## 3. Join methods compared
 
