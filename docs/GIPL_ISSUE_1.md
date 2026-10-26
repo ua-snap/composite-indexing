@@ -5,9 +5,11 @@ RCP 4.5 / 8.5. Same values in the Rasdaman coverage `crrel_gipl_outputs_nc` and 
 
 **Issue:** across ~46,000 km² of Alaska, GIPL's mean annual ground temperature at 1 m (MAGT 1 m) stays fixed for
 the entire century while the ground surface above it warms by several °C. These cells are called "stuck" below
-(1 m MAGT changes by **< 0.1 °C** between 2021 and 2120). In the same cells, MAGT at 0.5 m is nearly flat
-(**~0.4 °C** change over the century vs ~5 °C elsewhere), and MAGT at the surface pulls away from neighbouring cells
-(**+1.5 to +3.5 °C** by 2081–2100, against a ~0.2 °C difference observed today).
+(1 m MAGT changes by **< 0.1 °C** between 2021 and 2120). In the same cells, MAGT at 2, 3 and 5 m is just as fixed
+(**0.00 °C** median change), MAGT at 0.5 m is nearly flat (**~0.4 °C** change over the century vs ~5 °C elsewhere),
+and MAGT at the surface pulls away from neighbouring cells (**+1.5 to +3.5 °C** by 2081–2100, against a ~0.2 °C
+difference observed today). **88 %** of the stuck area is in the Interior, where it covers **10 %** of the
+permafrost area (**19 %** with a 2 km border).
 
 ---
 
@@ -27,7 +29,7 @@ model and scenario, available to 2100). **Top:** the surface warms to +8–10 °
 The stuck pattern does not depend on the climate forcing: it is fixed to the cells. Cells bordering the stuck
 patches are partly damped (pale ring around the outlines).
 
-## 3. 0.5 m depth: the same cells barely change
+## 3. Other depths: 0.5 m barely changes, 2–5 m are stuck too
 
 ![MAGT change at 0.5 m and 1 m, stuck vs other cells](figures/gipl_issue_depth_change.png)
 
@@ -39,9 +41,13 @@ patches):
 | 0.5 m, median (1st–90th percentile) | 0.38 °C (0.25–0.45) | 5.4 °C (2.4–8.0) |
 | 0.5 m, share of cells changing < 0.5 °C | > 99 % | ~0 % |
 | 1 m, median | 0.01 °C | 5.0 °C |
+| 2 m, median | 0.00 °C | 4.7 °C |
+| 3 m, median (3,000-cell sample) | 0.00 °C | 4.5 °C |
+| 5 m, median (3,000-cell sample) | 0.00 °C | 4.1 °C |
 
 At 0.5 m the cells drift slowly instead of staying exactly constant, so only 30 cells statewide fall under the
-< 0.1 °C threshold; the affected area is the same as at 1 m (NCAR-CCSM4 RCP 4.5: 0.32 vs 5.1 °C).
+< 0.1 °C threshold; the affected area is the same as at 1 m (NCAR-CCSM4 RCP 4.5: 0.32 vs 5.1 °C). From 1 m down to
+at least 5 m the stuck cells do not move at all, while other permafrost cells warm 4–5 °C at every depth.
 
 ## 4. Surface: the same cells drift away from their neighbours
 
@@ -87,6 +93,22 @@ Neighbours are the reference; there are no observations for 2081–2100. Border 
 - 1,172 patches, but 90 % of the stuck area lies in patches ≥ 25 km². Largest: upper Tanana valley (12,182 km²),
   north of Fort Yukon (4,568 km²), Copper River Basin (3,410 km²), Yukon Flats, lowlands west of Nenana.
 - Each stuck cell holds its own constant value (−5.0 to −1.1 °C, 1st–99th percentile), not one common temperature.
+
+By region ([CORRELATION.md](CORRELATION.md) regions; same ESA CCI PFR > 0 (2020) area as above):
+
+| Region | Share of all stuck area | Stuck, share of the region's permafrost area | Stuck + 2 km border |
+|---|---|---|---|
+| Arctic | 2 % | 0.3 % | 0.7 % |
+| **Interior** | **88 %** | **10.1 %** | **19.3 %** |
+| West | 1 % | 0.2 % | 0.8 % |
+| South | 9 % | 0.6 % | 1.6 % |
+| Statewide | 100 % | 4.6 % | 8.9 % |
+
+- The problem is concentrated in the Interior: about one in five of its permafrost cells is stuck or borders a stuck
+  cell.
+- In the South, 96 % of the stuck area (mostly the Copper River Basin) lies where ESA CCI shows no permafrost
+  (PFR = 0, 2020), so it barely counts against the South's permafrost area. Statewide, 81 % of the stuck area lies
+  inside ESA CCI's permafrost area.
 
 ## 6. Around Fairbanks (100 × 100 km)
 
@@ -153,9 +175,13 @@ Other GIPL behaviour seen in the same tests (start-up period, cold bias against 
 ---
 
 <sub>Methods: stuck = max − min of annual 1 m MAGT over 2021–2120 < 0.1 °C; the 0.5 m comparison uses the same
-max − min. Surface comparison: good permafrost cells within 10 km of a stuck cell; MAAT = SNAP 2 km
+max − min. 2, 3 and 5 m: same max − min, 5ModelAvg RCP 8.5; all stuck cells at 2 m, a random 3,000 stuck and 3,000
+other permafrost cells at 3 and 5 m; other permafrost cells here are those with ESA CCI PFR > 0 in 2023.
+Surface comparison: good permafrost cells within 10 km of a stuck cell; MAAT = SNAP 2 km
 5modelAvg / CRU TS 4.08. Permafrost area = ESA CCI Permafrost
-v5.0 PFR > 0 (2020) sampled at GIPL cell centres. Scripts in `scripts/02_tests/` (`t3_esa_gipl_continuity.py`,
+v5.0 PFR > 0 (2020) sampled at GIPL cell centres. Regional shares: stuck (or stuck + border) cells inside that
+area / the region's permafrost cells. Scripts in `scripts/02_tests/` (`t3_esa_gipl_continuity.py`,
 `t3b_gipl_artifact.py`, `t3c_gipl_statewide.py`, `t3d_statsgo_overlay.py`, `t3e_ssurgo_fairbanks.py`,
-`t3f_landcover.py`, `t3g_gipl_0p5m.py`, `t3h_surface_mask_test.py`) and
-`scripts/03_report/gipl_issue_figures.py`.</sub>
+`t3f_landcover.py`, `t3g_gipl_0p5m.py`, `t3h_surface_mask_test.py`),
+`scripts/03_report/gipl_issue_figures.py`, and `scripts/03_report/gipl_trust_figures.py --stats` (regional shares
+and 2–5 m; `<data>/results/t6/trust_stats.csv`).</sub>

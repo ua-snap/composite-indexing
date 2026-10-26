@@ -28,6 +28,8 @@ GIPL's change and gets today's level from ESA CCI.
 - **GIPL's first 15 years are not a normal projection.** In 2021–2023 the ground below the surface starts in the
   wrong place and climbs almost 2 °C in two years. Through **2035**, the 5-model average (both scenarios) and the
   GFDL-CM3 run follow **one shared year-to-year weather sequence**. Scenario-specific behaviour starts only in 2036.
+  Four of the six runs start from **identical 2021 maps**, and NCAR-CCSM4 spikes 4–5 °C at the surface in 2023 with
+  no warm year in its air temperature.
 - **Option A, ESA-adjusted values compared with 0 °C, beats raw GIPL but still has no sound 0 °C line at 1 km.**
   Even ESA's own 0 °C line reads 39 % of permafrost sites as thawed at 1 m: a 1 km cell mixes frozen and unfrozen
   ground. A threshold scheme would need its edges calibrated against field data, not fixed at 0 °C.
@@ -92,7 +94,10 @@ identical.*
   RCP 4.5 goes from −3.7 °C in 2021 to −1.9 °C in 2023; at 2 m from −4.0 to −2.2 °C. The surface rises from −1.9 to
   −0.3 °C over the same two years. Real ground does not warm 1.5–2 °C in two years.
 - **The NCAR-CCSM4 run jumps in 2023** (surface +3.6 °C under RCP 4.5 and +5.1 °C under RCP 8.5, against −0.3 °C in
-  the other runs), then drops back.
+  the other runs), then drops back. SNAP's NCAR-CCSM4 air temperature shows no such jump (statewide median of the same
+  cells): under RCP 4.5, 2023 (−1.9 °C) sits between 2022 (−2.5 °C) and 2024 (−1.7 °C), and 2024 is warmer, yet
+  GIPL's surface falls back to −0.9 °C; under RCP 8.5, 2023 (−5.1 °C) is the coldest year of 2021–2035. Both
+  scenarios spike in the same year although their air temperatures differ by 3 °C.
 - **The surface drops by about 1 °C in 2026** in the 5-model average under both scenarios (and a year earlier in
   GFDL-CM3 RCP 8.5). This is the drop described in [ESA_GIPL_SPLICING.md](ESA_GIPL_SPLICING.md), section 1. It appears
   in every run that follows the shared weather sequence (section 1.3), so it may be a cold year in that sequence
@@ -114,6 +119,10 @@ should start close together, with any gap largest at the surface.
 
 - **In 2021 the gap grows with depth** (1.7 °C at 2 m, more than the air's 0.85 °C). The weather cannot do that; the two
   runs must have been started from different ground temperatures.
+- **Yet four of the six runs start from exactly the same ground.** In 2021 the 5-model average and GFDL-CM3 under
+  RCP 4.5 and NCAR-CCSM4 under both scenarios are identical in every cell, at the surface and at 1 m. Only the two
+  other RCP 8.5 runs (5-model average, GFDL-CM3) start elsewhere. Different climate models have different 2021
+  weather, so their first-year values should differ; which runs match and which do not is unexplained.
 - **From 2023 to 2035 the gap almost vanishes** (surface ≤ 0.07 °C), even though the two scenarios' air temperatures
   differ by up to 1.8 °C in single years. GIPL behaves as if both scenarios had the same weather in those years.
 - **From 2036 the gap reopens** to the size expected from different weather.
@@ -133,7 +142,9 @@ changes of every cell between runs (median over cells; 1 = identical pattern, 0 
 
 - **GFDL-CM3 RCP 4.5 and the 5-model average RCP 4.5 are identical in every cell for 2021–2035** (checked at the
   surface, 1 m and 2 m), and differ from 2036 on.
-- **GFDL-CM3 RCP 8.5 follows the same sequence one year ahead.**
+- **GFDL-CM3 RCP 8.5 follows the same sequence one year ahead.** Moved one year later, it differs from the
+  5-model average RCP 8.5 by a median 0.05 °C per cell (90th percentile 0.19 °C) in 2023–2035, against 2.7 °C in 2036;
+  the statewide medians agree within 0.01 °C (0.07 °C in 2022).
 - **Under RCP 4.5, the 5-model average swings like a single climate model before 2036** (0.5–1 °C from year to year,
   like GFDL-CM3) **and like an average of models after** (mostly 0.1–0.3 °C).
 - **GIPL's year-to-year changes barely follow the projected air temperature** that we use for V1 and for expected
@@ -377,4 +388,6 @@ temperature for GIPL's implied value from 2006 at the earliest). Ranking skill =
 Scripts: `scripts/01_data/fetch_boreholes.py`, `scripts/02_tests/t6_gipl_levels.py` (stacks, start-up, bias,
 reference decade, scenario response, classes, trends), `scripts/02_tests/t6b_sites.py` (boreholes, CUSP),
 `scripts/03_report/gipl_issue2_figures.py`; `slurm/17_t6_prep.slurm`, `slurm/18_t6_analyze.slurm`; tables in
-`<data>/results/t6/`.</sub>
+`<data>/results/t6/`. NCAR-CCSM4 air temperature: SNAP 2 km CCSM4 monthly tas (archive zips, read-only), mean of 12
+months, statewide median of every 10th cell above (`trust_ncar_air.csv`). Identical 2021 maps (all valid cells) and the
+one-year shift of GFDL-CM3 RCP 8.5: `scripts/03_report/gipl_trust_figures.py --stats` (`trust_stats.csv`).</sub>
