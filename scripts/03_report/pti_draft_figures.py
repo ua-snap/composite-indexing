@@ -167,7 +167,7 @@ def main():
                 c = cls[(ver, scen, era)][m]
                 c = c[np.isfinite(c)]
                 left = 0
-                for q in range(5):
+                for q in range(len(CLASSES)):
                     wdt = 100 * np.mean(c == q)
                     ax.barh(y, wdt, left=left, color=CLASS_C[q], height=0.78, edgecolor="white", lw=0.6)
                     left += wdt
@@ -178,7 +178,7 @@ def main():
             ax.set_title(f"{rn}, RCP {scen[3]}.{scen[4]}", loc="left", fontsize=10)
     for ax in axs[-1]:
         ax.set_xlabel("% of the region's permafrost cells")
-    fig.legend([plt.Rectangle((0, 0), 1, 1, fc=c) for c in CLASS_C], CLASSES, ncol=5, frameon=False,
+    fig.legend([plt.Rectangle((0, 0), 1, 1, fc=c) for c in CLASS_C], CLASSES, ncol=len(CLASSES), frameon=False,
                loc="upper center", bbox_to_anchor=(0.5, 1.03))
     fig.tight_layout()
     fig.savefig(OUT / "d3_regional_class_shares.png", dpi=130, bbox_inches="tight")

@@ -14,17 +14,18 @@ projected warming, a cell scores higher when more of it is flat or shaded, or co
 **BLUF:**
 - **One score from four inputs:** PTI-C = 0.4 × today's ground surface temperature + 0.4 × projected warming +
   0.1 × % of the cell that is flat or shaded + 0.1 × % covered by permafrost-favorable vegetation, each first
-  scaled to 0–1. The score is cut into five classes at 0.2, 0.4, 0.6 and 0.8.
+  scaled to 0–1. The score is cut into three classes at equal thirds (1/3 and 2/3).
 - **Why only these inputs:** most gridded permafrost and climate layers measure the same thing (see section 1), so
   adding them would count the same information several times. Terrain and land cover are the exceptions, which is
   why they get their own terms.
 - **Temperature drives the score:** today's temperature and projected warming make up 73–83 % of the statewide
   mean score. Terrain and land cover can move a cell by at most 0.2, enough to cross one class. Most cells are
   largely flat or shaded (median 83 %), so the terrain term raises nearly every score by a similar amount.
-- **Through 2050, mostly Low to Moderate** (statewide 81–86 % of cells). By 2081–2100 under RCP 8.5,
-  76–83 % of cells are High or Very high.
-- **Scores bunch in the middle:** Very high appears almost only under RCP 8.5 by 2081–2100 (22–32 % of cells), and Very
-  low only in the coldest Arctic cells. Averaging four terms pulls scores toward the middle.
+- **Through 2050, mostly Moderate** (statewide 77–80 % of cells), with Low in the colder half of the Arctic. By
+  2081–2100 under RCP 8.5, 60–67 % of cells are High.
+- **Scores bunch in the middle:** Moderate holds 63–80 % of cells statewide in every era and scenario except
+  2081–2100 under RCP 8.5, and Low appears almost only in the Arctic. Averaging four terms pulls scores toward the
+  middle.
 - **Permafrost fraction (PFR) is the gate, not a term:** only cells where ESA shows permafrost get a score (section
   2 explains why).
 - **Decisions needed:** the weights, the scaling bounds, the class breaks, and which vegetation classes count as
@@ -56,9 +57,9 @@ Section 6 has example data sentences for three test areas.
 
 ## Key terms
 
-- **PTI class:** one of five classes, coloured as in PTI.md: ![Very low](figures/badges/pti_very_low.svg)
-  ![Low](figures/badges/pti_low.svg) ![Moderate](figures/badges/pti_moderate.svg) ![High](figures/badges/pti_high.svg)
-  ![Very high](figures/badges/pti_very_high.svg). In PTI-C the class comes from the 0–1 score.
+- **PTI class:** one of three classes, coloured as in PTI.md: ![Low](figures/badges/pti_low.svg)
+  ![Moderate](figures/badges/pti_moderate.svg) ![High](figures/badges/pti_high.svg). In PTI-C the class comes from
+  the 0–1 score.
 - **Permafrost cells:** 1 km cells where ESA shows any permafrost (permafrost fraction, PFR, above 0; ≈ 800,000
   cells). Only these cells get a score.
 - **Today's surface temperature:** mean annual ground surface temperature, 2014–2023, from ESA CCI Permafrost
@@ -123,11 +124,9 @@ Then the score is classified. This will also need to be tested and tuned. Classe
 
 | Class | PTI-C Score |
 |---|---|
-| ![Very low](figures/badges/pti_very_low.svg) | below 0.2 |
-| ![Low](figures/badges/pti_low.svg) | 0.2 to 0.4 |
-| ![Moderate](figures/badges/pti_moderate.svg) | 0.4 to 0.6 |
-| ![High](figures/badges/pti_high.svg) | 0.6 to 0.8 |
-| ![Very high](figures/badges/pti_very_high.svg) | 0.8 and above |
+| ![Low](figures/badges/pti_low.svg) | below 1/3 (0.33) |
+| ![Moderate](figures/badges/pti_moderate.svg) | 1/3 to 2/3 (0.33 to 0.67) |
+| ![High](figures/badges/pti_high.svg) | 2/3 (0.67) and above |
 
 ### Notes on inputs
 
@@ -187,21 +186,21 @@ grey. Each table gives the median score and the share of the area's permafrost c
 
 ![PTI-C statewide](figures/ptic_statewide.png)
 
-| Era, scenario | Score, median (V1 / V2) | Very low | Low | Moderate | High | Very high |
-|---|---|---|---|---|---|---|
-| 2026–2050, RCP 4.5 | 0.49 / 0.49 | 2 / 3 % | 30 / 30 % | 55 / 54 % | 14 / 13 % | 0 / 0 % |
-| 2026–2050, RCP 8.5 | 0.49 / 0.50 | 2 / 2 % | 30 / 29 % | 56 / 52 % | 11 / 16 % | 0 / 0 % |
-| 2051–2080, RCP 4.5 | 0.55 / 0.57 | 0 / 0 % | 19 / 16 % | 45 / 42 % | 36 / 42 % | 0 / 0 % |
-| 2051–2080, RCP 8.5 | 0.62 / 0.61 | 0 / 0 % | 6 / 9 % | 40 / 39 % | 53 / 51 % | 1 / 0 % |
-| 2081–2100, RCP 4.5 | 0.58 / 0.62 | 0 / 0 % | 10 / 6 % | 44 / 40 % | 45 / 53 % | 0 / 1 % |
-| 2081–2100, RCP 8.5 | 0.74 / 0.71 | 0 / 0 % | 0 / 0 % | 17 / 24 % | 50 / 54 % | 32 / 22 % |
+| Era, scenario | Score, median (V1 / V2) | Low | Moderate | High |
+|---|---|---|---|---|
+| 2026–2050, RCP 4.5 | 0.49 / 0.49 | 19 / 22 % | 80 / 77 % | 1 / 1 % |
+| 2026–2050, RCP 8.5 | 0.49 / 0.50 | 20 / 20 % | 80 / 79 % | 1 / 2 % |
+| 2051–2080, RCP 4.5 | 0.55 / 0.57 | 7 / 5 % | 80 / 76 % | 13 / 19 % |
+| 2051–2080, RCP 8.5 | 0.62 / 0.61 | 2 / 3 % | 63 / 66 % | 35 / 31 % |
+| 2081–2100, RCP 4.5 | 0.58 / 0.62 | 4 / 1 % | 72 / 64 % | 24 / 35 % |
+| 2081–2100, RCP 8.5 | 0.74 / 0.71 | 0 / 0 % | 33 / 40 % | 67 / 60 % |
 
-- **Through 2050, mostly Moderate (52–56 %) and Low (29–30 %).** Low covers most of the Arctic; Very low only the
-  coldest cells of the north-eastern Arctic.
-- **By 2051–2080, High grows to 36–42 % (RCP 4.5) or about half (RCP 8.5) of cells.**
-- **By 2081–2100 under RCP 8.5, 76–83 % are High or Very high.** Very high appears almost only here.
-- **V1 vs V2:** median scores differ by 0.04 or less; class shares differ most for Very high in 2081–2100, RCP 8.5
-  (V1 warms more).
+- **Through 2050, mostly Moderate (77–80 %) and Low (19–22 %).** Low covers the colder half of the Arctic; High
+  2 % or less.
+- **By 2051–2080, High grows to 13–19 % (RCP 4.5) or about a third (31–35 %, RCP 8.5) of cells.**
+- **By 2081–2100, High reaches 24–35 % (RCP 4.5) and 60–67 % (RCP 8.5).**
+- **V1 vs V2:** median scores differ by 0.04 or less; class shares differ most in 2081–2100 (High under RCP 4.5:
+  24 vs 35 %, V2 warms more; under RCP 8.5: 67 vs 60 %, V1 warms more).
 
 ### 4.2 Arctic
 
@@ -209,20 +208,22 @@ grey. Each table gives the median score and the share of the area's permafrost c
 
 ![PTI-C Arctic](figures/ptic_arctic.png)
 
-| Era, scenario | Score, median (V1 / V2) | Very low | Low | Moderate | High | Very high |
-|---|---|---|---|---|---|---|
-| 2026–2050, RCP 4.5 | 0.35 / 0.33 | 5 / 7 % | 64 / 64 % | 27 / 25 % | 4 / 3 % | 0 / 0 % |
-| 2026–2050, RCP 8.5 | 0.34 / 0.34 | 6 / 6 % | 64 / 64 % | 27 / 26 % | 3 / 4 % | 0 / 0 % |
-| 2051–2080, RCP 4.5 | 0.42 / 0.43 | 0 / 0 % | 42 / 36 % | 47 / 51 % | 11 / 13 % | 0 / 0 % |
-| 2051–2080, RCP 8.5 | 0.51 / 0.46 | 0 / 0 % | 12 / 21 % | 66 / 62 % | 21 / 17 % | 1 / 0 % |
-| 2081–2100, RCP 4.5 | 0.45 / 0.49 | 0 / 0 % | 22 / 13 % | 62 / 67 % | 16 / 20 % | 0 / 0 % |
-| 2081–2100, RCP 8.5 | 0.63 / 0.61 | 0 / 0 % | 0 / 0 % | 36 / 47 % | 51 / 45 % | 12 / 8 % |
+| Era, scenario | Score, median (V1 / V2) | Low | Moderate | High |
+|---|---|---|---|---|
+| 2026–2050, RCP 4.5 | 0.35 / 0.33 | 44 / 50 % | 56 / 50 % | 0 / 0 % |
+| 2026–2050, RCP 8.5 | 0.34 / 0.34 | 45 / 45 % | 55 / 54 % | 0 / 0 % |
+| 2051–2080, RCP 4.5 | 0.42 / 0.43 | 15 / 11 % | 81 / 83 % | 4 / 5 % |
+| 2051–2080, RCP 8.5 | 0.51 / 0.46 | 4 / 6 % | 84 / 85 % | 13 / 9 % |
+| 2081–2100, RCP 4.5 | 0.45 / 0.49 | 10 / 3 % | 82 / 86 % | 8 / 11 % |
+| 2081–2100, RCP 8.5 | 0.63 / 0.61 | 0 / 0 % | 63 / 73 % | 37 / 27 % |
 
-- **Through 2050, mostly Low (64 %).** The cold surface keeps the "today" term small (about 0.11 of the score).
+- **Through 2050, Low and Moderate about evenly** (Low 44–50 %). The cold surface keeps the "today" term small
+  (about 0.11 of the score).
+- **2051–2100, mostly Moderate** (81–86 %), except under RCP 8.5 in 2081–2100.
 - **Terrain and land cover matter most here:** the Arctic has the most flat or shaded ground and favorable cover,
   and the two terms add about 0.15 to its scores, more than today's temperature does.
-- **2081–2100, RCP 8.5:** warming of +5.5 to +6.1 °C (median) lifts 53–64 % of the cells to High or Very high;
-  the rest stay Moderate.
+- **2081–2100, RCP 8.5:** warming of +5.5 to +6.1 °C (median) lifts 27–37 % of the cells to High; the rest stay
+  Moderate.
 - **V1 vs V2:** largest difference under RCP 8.5, 2051–2080 (V1 warms more: +4.0 vs +3.4 °C).
 
 ### 4.3 Interior
@@ -232,18 +233,18 @@ cells; the rest use air warming and are flagged.
 
 ![PTI-C Interior](figures/ptic_interior.png)
 
-| Era, scenario | Score, median (V1 / V2) | Very low | Low | Moderate | High | Very high |
-|---|---|---|---|---|---|---|
-| 2026–2050, RCP 4.5 | 0.53 / 0.54 | 0 / 0 % | 9 / 9 % | 73 / 72 % | 18 / 19 % | 0 / 0 % |
-| 2026–2050, RCP 8.5 | 0.53 / 0.54 | 0 / 0 % | 10 / 8 % | 75 / 70 % | 15 / 22 % | 0 / 0 % |
-| 2051–2080, RCP 4.5 | 0.59 / 0.62 | 0 / 0 % | 4 / 3 % | 50 / 39 % | 46 / 57 % | 0 / 0 % |
-| 2051–2080, RCP 8.5 | 0.65 / 0.65 | 0 / 0 % | 2 / 2 % | 27 / 27 % | 70 / 70 % | 1 / 1 % |
-| 2081–2100, RCP 4.5 | 0.62 / 0.66 | 0 / 0 % | 3 / 2 % | 38 / 26 % | 59 / 70 % | 0 / 2 % |
-| 2081–2100, RCP 8.5 | 0.77 / 0.76 | 0 / 0 % | 0 / 0 % | 6 / 10 % | 56 / 61 % | 38 / 29 % |
+| Era, scenario | Score, median (V1 / V2) | Low | Moderate | High |
+|---|---|---|---|---|
+| 2026–2050, RCP 4.5 | 0.53 / 0.54 | 4 / 4 % | 94 / 94 % | 2 / 2 % |
+| 2026–2050, RCP 8.5 | 0.53 / 0.54 | 4 / 4 % | 95 / 94 % | 1 / 3 % |
+| 2051–2080, RCP 4.5 | 0.59 / 0.62 | 2 / 1 % | 83 / 74 % | 15 / 25 % |
+| 2051–2080, RCP 8.5 | 0.65 / 0.65 | 0 / 1 % | 56 / 57 % | 43 / 42 % |
+| 2081–2100, RCP 4.5 | 0.62 / 0.66 | 1 / 0 % | 72 / 55 % | 27 / 45 % |
+| 2081–2100, RCP 8.5 | 0.77 / 0.76 | 0 / 0 % | 16 / 21 % | 84 / 78 % |
 
-- **Through 2050, mostly Moderate (70–75 %):** a warm surface today, but little warming yet.
-- **2051–2080:** High for 46–57 % of cells under RCP 4.5 and 70 % under RCP 8.5.
-- **2081–2100, RCP 8.5:** 90–94 % High or Very high.
+- **Through 2050, almost all Moderate (94–95 %):** a warm surface today, but little warming yet.
+- **2051–2080:** High for 15–25 % of cells under RCP 4.5 and 42–43 % under RCP 8.5.
+- **2081–2100:** High for 27–45 % under RCP 4.5 and 78–84 % under RCP 8.5.
 - Nearly as much flat or shaded ground as the Arctic, but much less favorable cover, so the two terms add about 0.11.
 
 ### 4.4 West
@@ -252,20 +253,20 @@ cells; the rest use air warming and are flagged.
 
 ![PTI-C West](figures/ptic_west.png)
 
-| Era, scenario | Score, median (V1 / V2) | Very low | Low | Moderate | High | Very high |
-|---|---|---|---|---|---|---|
-| 2026–2050, RCP 4.5 | 0.58 / 0.57 | 0 / 0 % | 0 / 0 % | 70 / 72 % | 29 / 28 % | 0 / 0 % |
-| 2026–2050, RCP 8.5 | 0.57 / 0.59 | 0 / 0 % | 0 / 0 % | 76 / 62 % | 24 / 37 % | 0 / 0 % |
-| 2051–2080, RCP 4.5 | 0.65 / 0.66 | 0 / 0 % | 0 / 0 % | 18 / 14 % | 82 / 86 % | 0 / 0 % |
-| 2051–2080, RCP 8.5 | 0.71 / 0.69 | 0 / 0 % | 0 / 0 % | 2 / 5 % | 96 / 94 % | 2 / 1 % |
-| 2081–2100, RCP 4.5 | 0.68 / 0.70 | 0 / 0 % | 0 / 0 % | 5 / 3 % | 95 / 96 % | 0 / 2 % |
-| 2081–2100, RCP 8.5 | 0.85 / 0.79 | 0 / 0 % | 0 / 0 % | 0 / 0 % | 19 / 54 % | 81 / 46 % |
+| Era, scenario | Score, median (V1 / V2) | Low | Moderate | High |
+|---|---|---|---|---|
+| 2026–2050, RCP 4.5 | 0.58 / 0.57 | 0 / 0 % | 99 / 99 % | 1 / 1 % |
+| 2026–2050, RCP 8.5 | 0.57 / 0.59 | 0 / 0 % | 100 / 98 % | 0 / 2 % |
+| 2051–2080, RCP 4.5 | 0.65 / 0.66 | 0 / 0 % | 67 / 59 % | 33 / 41 % |
+| 2051–2080, RCP 8.5 | 0.71 / 0.69 | 0 / 0 % | 18 / 31 % | 82 / 69 % |
+| 2081–2100, RCP 4.5 | 0.68 / 0.70 | 0 / 0 % | 36 / 23 % | 64 / 77 % |
+| 2081–2100, RCP 8.5 | 0.85 / 0.79 | 0 / 0 % | 0 / 2 % | 100 / 98 % |
 
 - **The highest scores of any region:** a warm surface today combined with plenty of flat or shaded ground and
   favorable cover.
-- **From 2051 on, mostly High** (82–96 %).
-- **2081–2100, RCP 8.5: the only large Very high share** (V1 81 %, V2 46 %). V1 warms more here (+5.6 vs +4.8 °C),
-  which puts more cells over the 0.8 break.
+- **Through 2050, almost all Moderate** (98–100 %).
+- **From 2051 on, High grows fastest here:** 33–41 % (RCP 4.5) and 69–82 % (RCP 8.5) by 2051–2080; 64–77 % and
+  98–100 % by 2081–2100. Under RCP 8.5, 2051–2080, V1 warms more, so more of its cells cross the 2/3 break.
 
 ### 4.5 South
 
@@ -273,18 +274,18 @@ cells; the rest use air warming and are flagged.
 
 ![PTI-C South](figures/ptic_south.png)
 
-| Era, scenario | Score, median (V1 / V2) | Very low | Low | Moderate | High | Very high |
-|---|---|---|---|---|---|---|
-| 2026–2050, RCP 4.5 | 0.48 / 0.48 | 0 / 0 % | 10 / 10 % | 80 / 80 % | 10 / 10 % | 0 / 0 % |
-| 2026–2050, RCP 8.5 | 0.47 / 0.49 | 0 / 0 % | 11 / 6 % | 80 / 81 % | 9 / 12 % | 0 / 0 % |
-| 2051–2080, RCP 4.5 | 0.53 / 0.54 | 0 / 0 % | 2 / 1 % | 77 / 73 % | 21 / 25 % | 0 / 0 % |
-| 2051–2080, RCP 8.5 | 0.58 / 0.57 | 0 / 0 % | 1 / 1 % | 60 / 64 % | 40 / 35 % | 0 / 0 % |
-| 2081–2100, RCP 4.5 | 0.56 / 0.58 | 0 / 0 % | 1 / 0 % | 68 / 58 % | 31 / 41 % | 0 / 0 % |
-| 2081–2100, RCP 8.5 | 0.69 / 0.65 | 0 / 0 % | 0 / 0 % | 7 / 23 % | 80 / 68 % | 13 / 8 % |
+| Era, scenario | Score, median (V1 / V2) | Low | Moderate | High |
+|---|---|---|---|---|
+| 2026–2050, RCP 4.5 | 0.48 / 0.48 | 2 / 2 % | 97 / 97 % | 2 / 2 % |
+| 2026–2050, RCP 8.5 | 0.47 / 0.49 | 2 / 1 % | 97 / 97 % | 1 / 2 % |
+| 2051–2080, RCP 4.5 | 0.53 / 0.54 | 0 / 0 % | 92 / 89 % | 8 / 11 % |
+| 2051–2080, RCP 8.5 | 0.58 / 0.57 | 0 / 0 % | 83 / 84 % | 17 / 16 % |
+| 2081–2100, RCP 4.5 | 0.56 / 0.58 | 0 / 0 % | 87 / 81 % | 12 / 18 % |
+| 2081–2100, RCP 8.5 | 0.69 / 0.65 | 0 / 0 % | 35 / 57 % | 65 / 43 % |
 
 - **Mostly Moderate until late century:** mountainous ground with sunlit slopes (the least flat or shaded ground of
   any region) and little favorable cover; the two terms add about 0.08, the least of any region.
-- **2081–2100, RCP 8.5:** High for 68–80 % of cells; V1 warms more (+4.6 vs +4.0 °C).
+- **2081–2100, RCP 8.5:** High for 43–65 % of cells; V1 warms more (+4.6 vs +4.0 °C).
 
 ## 5. What drives the score
 
@@ -304,8 +305,9 @@ breaks.*
 - **The terrain term is high almost everywhere:** most cells are largely flat or shaded (median 80–88 % in every
   region except the South, 60 %), so it raises nearly all scores by 0.06–0.09 and separates cells little. Land cover
   does most of the separating between regions.
-- **Why scores bunch in the middle:** a cell needs high values in nearly all inputs to reach Very high (0.8), and
-  low values in all of them to reach Very low (0.2). An average of four inputs rarely does either.
+- **Why scores bunch in the middle:** a cell needs high values in most inputs to reach High (2/3), and low values in
+  most of them to stay Low (below 1/3), which happens mainly in the cold Arctic. An average of four inputs pulls
+  scores toward the middle, so most cells are Moderate.
 
 ## 6. Test areas and example data sentences
 
@@ -339,8 +341,8 @@ below.*
 2. **Scaling bounds:** today −6 to +2 °C, warming 0 to 6 °C, set from the range of the data in the permafrost cells
    (section 2). Moving a bound changes every score. A higher warming bound would stop a quarter of V1 cells being
    capped in 2081–2100 under RCP 8.5, but would lower every other score.
-3. **Class breaks:** equal steps of 0.2 leave Very low and Very high nearly empty until late century. Keep them, or
-   set breaks that spread the classes more evenly?
+3. **Class breaks:** equal thirds (1/3, 2/3) put most cells in Moderate until late century (statewide 63–80 %).
+   Keep them, or set breaks that spread the classes more evenly?
 4. **favorable vegetation:** which NLCD classes count (shrub/scrub and deciduous forest are left out), and whether
    they should raise the score at all (insulating cover protects permafrost, but its ground is often ice-rich and
    vulnerable once disturbed).

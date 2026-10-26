@@ -7,7 +7,7 @@ Question: "Does this cell contain permafrost that is susceptible to thaw?"
               V1 air (T_N2 - today), V2 GIPL via the delta change method, air where GIPL is masked (T_G2 - today)
   s_flat    = share of the cell's land that is flat or shaded (32 m TII <= 0.1, i.e. not sunlit; 1 - sun_share)
   s_cover   = share of the cell in permafrost-favourable NLCD 2016 classes {42, 90, 95, 72, 51, 74}
-Classes on the score: Very low < 0.2 <= Low < 0.4 <= Moderate < 0.6 <= High < 0.8 <= Very high.
+Classes on the score (equal thirds): Low < 1/3 <= Moderate < 2/3 <= High.
 Domain = PTI.md's (ESA PFR 2023 > 0, GIPL grid); PFR is the gate only.
 Outputs: <data>/results/t5/{ptic_area_summary,ptic_terms_corr,ptic_test_areas}.csv, ptic.nc;
 docs/figures/ptic_{scaling,terms,class_shares,contrib,<area>}.png
@@ -39,7 +39,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 OUT = C.DATA / "results/t5"
 FIG = C.REPO / "docs/figures"
 W = dict(today=0.4, warming=0.4, flat=0.1, cover=0.1)
-BREAKS = [0.2, 0.4, 0.6, 0.8]
+BREAKS = [1 / 3, 2 / 3]
 COVER = [42, 90, 95, 72, 51, 74]  # evergreen forest, woody + herbaceous wetland, sedge/herbaceous, dwarf scrub, moss
 INK, INK2, GRID, CONTEXT = "#0b0b0b", "#52514e", "#e4e3df", "#e4e3df"
 TERM_C = {"today": "#0d366b", "warming": "#3987e5", "flat": "#9ec5f4", "cover": "#c9c7c1"}
@@ -227,7 +227,7 @@ def fig_class_shares(df):
             ax.spines[sp].set_visible(False)
     axs[0].set_ylabel("% of permafrost cells")
     h = [plt.Rectangle((0, 0), 1, 1, fc=c) for c in CLASS_C]
-    fig.legend(h, CLASSES, loc="upper center", ncol=5, frameon=False, bbox_to_anchor=(0.5, 1.04))
+    fig.legend(h, CLASSES, loc="upper center", ncol=len(CLASSES), frameon=False, bbox_to_anchor=(0.5, 1.04))
     fig.text(0.5, -0.04, "Each pair of bars: V1 (left), V2 (right).", ha="center", fontsize=8.5, color=INK2)
     fig.tight_layout()
     fig.savefig(FIG / "ptic_class_shares.png", dpi=140, bbox_inches="tight")
@@ -271,7 +271,7 @@ def fig_area(k, an, ok, reg, dom, cls):
             if k:
                 ax.imshow(np.where(dom & ~area, 1.0, np.nan)[r0:r1, c0:c1], cmap=ListedColormap([CONTEXT]), vmin=0,
                           vmax=2, interpolation="nearest")
-            ax.imshow(np.where(area, cls[(ver, scen, era)], np.nan)[r0:r1, c0:c1], cmap=CMAP, vmin=-0.5, vmax=4.5,
+            ax.imshow(np.where(area, cls[(ver, scen, era)], np.nan)[r0:r1, c0:c1], cmap=CMAP, vmin=-0.5, vmax=len(CLASSES) - 0.5,
                       interpolation="nearest")
             off(ax)
             ax.set_title(f"{ver}, RCP {scen[3]}.{scen[4]}, {era_txt(era)}", loc="left", fontsize=10)
