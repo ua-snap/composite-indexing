@@ -59,13 +59,13 @@ def crop(a, min_cells=40):
 
 def fig_startup():
     s = pd.read_csv(T6 / "startup_series.csv")
-    s = s[(s.region == "Statewide") & (s.year <= 2060)]
+    s = s[(s.region == "Statewide") & (s.year <= 2050)]
     fig, axs = plt.subplots(2, 4, figsize=(16, 7), sharex=True)
     for j, dep in enumerate(DEP_LABEL):
         for i, scen in enumerate(["rcp45", "rcp85"]):
             ax = axs[i, j]
-            ax.axvspan(2020.5, 2035.5, color=GRID, alpha=0.45, lw=0)
-            ax.axvspan(2020.5, 2025.5, color=GRID, alpha=0.8, lw=0)
+            ax.axvspan(2000.5, 2015.5, color=GRID, alpha=0.45, lw=0)
+            ax.axvspan(2000.5, 2003.5, color=GRID, alpha=0.8, lw=0)
             for run, col in RUN_C.items():
                 d = s[(s.run == run) & (s.scen == scen) & (s.depth == dep)]
                 ax.plot(d.year, d.gipl_median, color=col, lw=1.6 if run == "5ModelAvg" else 1.2,
@@ -76,8 +76,10 @@ def fig_startup():
                 ax.set_ylabel("ground temperature, median (°C)")
     h, l = axs[0, 0].get_legend_handles_labels()
     h += [Patch(color=GRID, alpha=0.9), Patch(color=GRID, alpha=0.45)]
-    l += ["2021–2025: start-up years", "2021–2035: shared weather sequence (section 1)"]
+    l += ["2001–2003: start-up years", "2001–2015: observed weather (CRU), same in every run"]
     fig.legend(h, l, loc="upper center", ncol=5, frameon=False, bbox_to_anchor=(0.5, 1.03))
+    for ax in axs[-1]:
+        ax.set_xlabel("climate year (GIPL file year − 20)")
     fig.tight_layout()
     fig.savefig(FIG / "gipl2_startup.png", dpi=140, bbox_inches="tight")
     plt.close(fig)
@@ -91,8 +93,10 @@ def fig_gap():
         d = g[g.depth == dep]
         ax.plot(d.year, d.gipl_gap, color=col, lw=1.8, marker="o", ms=3.5, label=f"GIPL {DEP_LABEL[dep]}")
     d = g[g.depth == "magtsurface"]
-    ax.plot(d.year, d.air_gap, color=INK2, lw=1.2, ls=(0, (3, 2)), label="air temperature (model, 5-model average)")
-    ax.axvspan(2020.5, 2025.5, color=GRID, lw=0)
+    ax.plot(d.year, d.air_gap, color=INK2, lw=1.2, ls=(0, (3, 2)),
+            label="air temperature (observed to 2015, the same in both; then 5-model average)")
+    ax.axvspan(2000.5, 2003.5, color=GRID, lw=0)
+    ax.set_xlabel("climate year (GIPL file year − 20)")
     ax.set_ylabel("median |RCP 8.5 − RCP 4.5| (°C)")
     ax.set_title("How far apart the two scenarios are, year by year (5ModelAvg)")
     ax.legend(frameon=False, fontsize=8.5)
@@ -104,7 +108,7 @@ def fig_gap():
 
 def fig_bias():
     b = pd.read_csv(T6 / "bias.csv")
-    b = b[(b.scen == "rcp85") & (b.base == "2026-2035")]
+    b = b[(b.scen == "rcp85") & (b.years == "2004-2015")]
     deps = ["magtsurface", "magt1m", "magt2m"]
     regs = ["Statewide", "Arctic", "Interior", "West", "South"]
     fig, ax = plt.subplots(figsize=(10, 4.4))
@@ -114,16 +118,16 @@ def fig_bias():
             r = b[(b.run == "5ModelAvg") & (b.depth == dep) & (b.region == rn)].iloc[0]
             x = i + (k - 2) * w
             col = INK if rn == "Statewide" else REGION_C[rn]
-            ax.plot([x, x], [r.excess_p10, r.excess_p90], color=col, lw=1.2, solid_capstyle="round")
-            ax.plot([x, x], [r.excess_p25, r.excess_p75], color=col, lw=5, solid_capstyle="round")
-            ax.plot(x, r.excess_median, "o", color="white", ms=4.5, mec=col, mew=1.5, zorder=3)
+            ax.plot([x, x], [r.offset_p10, r.offset_p90], color=col, lw=1.2, solid_capstyle="round")
+            ax.plot([x, x], [r.offset_p25, r.offset_p75], color=col, lw=5, solid_capstyle="round")
+            ax.plot(x, r.offset_median, "o", color="white", ms=4.5, mec=col, mew=1.5, zorder=3)
         for run, mk in [("GFDL-CM3", "^"), ("NCAR-CCSM4", "s")]:
             r = b[(b.run == run) & (b.depth == dep) & (b.region == "Statewide")].iloc[0]
-            ax.plot(i - 2 * w - 0.07, r.excess_median, mk, color=RUN_C[run], ms=5)
+            ax.plot(i - 2 * w - 0.07, r.offset_median, mk, color=RUN_C[run], ms=5)
     ax.axhline(0, color=INK2, lw=0.8)
     ax.set_xticks(range(3), ["surface (vs ESA GST)", "1 m (vs ESA T1m)", "2 m (vs ESA T2m)"])
-    ax.set_ylabel("GIPL − ESA, after expected warming (°C)")
-    ax.set_title("GIPL 2026–2035 vs ESA 2014–2023, cell by cell (RCP 8.5): median (dot), middle half (bar), "
+    ax.set_ylabel("GIPL − ESA, same years (°C)")
+    ax.set_title("GIPL vs ESA, both 2004–2015 (observed weather in both), cell by cell: median (dot), middle half (bar), "
                  "10th–90th percentile (line)")
     h = [plt.Line2D([], [], color=INK if r == "Statewide" else REGION_C[r], lw=5) for r in regs]
     h += [plt.Line2D([], [], ls="", marker="^", color=RUN_C["GFDL-CM3"]),
@@ -140,29 +144,29 @@ def fig_bias_maps():
     cols = z["cols"]
     fig, axs = plt.subplots(1, 3, figsize=(16, 4.8), gridspec_kw=dict(wspace=0.02))
     for ax, dep in zip(axs, ["magtsurface", "magt1m", "magt2m"]):
-        g = crop(to_grid(z[f"excess_rcp85_{dep}_2026"], cols))
+        g = crop(to_grid(z[f"offset_rcp85_{dep}_2004"], cols))
         im = ax.imshow(g, cmap=DIV, vmin=-4, vmax=4, interpolation="nearest")
         ax.set_title(DEP_LABEL[dep])
         ax.set_xticks([]); ax.set_yticks([])
         for s in ax.spines.values():
             s.set_visible(False)
-    fig.colorbar(im, ax=axs, shrink=0.8, pad=0.01, label="GIPL − ESA, after expected warming (°C); blue = GIPL colder")
+    fig.colorbar(im, ax=axs, shrink=0.8, pad=0.01, label="GIPL − ESA, both 2004–2015 (°C); blue = GIPL colder")
     fig.savefig(FIG / "gipl2_bias_maps.png", dpi=130, bbox_inches="tight")
     plt.close(fig)
 
 
 def fig_boreholes():
     d = pd.read_csv(T6 / "borehole_compare.csv")
-    d = d[d.gipl_class.isin([1, 2]) & d.esa.notna() & d.gipl_implied.notna()]
+    d = d[d.gipl_class.isin([1, 2]) & d.esa.notna() & d.gipl.notna()]
     fig, axs = plt.subplots(1, 3, figsize=(14, 4.8))
     for ax, (k, lab) in zip(axs, [("sfc", "surface"), ("d1m", "1 m"), ("d2m", "2 m")]):
         g = d[d.depth == k]
         lim = (-8, 5)
         ax.plot(lim, lim, color=INK2, lw=0.8, ls=(0, (2, 2)))
         ax.scatter(g.obs, g.esa, s=22, color="#9a9890", edgecolor="white", lw=0.5, label="ESA CCI", zorder=2)
-        ax.scatter(g.obs, g.gipl_implied, s=22, color=RUN_C["5ModelAvg"], edgecolor="white", lw=0.5,
+        ax.scatter(g.obs, g.gipl, s=22, color=RUN_C["5ModelAvg"], edgecolor="white", lw=0.5,
                    label="GIPL (5ModelAvg)", zorder=3)
-        e1, e2 = np.median(g.esa - g.obs), np.median(g.gipl_implied - g.obs)
+        e1, e2 = np.median(g.esa - g.obs), np.median(g.gipl - g.obs)
         ax.set_title(f"{lab}: {len(g)} sites — median error ESA {e1:+.1f} °C, GIPL {e2:+.1f} °C")
         ax.set_xlim(lim); ax.set_ylim(lim)
         ax.set_xlabel("observed mean annual temperature (°C)")
@@ -182,7 +186,7 @@ def fig_cusp():
     fig, axs = plt.subplots(2, 2, figsize=(12, 7), sharex=True)
     bins = np.arange(-8, 6.01, 0.25)
     for i, (k, lab) in enumerate([("sfc", "surface"), ("d1m", "1 m")]):
-        for j, (p, name) in enumerate([(f"esa_{k}", "ESA CCI"), (f"gipl_implied_{k}", "GIPL (5ModelAvg)")]):
+        for j, (p, name) in enumerate([(f"esa_{k}", "ESA CCI"), (f"gipl_{k}", "GIPL (5ModelAvg)")]):
             ax = axs[i, j]
             for v, col, ll in [(1, PF_C, "permafrost found"), (0, NOPF_C, "no permafrost found")]:
                 x = np.clip(d.loc[d.pf_obs == v, p].values, -8, 6)

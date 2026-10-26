@@ -13,6 +13,7 @@ set -euo pipefail
 cd "${SLURM_SUBMIT_DIR}"
 RUN="${MAMBA_EXE:-$HOME/.local/bin/micromamba} run -n arcticdem-pisr python -I"
 echo "== t4";      $RUN scripts/02_tests/t4_index_variants.py
+echo "== t4b";     $RUN scripts/02_tests/t4b_seasonal_warming.py  # PTI.md section 2 table
 echo "== results"; $RUN scripts/03_report/pti_results_figures.py
 echo "== extra";   $RUN scripts/03_report/pti_extra_figures.py
 echo "== drafts";  $RUN scripts/03_report/pti_draft_figures.py

@@ -14,15 +14,18 @@ the ground is to thawing today and how much it is projected to warm.
   makes very cold places look safe even when they warm a lot, and warm places look at risk even when little changes.
   The table asks two questions instead (how warm is it today, and how much will it warm?), and its rules are written
   out so anyone can check or adjust them.
-- **Through 2050, almost no cell is High** (warming mostly stays under 2 °C). By 2051–2080, about two-thirds of
-  permafrost cells are High (65–69 %); by 2081–2100 under RCP 8.5, nearly all (98–100 %).
+- **Through 2050, almost no cell is High** (warming mostly stays under 2 °C). Under RCP 8.5, about two-thirds of
+  permafrost cells are High by 2051–2080 (60–69 %) and nearly all by 2081–2100 (94–100 %). Under RCP 4.5 the answer
+  depends on the version (next point).
 - **Two versions, differing only in where the projected warming comes from:** V1 uses air temperature (no GIPL); V2
-  uses GIPL, with air temperature where GIPL has no usable values (about 1 in 5 Interior cells, flagged). Where V2
-  uses GIPL, the two give the same class for 80–100 % of cells, depending on scenario and era; the differences are
-  mostly in the Arctic, and almost always by one class (section 4).
+  uses GIPL, with air temperature where GIPL has no usable values (about 1 in 5 Interior cells, flagged). **GIPL's
+  ground surface warms about 20 % less than the air**, and much of the Interior, West and South sits close to the
+  2 °C warming edge at mid-century. So the versions often disagree: under RCP 4.5 in 2051–2080, V1 rates 65 % of
+  permafrost cells High and V2 16 %. Where they differ, V2 is almost always one class lower (sections 2 and 4).
 - **Permafrost extent, terrain and land cover stay out of the number** and go in the data sentence.
-- **Decisions needed:** the table's entries and band edges (especially the "over 5 °C" column, which decides the
-  Arctic under RCP 8.5 by 2081–2100), and whether to adopt V1 or V2.
+- **Decisions needed:** whether to adopt V1 or V2 (now the most consequential choice), and the table's entries and
+  band edges (especially the 2 °C warming edge, and the "over 5 °C" column, which decides much of the Arctic under
+  RCP 8.5 by 2081–2100).
 
 ---
 
@@ -55,13 +58,14 @@ Section 5 of this document has example data sentences for 3 test areas.
   cells). Only these cells get a class.
 - **Today's surface temperature:** mean annual ground surface temperature, 2014–2023, from ESA CCI Permafrost
   (observation-based).
-- **Projected warming:** how much the ground surface warms from today to an era (2026–2050, 2051–2080, 2081–2100),
-  under a greenhouse-gas scenario (RCP 4.5: moderate; RCP 8.5: high), using the 5-climate-model average.
+- **Projected warming:** how much the ground surface warms from today (2014–2023) to an era (2026–2050, 2051–2080,
+  2081–2100), under a greenhouse-gas scenario (RCP 4.5: moderate; RCP 8.5: high), using the 5-climate-model average.
 - **Delta change method:** future = today's observed level + the change a model projects; the model contributes only
   its change ([ESA_GIPL_SPLICING.md](ESA_GIPL_SPLICING.md)).
 - **V1:** projected warming = air-temperature warming (SNAP 2 km downscaled climate). No GIPL.
-- **V2:** projected warming = GIPL ground-surface warming (delta change method). Where GIPL has no usable values
-  ([GIPL_ISSUE_1.md](GIPL_ISSUE_1.md)), V1's air warming is used and the cell is flagged.
+- **V2:** projected warming = GIPL ground-surface warming (delta change method). GIPL's files are labelled 20 years
+  late, so V2 reads each era from the files labelled 20 years later ([GIPL_ISSUE_3.md](GIPL_ISSUE_3.md)). Where GIPL
+  has no usable values ([GIPL_ISSUE_1.md](GIPL_ISSUE_1.md)), V1's air warming is used and the cell is flagged.
 - **Context layers:** permafrost extent (ESA PFR), terrain (share of sun-facing and shaded slopes) and land cover
   (share of black spruce / wetland). Shown in the data sentence, not used in the class.
 
@@ -81,8 +85,9 @@ Each permafrost cell is described by two numbers, and the table turns them into 
   survives only where it is locally protected (snow, organic layers, shading), so it stays Moderate while warming is
   under 2 °C.
 - With three classes, the **near-0 and warm-surface rows are identical** (Moderate under 2 °C of warming, High above).
+  Most of the Interior, West and South is in these two rows, so for them **the 2 °C edge alone decides the class**.
 - The **over 5 °C** column is the 4–5 °C column moved up one class (High stays High), so it changes only the cold row.
-  It matters for the Arctic under RCP 8.5 by 2081–2100: its surface warms by 5.5–6 °C (median) and ends above 0 °C,
+  It matters for the Arctic under RCP 8.5 by 2081–2100: its surface warms by 5–6 °C (median) and ends above 0 °C,
   so cells that are cold today become High rather than Moderate.
 - The entries are a **draft for the team to edit**; maps and numbers follow the table. (An earlier draft had five
   classes; Very low and Low are now Low, High and Very high are now High.)
@@ -102,9 +107,9 @@ weakness:
   stand-in for ground-surface warming. **V1** uses air warming.
 - **GIPL** is a permafrost model that turns air temperature and snow into ground temperatures, so its surface
   temperature is closer to what the ground itself experiences. But it has areas with unusable values
-  ([GIPL_ISSUE_1.md](GIPL_ISSUE_1.md)), and its temperature levels do not match today's observation-based values, so only
-  its *change* is used ([ESA_GIPL_SPLICING.md](ESA_GIPL_SPLICING.md)). **V2** uses GIPL's warming where it is usable
-  and air warming elsewhere (flagged).
+  ([GIPL_ISSUE_1.md](GIPL_ISSUE_1.md)), and its temperature levels differ from today's observation-based values cell
+  by cell (by up to about 2 °C), so only its *change* is used ([ESA_GIPL_SPLICING.md](ESA_GIPL_SPLICING.md)). **V2**
+  uses GIPL's warming where it is usable and air warming elsewhere (flagged).
 
 Neither can be checked against future observations, so both are shown; which one to adopt is an open question.
 
@@ -115,34 +120,37 @@ Neither can be checked against future observations, so both are shown; which one
 
 Both use the same today's surface temperature and the same table.
 
-### Why GIPL's ground surface warms differently from the air
+### GIPL's ground surface warms less than the air
 
 <img src="figures/t4_gipl_minus_air.png" alt="Where GIPL's surface warming differs from air warming" width="55%">
 
 *V2 − V1 projected warming, 2051–2080, RCP 8.5. Blue: GIPL's ground surface warms less than the air; red: more.*
 
-- **The air warms much more in winter than in summer**: winter (December–February) warming is about twice summer
-  (June–August) warming in the Arctic, Interior and West, and 1.2–1.5 times in the South; the gap is largest in the
-  Arctic.
-- **Snow insulates the ground in winter.** Under a snowpack, winter air warming reaches the ground surface only
-  partly, so where warming is concentrated in winter, GIPL's surface warms less than the air. The data agree: the
-  larger a cell's winter-over-summer warming, the more GIPL lags the air (statewide Spearman ρ = −0.70 under RCP 8.5,
-  2051–2080), and the lag is largest in the Arctic.
-- **That is not the whole story.** Under RCP 4.5, GIPL warms slightly *more* than the air overall, and in the West the
-  relationship reverses. Snow changes in other ways too (for example, a shorter snow season exposes the ground to
-  warmer air in spring), and GIPL's snow and soil inputs are not documented, so these effects cannot be separated.
+- **Almost everywhere, GIPL's surface warms less than the air:** by about 0.5–0.8 °C statewide at mid-century, about
+  a fifth of the air warming, and by up to 1.4 °C in the West and South by 2081–2100 under RCP 8.5. Only along the
+  eastern Brooks Range does it warm more.
+- **Part of the gap is the reference decade.** GIPL's 2014–2023 contains two observed, unusually warm years
+  (2014–2015) before its projections start. Measured from 2016–2025 instead, the gap shrinks by about 0.2 °C.
+- **The rest is GIPL's own ground response.** Over 2016–2070, GIPL's surface warms 0.8–0.9 times as fast as the
+  projected air under both scenarios: snow, vegetation and soil sit between the air and the ground.
+- **Snow alone does not explain the pattern.** The air warms about twice as much in winter as in summer, but cells
+  where winter warming dominates do not lag much more (Spearman ρ −0.05 to −0.08 statewide, −0.3 to −0.4 in the
+  Arctic). GIPL's snow and soil inputs are not documented, so the causes cannot be separated.
+- **The recent record points the other way.** Over 2003–2023, ESA's observation-based ground surface warmed *faster*
+  than the observed air (0.62 vs 0.37 °C per decade). Whether the ground will lag the air (GIPL) or keep pace with it
+  (V1) cannot be tested before it happens.
 
 | 2051–2080, RCP 4.5 / RCP 8.5 | Winter air warming | Summer air warming | V2 − V1 (annual ground surface) |
 |---|---|---|---|
-| Statewide | +3.6 / +4.4 °C | +1.7 / +2.6 °C | +0.3 / −0.3 °C |
-| Arctic | +4.1 / +5.3 °C | +1.7 / +2.8 °C | +0.1 / −0.7 °C |
-| Interior | +3.2 / +3.9 °C | +1.6 / +2.5 °C | +0.4 / −0.1 °C |
-| West | +3.7 / +4.6 °C | +1.7 / +2.5 °C | +0.2 / −0.3 °C |
-| South | +2.7 / +3.1 °C | +1.8 / +2.6 °C | +0.2 / −0.1 °C |
+| Statewide | +3.6 / +4.4 °C | +1.7 / +2.6 °C | −0.6 / −0.8 °C |
+| Arctic | +4.1 / +5.3 °C | +1.7 / +2.8 °C | −0.5 / −0.7 °C |
+| Interior | +3.2 / +3.9 °C | +1.6 / +2.5 °C | −0.5 / −0.7 °C |
+| West | +3.7 / +4.6 °C | +1.7 / +2.5 °C | −0.8 / −1.0 °C |
+| South | +2.7 / +3.1 °C | +1.8 / +2.6 °C | −0.6 / −0.9 °C |
 
-Because a difference of half a degree can move a cell across a warming band, V1 and V2 do not always give the same
-class. Where V2 uses GIPL, they agree for nearly all cells through 2050, and for 80–98 % of cells in the later
-eras; section 4 maps where they differ. Each area in section 3 lists its own median warming for V1 and V2.
+Because a difference of half a degree can move a cell across a warming band, V1 and V2 often give different classes,
+most of all at mid-century, when much of Alaska's projected warming sits close to the 2 °C edge. Section 4 maps where
+they differ. Each area in section 3 lists its own median warming for V1 and V2.
 
 ## 3. Results, area by area
 
@@ -175,23 +183,25 @@ flagged, in the rest).
 
 | Era, scenario | Projected warming, median (V1 / V2) | Low | Moderate | High |
 |---|---|---|---|---|
-| 2026–2050, RCP 4.5 | +1.5 / +1.4 °C | 34 / 34 % | 66 / 66 % | 0 / 0 % |
-| 2026–2050, RCP 8.5 | +1.4 / +1.6 °C | 34 / 34 % | 66 / 66 % | 0 / 0 % |
-| 2051–2080, RCP 4.5 | +2.5 / +2.7 °C | 25 / 25 % | 10 / 11 % | 65 / 65 % |
-| 2051–2080, RCP 8.5 | +3.5 / +3.2 °C | 10 / 24 % | 21 / 10 % | 69 / 66 % |
-| 2081–2100, RCP 4.5 | +3.0 / +3.5 °C | 25 / 18 % | 9 / 14 % | 66 / 67 % |
-| 2081–2100, RCP 8.5 | +5.5 / +5.0 °C | 0 / 0 % | 0 / 2 % | 100 / 98 % |
+| 2026–2050, RCP 4.5 | +1.5 / +1.2 °C | 34 / 34 % | 66 / 66 % | 0 / 0 % |
+| 2026–2050, RCP 8.5 | +1.4 / +1.0 °C | 34 / 34 % | 66 / 66 % | 0 / 0 % |
+| 2051–2080, RCP 4.5 | +2.5 / +2.0 °C | 25 / 28 % | 10 / 56 % | 65 / 16 % |
+| 2051–2080, RCP 8.5 | +3.5 / +2.8 °C | 10 / 23 % | 21 / 17 % | 69 / 60 % |
+| 2081–2100, RCP 4.5 | +3.0 / +2.5 °C | 25 / 25 % | 9 / 17 % | 66 / 58 % |
+| 2081–2100, RCP 8.5 | +5.5 / +4.5 °C | 0 / 0 % | 0 / 6 % | 100 / 94 % |
 
-- **Through 2050, almost nothing is High** (V1: no cells; V2: under 0.5 %): projected warming stays mostly under
-  2 °C, so cells that are warm today are Moderate rather than automatically High; the cold Arctic is Low (34 %).
-- **By 2051–2080, about two-thirds of permafrost cells are High** (65–69 %), in both scenarios and both versions.
-  Under RCP 4.5 that share hardly grows by 2081–2100 (66–67 %); under RCP 8.5 it reaches nearly all cells
-  (98–100 %), as warming of over 5 °C lifts even the cold Arctic to High.
-- **The Arctic holds almost all of the Low and Moderate cells** (section 3.2); the Interior, West and South are mostly
-  High from 2051 on (82–100 % of cells).
-- **V1 vs V2:** where V2 uses GIPL, 26 % of cells change class in at least one of the six scenario-era combinations,
-  almost always by one class. The biggest differences: RCP 8.5, 2051–2080 (20 % of cells, mostly V2 lower) and RCP
-  4.5, 2081–2100 (8 %, V2 higher), both mostly in the Arctic. See section 4.
+- **Through 2050, almost nothing is High** (V1: no cells; V2: under 0.1 %): projected warming stays under 2 °C in
+  most cells, so cells that are warm today are Moderate rather than automatically High; the cold Arctic is Low (34 %).
+- **2051–2080:** V1 puts about two-thirds of permafrost cells in High under both scenarios (65–69 %). V2 does so only
+  under RCP 8.5 (60 %). Under RCP 4.5, V2's median warming (+2.0 °C) sits right on the 2 °C edge, so most cells that
+  are near 0 °C or warm today stay Moderate (16 % High).
+- **2081–2100:** under RCP 4.5, 58–66 % of cells are High; under RCP 8.5, nearly all (94–100 %), as warming of over
+  5 °C lifts even much of the cold Arctic to High.
+- **The Arctic holds most of the Low cells** (section 3.2). The Interior, West and South are mostly High from 2051 on
+  under V1 (88–100 % of cells), and under V2 only under RCP 8.5 or by 2081–2100 (sections 3.3–3.5).
+- **V1 vs V2:** where V2 uses GIPL, 82 % of cells change class in at least one of the six scenario-era combinations,
+  almost always with V2 one class lower. The biggest differences: RCP 4.5, 2051–2080 (57 % of cells) and RCP 8.5,
+  2051–2080 (26 %). See section 4.
 
 ### 3.2 Arctic
 
@@ -204,25 +214,25 @@ south). V2 uses GIPL in 99 % of cells.
 
 | Era, scenario | Projected warming, median (V1 / V2) | Low | Moderate | High |
 |---|---|---|---|---|
-| 2026–2050, RCP 4.5 | +1.6 / +1.4 °C | 77 / 77 % | 23 / 23 % | 0 / 0 % |
-| 2026–2050, RCP 8.5 | +1.6 / +1.6 °C | 77 / 77 % | 23 / 23 % | 0 / 0 % |
-| 2051–2080, RCP 4.5 | +2.7 / +2.9 °C | 60 / 60 % | 17 / 17 % | 23 / 23 % |
-| 2051–2080, RCP 8.5 | +4.0 / +3.4 °C | 23 / 57 % | 48 / 20 % | 29 / 23 % |
-| 2081–2100, RCP 4.5 | +3.2 / +3.7 °C | 60 / 44 % | 17 / 31 % | 23 / 25 % |
-| 2081–2100, RCP 8.5 | +6.1 / +5.5 °C | 0 / 0 % | 0 / 3 % | 100 / 97 % |
+| 2026–2050, RCP 4.5 | +1.6 / +1.3 °C | 77 / 77 % | 23 / 23 % | 0 / 0 % |
+| 2026–2050, RCP 8.5 | +1.6 / +1.1 °C | 77 / 77 % | 23 / 23 % | 0 / 0 % |
+| 2051–2080, RCP 4.5 | +2.7 / +2.2 °C | 60 / 65 % | 17 / 24 % | 23 / 10 % |
+| 2051–2080, RCP 8.5 | +4.0 / +3.3 °C | 23 / 54 % | 48 / 23 % | 29 / 23 % |
+| 2081–2100, RCP 4.5 | +3.2 / +2.8 °C | 60 / 59 % | 17 / 18 % | 23 / 23 % |
+| 2081–2100, RCP 8.5 | +6.1 / +5.1 °C | 0 / 0 % | 0 / 11 % | 100 / 89 % |
 
 - **Through 2050, mostly Low** (77 %), with Moderate along the southern edge.
-- **RCP 4.5:** about a quarter of cells are High in 2051–2100 (the warmer southern foothills); the rest stay Low or
-  Moderate.
-- **RCP 8.5, 2051–2080:** median warming sits right at the 4 °C edge. V1 (+4.0 °C) puts much of the cold north in
-  "Moderate" (cold today, 4–5 °C of warming), V2 (+3.4 °C) in "Low" (cold today, 3–4 °C). The straight diagonal line
-  on the V1 map is that edge crossing the coarse air-warming grid; V2 does not have it.
-- **RCP 8.5, 2081–2100:** the surface warms by +5.5 to +6.1 °C (median) and ends at about +1.0 to +1.7 °C, warmer
-  than the Interior's surface today (+0.7 °C). Nearly all cells are High (97–100 %). The "over 5 °C" column decides
-  the cold north (58–60 % of cells): without it they would be Moderate (first open question).
-- **V1 vs V2:** 53 % of cells change class in at least one combination. Under RCP 8.5, 2051–2080, V2 is mostly lower
-  (43 % of cells; see above); under RCP 4.5, 2081–2100, it is higher (18 %). Fewer than 0.5 % of cells differ by two
-  classes. See section 4.
+- **RCP 4.5:** about a quarter of cells are High in 2051–2100 under V1 (the warmer southern foothills); under V2, 10 %
+  in 2051–2080 and 23 % by 2081–2100. The rest stay Low or Moderate.
+- **RCP 8.5, 2051–2080:** V1's median warming (+4.0 °C) sits right at the 4 °C edge and puts much of the cold north in
+  "Moderate" (cold today, 4–5 °C of warming); V2 (+3.3 °C) keeps it "Low" (cold today, 3–4 °C): 54 % Low against 23 %.
+  The straight diagonal line on the V1 map is that edge crossing the coarse air-warming grid; V2 does not have it.
+- **RCP 8.5, 2081–2100:** the surface warms by +5.1 to +6.1 °C (median) and ends at about +0.7 to +1.7 °C, as warm
+  as or warmer than the Interior's surface today (+0.7 °C). Nearly all cells are High (89–100 %). The "over 5 °C"
+  column decides the cold north (49–60 % of cells): without it they would be Moderate (first open question).
+- **V1 vs V2:** 69 % of cells change class in at least one combination, nearly all with V2 lower; most under RCP 8.5,
+  2051–2080 (41 % of cells) and RCP 4.5, 2051–2080 (18 %). V2 is higher only along the eastern Brooks Range (2 % of
+  cells). Fewer than 0.5 % of cells differ by two classes. See section 4.
 
 ### 3.3 Interior
 
@@ -236,18 +246,21 @@ are flagged.
 
 | Era, scenario | Projected warming, median (V1 / V2) | Low | Moderate | High |
 |---|---|---|---|---|
-| 2026–2050, RCP 4.5 | +1.4 / +1.5 °C | 6 / 6 % | 94 / 94 % | 0 / 0 % |
-| 2026–2050, RCP 8.5 | +1.3 / +1.6 °C | 6 / 6 % | 94 / 94 % | 0 / 0 % |
-| 2051–2080, RCP 4.5 | +2.3 / +2.6 °C | 2 / 1 % | 7 / 7 % | 91 / 92 % |
-| 2051–2080, RCP 8.5 | +3.2 / +3.1 °C | 1 / 1 % | 5 / 5 % | 94 / 94 % |
-| 2081–2100, RCP 4.5 | +2.7 / +3.3 °C | 1 / 1 % | 5 / 5 % | 94 / 94 % |
-| 2081–2100, RCP 8.5 | +5.0 / +4.7 °C | 0 / 0 % | 0 / 1 % | 100 / 98 % |
+| 2026–2050, RCP 4.5 | +1.4 / +1.1 °C | 6 / 6 % | 94 / 94 % | 0 / 0 % |
+| 2026–2050, RCP 8.5 | +1.3 / +0.9 °C | 6 / 6 % | 94 / 94 % | 0 / 0 % |
+| 2051–2080, RCP 4.5 | +2.3 / +1.8 °C | 2 / 4 % | 7 / 71 % | 91 / 25 % |
+| 2051–2080, RCP 8.5 | +3.2 / +2.6 °C | 1 / 2 % | 5 / 13 % | 94 / 84 % |
+| 2081–2100, RCP 4.5 | +2.7 / +2.3 °C | 1 / 3 % | 5 / 16 % | 94 / 81 % |
+| 2081–2100, RCP 8.5 | +5.0 / +4.0 °C | 0 / 0 % | 0 / 3 % | 100 / 97 % |
 
 - **Through 2050, almost all Moderate** (94 %).
-- **From 2051 on, over 90 % High** (91–100 %) in both scenarios and both versions. Most Interior cells are near 0 °C
-  or warm today, and in those rows any warming above 2 °C is High, so the 3 °C edge does not matter here.
-- **V1 vs V2:** 5 % of the cells where V2 uses GIPL change class in at least one combination (at most 2 % in any one).
-  The 19 % of cells without usable GIPL values are identical in both versions. See section 4.
+- **Most Interior cells are near 0 °C or warm today**, so the 2 °C warming edge alone decides between Moderate and
+  High. Under V1, warming passes it in almost every cell from 2051 on (91–100 % High).
+- **Under V2, warming sits close to that edge.** Under RCP 4.5 the median is +1.8 °C in 2051–2080 (25 % High) and
+  +2.3 °C in 2081–2100 (81 %); under RCP 8.5, +2.6 °C (84 %) and +4.0 °C (97 %).
+- **V1 vs V2:** 90 % of the cells where V2 uses GIPL change class in at least one combination, nearly all with V2
+  lower; under RCP 4.5, 2051–2080, 85 % of cells. The 19 % of cells without usable GIPL values are identical in both
+  versions. See section 4.
 
 ### 3.4 West
 
@@ -260,17 +273,19 @@ uses GIPL in 96 % of cells.
 
 | Era, scenario | Projected warming, median (V1 / V2) | Low | Moderate | High |
 |---|---|---|---|---|
-| 2026–2050, RCP 4.5 | +1.4 / +1.4 °C | 0 / 0 % | 100 / 100 % | 0 / 0 % |
-| 2026–2050, RCP 8.5 | +1.4 / +1.6 °C | 0 / 0 % | 100 / 98 % | 0 / 2 % |
-| 2051–2080, RCP 4.5 | +2.5 / +2.6 °C | 0 / 0 % | 0 / 1 % | 100 / 99 % |
-| 2051–2080, RCP 8.5 | +3.6 / +3.2 °C | 0 / 0 % | 0 / 0 % | 100 / 100 % |
-| 2081–2100, RCP 4.5 | +3.1 / +3.3 °C | 0 / 0 % | 0 / 0 % | 100 / 100 % |
-| 2081–2100, RCP 8.5 | +5.6 / +4.8 °C | 0 / 0 % | 0 / 0 % | 100 / 100 % |
+| 2026–2050, RCP 4.5 | +1.4 / +1.0 °C | 0 / 0 % | 100 / 100 % | 0 / 0 % |
+| 2026–2050, RCP 8.5 | +1.4 / +0.8 °C | 0 / 0 % | 100 / 100 % | 0 / 0 % |
+| 2051–2080, RCP 4.5 | +2.5 / +1.7 °C | 0 / 0 % | 0 / 91 % | 100 / 9 % |
+| 2051–2080, RCP 8.5 | +3.6 / +2.5 °C | 0 / 0 % | 0 / 4 % | 100 / 96 % |
+| 2081–2100, RCP 4.5 | +3.1 / +2.3 °C | 0 / 0 % | 0 / 7 % | 100 / 93 % |
+| 2081–2100, RCP 8.5 | +5.6 / +4.1 °C | 0 / 0 % | 0 / 0 % | 100 / 100 % |
 
-- **Through 2050, almost all Moderate** (98–100 %).
-- **From 2051 on, essentially all High** (99–100 %) in both scenarios and both versions.
-- **V1 vs V2:** 3 % of cells change class in at least one combination (V2 higher under RCP 8.5, 2026–2050: 2 % of
-  cells). See section 4.
+- **Through 2050, all Moderate** (100 %).
+- **From 2051 on, all High under V1** (100 %).
+- **Under V2, RCP 4.5, 2051–2080 is the exception:** warming (+1.7 °C median) stays under 2 °C for most cells, so
+  91 % stay Moderate. Otherwise 93–100 % are High.
+- **V1 vs V2:** 95 % of cells change class in at least one combination, nearly all in RCP 4.5, 2051–2080 (95 % of
+  cells, V2 lower). See section 4.
 
 ### 3.5 South
 
@@ -283,19 +298,20 @@ cells.
 
 | Era, scenario | Projected warming, median (V1 / V2) | Low | Moderate | High |
 |---|---|---|---|---|
-| 2026–2050, RCP 4.5 | +1.3 / +1.3 °C | 2 / 2 % | 98 / 98 % | 0 / 0 % |
-| 2026–2050, RCP 8.5 | +1.2 / +1.5 °C | 2 / 2 % | 98 / 98 % | 0 / 0 % |
-| 2051–2080, RCP 4.5 | +2.1 / +2.4 °C | 0 / 0 % | 12 / 18 % | 88 / 82 % |
-| 2051–2080, RCP 8.5 | +2.9 / +2.8 °C | 0 / 0 % | 2 / 3 % | 98 / 97 % |
-| 2081–2100, RCP 4.5 | +2.6 / +3.0 °C | 0 / 0 % | 2 / 2 % | 97 / 98 % |
-| 2081–2100, RCP 8.5 | +4.6 / +4.0 °C | 0 / 0 % | 0 / 0 % | 100 / 100 % |
+| 2026–2050, RCP 4.5 | +1.3 / +0.9 °C | 2 / 2 % | 98 / 98 % | 0 / 0 % |
+| 2026–2050, RCP 8.5 | +1.2 / +0.6 °C | 2 / 2 % | 98 / 98 % | 0 / 0 % |
+| 2051–2080, RCP 4.5 | +2.1 / +1.5 °C | 0 / 2 % | 12 / 94 % | 88 / 4 % |
+| 2051–2080, RCP 8.5 | +2.9 / +1.9 °C | 0 / 1 % | 2 / 57 % | 98 / 42 % |
+| 2081–2100, RCP 4.5 | +2.6 / +1.9 °C | 0 / 1 % | 2 / 60 % | 97 / 39 % |
+| 2081–2100, RCP 8.5 | +4.6 / +3.1 °C | 0 / 0 % | 0 / 2 % | 100 / 98 % |
 
 - **Through 2050, almost all Moderate** (98 %).
-- **2051–2080:** mostly High in both scenarios. Under RCP 4.5 the median warming (+2.1 to +2.4 °C) sits just above
-  the 2 °C edge, so 12–18 % of cells are still Moderate; under RCP 8.5, 97–98 % are High.
-- **2081–2100:** nearly all High (97–100 %).
-- **V1 vs V2:** 15 % of cells change class in at least one combination, nearly all under RCP 4.5, 2051–2080 (13 % of
-  cells, mostly V2 lower). See section 4.
+- **Under V1, mostly High from 2051 on** (88–100 %).
+- **Under V2, GIPL warms least here** (0.6–1.5 °C less than the air), so warming stays near or under 2 °C until late
+  in the century: High in 4 % of cells (RCP 4.5, 2051–2080), 39–42 % (RCP 4.5, 2081–2100; RCP 8.5, 2051–2080) and 98 %
+  (RCP 8.5, 2081–2100).
+- **V1 vs V2:** 97 % of cells change class in at least one combination, and 45 % in three or more, nearly always with
+  V2 lower. See section 4.
 
 ## 4. Where V1 and V2 differ
 
@@ -317,29 +333,27 @@ V2 lower.*
 
 | Area | Cells where V2 uses GIPL | Same class in all 6 | Differ in 1 / 2 / 3+ combinations | V2 higher only | V2 lower only | Both directions | Most affected scenario and era |
 |---|---|---|---|---|---|---|---|
-| Statewide | 724,326 | 74 % | 20 / 6 / 0 % | 4 % | 17 % | 5 % | RCP 8.5, 2051–2080: 20 % of cells (mostly V2 lower) |
-| Arctic | 317,000 | 47 % | 39 / 14 / 0 % | 7 % | 34 % | 12 % | RCP 8.5, 2051–2080: 46 % (mostly V2 lower) |
-| Interior | 279,692 | 95 % | 4 / 1 / 0 % | 2 % | 3 % | 0 % | RCP 4.5, 2051–2080: 2 % (mostly V2 higher) |
-| West | 101,947 | 97 % | 3 / 0 / 0 % | 2 % | 1 % | 0 % | RCP 8.5, 2026–2050: 2 % (V2 higher) |
-| South | 25,654 | 85 % | 15 / 0 / 0 % | 4 % | 11 % | 0 % | RCP 4.5, 2051–2080: 13 % (mostly V2 lower) |
+| Statewide | 724,326 | 18 % | 70 / 6 / 6 % | 1 % | 81 % | 0 % | RCP 4.5, 2051–2080: 57 % of cells (V2 lower) |
+| Arctic | 317,000 | 31 % | 66 / 3 / 0 % | 2 % | 67 % | 0 % | RCP 8.5, 2051–2080: 41 % (mostly V2 lower) |
+| Interior | 279,692 | 10 % | 71 / 9 / 10 % | 0 % | 90 % | 0 % | RCP 4.5, 2051–2080: 85 % (V2 lower) |
+| West | 101,947 | 5 % | 87 / 4 / 4 % | 0 % | 95 % | 0 % | RCP 4.5, 2051–2080: 95 % (V2 lower) |
+| South | 25,654 | 3 % | 31 / 21 / 45 % | 0 % | 97 % | 0 % | RCP 4.5, 2051–2080: 89 % (V2 lower) |
 
-- **Through 2050, the two agree almost everywhere** (at least 98 % of cells in every area): warming is mostly under
-  2 °C in both versions.
-- **Most cells that differ do so in only one or two of the six combinations**, and almost always by one class (two
-  classes: 0.1 % of cells statewide, 0.2 % in the Arctic).
-- **The differences are mostly in the Arctic.** Most Interior, West and South cells are near 0 °C or warm today, and
-  in those two rows every warming band above 2 °C is High, so only the 2 °C edge can change their class. Arctic cells
-  sit in the cold and cool rows, where the 3 and 4 °C edges also change the class.
-- **The direction follows section 2.** Under RCP 8.5, GIPL's surface warms less than the air (partly because snow
-  shields the ground from winter warming), so V2 is a class lower: most of all in the Arctic in 2051–2080, near the
-  4 °C edge. Under RCP 4.5, GIPL's surface warms slightly more than the air, so V2 is a class higher where warming
-  sits just below an edge: most of all in the Arctic in 2081–2100 (18 % of Arctic cells).
-- **On the maps**, V2 is mostly lower across the northern Arctic and the western Brooks Range, and higher along the
-  eastern Brooks Range; in the north-west Arctic it is higher in some combinations and lower in others. Elsewhere the two agree
-  almost everywhere, apart from scattered cells along the south coast.
-- **For the V1-or-V2 decision:** the choice moves classes by one step, in one or two combinations per cell; it does
-  not change the overall picture in section 3. It matters mainly for the Arctic (RCP 8.5, 2051–2080: 46 % of Arctic
-  cells) and, less, for the South under RCP 4.5 in 2051–2080 (13 %).
+- **Through 2050, the two agree almost everywhere** (at least 99.9 % of cells in every area): warming is under 2 °C
+  in both versions.
+- **From 2051 on, V2 is lower almost everywhere**, because GIPL's surface warms less than the air (section 2). V2 is
+  higher only along the eastern Brooks Range, where GIPL warms more (2 % of Arctic cells).
+- **The differences are always one class** (two classes: 0.1 % of cells at most).
+- **They are largest under RCP 4.5 in 2051–2080.** V1's warming sits just above the 2 °C edge there and V2's just
+  below it. In the near-0 and warm-surface rows (most of the Interior, West and South) that is the difference between
+  High and Moderate, for 85–95 % of those regions' cells. In the Arctic, the 3 °C and 4 °C edges matter too (RCP 8.5,
+  2051–2080: 41 % of cells).
+- **On the maps**, the two agree in all six combinations across the cold northern Arctic (Low throughout). They
+  differ in one combination across most of the state, and in three or more in the southern mountains (Alaska Range,
+  Wrangell and Chugach Mountains) and the south-west.
+- **For the V1-or-V2 decision:** the choice now changes the overall picture at mid-century. Under RCP 4.5 in
+  2051–2080, V1 rates 65 % of permafrost cells High and V2 16 %. It matters most for the Interior, West and South under
+  RCP 4.5, and for the Arctic under RCP 8.5.
 
 ## 5. Test areas and example data sentences
 
@@ -356,7 +370,7 @@ Black square: the 10 × 10 km test area; small outlined cell: the centre cell de
 below.*
 
 > **Brooks Range test area:** PTI: ![Moderate](figures/badges/pti_moderate.svg) (2051–2080, RCP 8.5): surface cool
-> today (−3.9 °C), projected to warm +3.4 °C. Permafrost extent: continuous (PFR 100 %). Terrain: 78 % shaded slopes,
+> today (−3.9 °C), projected to warm +3.0 °C. Permafrost extent: continuous (PFR 100 %). Terrain: 78 % shaded slopes,
 > which favour permafrost. Land cover: 0 % black spruce / wetland; mostly shrub, tundra or open ground.
 
 > **Fairbanks test area:** PTI: ![High](figures/badges/pti_high.svg) (2051–2080, RCP 8.5): surface above
@@ -364,9 +378,9 @@ below.*
 > slopes, so permafrost is likely limited to shaded and flat ground. Land cover: 65 % black spruce / wetland
 > (insulating organic layer). Note: GIPL unavailable here; air-temperature warming used instead.
 
-> **Denali test area:** PTI: ![High](figures/badges/pti_high.svg) (2051–2080, RCP 8.5): surface above 0 °C today
-> (+0.2 °C), projected to warm +2.8 °C. Permafrost extent: extensive (PFR 71 %). Terrain: 84 % shaded slopes, which
-> favour permafrost. Land cover: 0 % black spruce / wetland; mostly shrub, tundra or open ground.
+> **Denali test area:** PTI: ![Moderate](figures/badges/pti_moderate.svg) (2051–2080, RCP 8.5): surface above 0 °C
+> today (+0.2 °C), projected to warm +1.9 °C. Permafrost extent: extensive (PFR 71 %). Terrain: 84 % shaded slopes,
+> which favour permafrost. Land cover: 0 % black spruce / wetland; mostly shrub, tundra or open ground.
 
 Draft wording rules:
 
@@ -381,15 +395,17 @@ Draft wording rules:
 
 ## Open questions
 
-1. **Table entries.** Most consequential: "cold today, over 5 °C of warming" is High. Under RCP 8.5 the Arctic
-   warms by 5.5–6 °C by 2081–2100, so this one box decides 58–60 % of Arctic cells in that era (they would be
-   Moderate without the "over 5 °C" column). With three classes the near-0 and warm-surface rows are identical: keep
-   them as two rows, or merge them?
-2. **Band edges:** today −4 / −2 / 0 °C; warming 2 / 3 / 4 / 5 °C. Some areas' warming sits close to an edge that
-   changes their class (the Arctic near 4 °C under RCP 8.5 in 2051–2080; the South near 2 °C under RCP 4.5 in
-   2051–2080), so moving an edge by half a degree would change many classes there.
-3. **V1 or V2:** where V2 uses GIPL, they give different classes for up to 20 % of cells in one scenario and era
-   (46 % in the Arctic), and 26 % of cells differ in at least one of the six combinations (section 4).
+1. **V1 or V2:** where V2 uses GIPL, they give different classes for up to 57 % of cells in one scenario and era
+   (RCP 4.5, 2051–2080; 85–95 % in the Interior, West and South), and 82 % of cells differ in at least one of the six
+   combinations (section 4). V2 is almost always lower, because GIPL's surface warms about 20 % less than the air.
+2. **Table entries.** Most consequential: "cold today, over 5 °C of warming" is High. Under RCP 8.5 the Arctic
+   warms by 5–6 °C by 2081–2100, so this one box decides 49–60 % of Arctic cells in that era (they would be Moderate
+   without the "over 5 °C" column). With three classes the near-0 and warm-surface rows are identical: keep them as
+   two rows, or merge them?
+3. **Band edges:** today −4 / −2 / 0 °C; warming 2 / 3 / 4 / 5 °C. Much of the projected warming sits close to an
+   edge that changes the class: the 2 °C edge for the Interior, West and South at mid-century (V2 under RCP 4.5 sits
+   just below it, V1 just above), and the 4 °C edge for the Arctic under RCP 8.5 in 2051–2080. Moving an edge by half
+   a degree would change many classes there.
 4. **Data sentence wording and thresholds** (40 % terrain, 50 % land cover) are drafts.
 
 ## Notes
@@ -401,19 +417,23 @@ Draft wording rules:
 - 5-model average only; single climate models and the full uncertainty range are not shown.
 - V1, and V2 where GIPL is unavailable, use air warming as a stand-in for ground-surface warming.
 - V2 relies on GIPL's projected *changes*; GIPL's own temperature levels are not used
-  ([ESA_GIPL_SPLICING.md](ESA_GIPL_SPLICING.md)). Why GIPL's warming differs from air warming is only partly
-  explained (section 2).
+  ([ESA_GIPL_SPLICING.md](ESA_GIPL_SPLICING.md)). Why GIPL's warming lags the air's is only partly explained
+  (section 2).
+- GIPL's files are labelled 20 years late; V2 reads them on the climate years they carry. This shift is inferred from
+  the data, not documented ([GIPL_ISSUE_3.md](GIPL_ISSUE_3.md)).
 
 <sub>Methods: 1 km GIPL grid; permafrost cells = ESA CCI Permafrost v5 PFR 2023 > 0; today = ESA ground surface
-temperature 2014–2023 (sampled at cell centres); air temperature = SNAP 2 km 5-model average (parent cell); V2 warming
-= model air warming 2014–2023 → 2026–2035 ("bridge") + GIPL surface change from 2026–2035 (delta change method), on
-cells where GIPL is usable ([GIPL_ISSUE_1.md](GIPL_ISSUE_1.md)). Seasonal air warming (section 2): December–February and
+temperature 2014–2023 (sampled at cell centres); air temperature = SNAP 2 km 5-model average (parent cell); V1
+warming = model air temperature, era minus 2014–2023; V2 warming = GIPL surface temperature, era minus 2014–2023, on
+climate years (GIPL files labelled 20 years later, [GIPL_ISSUE_3.md](GIPL_ISSUE_3.md); delta change method), on cells
+where GIPL is usable ([GIPL_ISSUE_1.md](GIPL_ISSUE_1.md)). Seasonal air warming (section 2): December–February and
 June–August means, era minus 2014–2023, on cells where GIPL is usable (`scripts/02_tests/t4b_seasonal_warming.py`).
-Table breaks: today −4 / −2 / 0 °C; warming 2 / 3 / 4 / 5 °C. V1 vs V2 (section 4): classes compared cell by cell
-in each of the six scenario × era combinations, on permafrost cells where V2 uses GIPL. Data sentences: the 1 km cell
-at the centre of each test area; class badges in `docs/figures/badges/`. Terrain from the 32 m terrain insolation
-index; land cover from NLCD 2016 (30 m). Scripts: `scripts/02_tests/t4_index_variants.py` (`TABLE`, `TODAY_EDGES`,
-`WARM_EDGES`; data sentences), `scripts/03_report/pti_results_figures.py` (section 3),
-`scripts/03_report/pti_extra_figures.py` (section 4 and the test-area map), `scripts/03_report/test_area_maps.py` (test-area class maps); per-cell results and summary tables
+Ground and air warming rates: `scripts/02_tests/t6_gipl_levels.py` (trends). Table breaks: today −4 / −2 / 0 °C;
+warming 2 / 3 / 4 / 5 °C. V1 vs V2 (section 4): classes compared cell by cell in each of the six scenario × era
+combinations, on permafrost cells where V2 uses GIPL. Data sentences: the 1 km cell at the centre of each test area;
+class badges in `docs/figures/badges/`. Terrain from the 32 m terrain insolation index; land cover from NLCD 2016
+(30 m). Scripts: `scripts/02_tests/t4_index_variants.py` (`TABLE`, `TODAY_EDGES`, `WARM_EDGES`; data sentences),
+`scripts/03_report/pti_results_figures.py` (section 3), `scripts/03_report/pti_extra_figures.py` (section 4 and the
+test-area map), `scripts/03_report/test_area_maps.py` (test-area class maps); per-cell results and summary tables
 (`pti_area_summary.csv`, `v1_v2_differences.csv`, `sentences.csv`) in `<data>/results/t4/`. Alternatives that were
 tested and set aside are archived in [PTI_EXPERIMENTS.md](PTI_EXPERIMENTS.md).</sub>

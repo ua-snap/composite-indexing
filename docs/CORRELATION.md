@@ -8,8 +8,9 @@ overlaps with the others, for Alaska today and for projected futures, statewide 
 - Today, **ground temperature, air temperature, permafrost fraction and active-layer thickness are largely one
   pattern** (cold north vs warmer south). Ground surface and 1 m ground temperature are practically the same map.
 - **Terrain (sun-facing slopes) and land cover carry separate information.**
-- In the projections, **GIPL surface temperature and air temperature are nearly the same map, but how much each
-  warms by the end of the century is not**: the change in GIPL surface temperature adds information of its own.
+- In the projections, **GIPL surface temperature and air temperature are nearly the same map, and so is where each
+  warms most** (ρ 0.74–0.91). GIPL's warming mostly repeats the air's pattern, at about 80 % of its size
+  ([PTI.md](PTI.md), section 2). Only in the South do the two warming maps differ.
 - Regionally, **air temperature is a much weaker stand-in for ground temperature in the Interior and the South** than
   statewide numbers suggest.
 
@@ -64,7 +65,7 @@ significant", and neighbouring cells are not independent anyway. What matters is
 | Active layer | Seasonal thaw depth (2000–2020) | ESA CCI Permafrost v5 |
 | Air T | Mean annual air temperature (2000–2020; projected eras) | SNAP 2 km: CRU TS 4.08; 5-model average |
 | Surface T (GIPL) | Projected mean annual ground surface temperature | GIPL 2.0, 5-model average |
-| Change | Projected era minus 2026–2035 | as above |
+| Change | Projected era minus 2014–2023 (GIPL on the climate years it carries, [GIPL_ISSUE_3.md](GIPL_ISSUE_3.md)) | as above |
 | Terrain thaw score | Share of sun-facing slope in the cell, from the terrain insolation index | ArcticDEM (32 m) |
 | Land cover | Share of forest, shrub, herbaceous/moss, wetland | NLCD Alaska 2016 (30 m) |
 
@@ -97,18 +98,21 @@ PC1 is the north–south temperature gradient; PC2 and PC3 are land-cover and te
 
 | Statewide ρ | 2051–2080 RCP 4.5 | 2051–2080 RCP 8.5 | 2081–2100 RCP 4.5 | 2081–2100 RCP 8.5 |
 |---|---|---|---|---|
-| Air T vs surface T (GIPL) | 0.96 | 0.95 | 0.96 | 0.95 |
-| Air T change vs surface T change (GIPL) | 0.02 | 0.26 | 0.31 | 0.78 |
-| Surface T (GIPL) vs permafrost fraction | −0.74 | −0.75 | −0.75 | −0.75 |
+| Air T vs surface T (GIPL) | 0.96 | 0.96 | 0.96 | 0.96 |
+| Air T change vs surface T change (GIPL) | 0.74 | 0.91 | 0.76 | 0.91 |
+| Surface T (GIPL) vs permafrost fraction | −0.75 | −0.76 | −0.75 | −0.76 |
 
-- **Levels are redundant:** projected air T and GIPL surface T are almost the same map in every period (ρ 0.95–0.96;
-  VIF 16–27).
-- **Changes are not:** how much GIPL surface temperature warms is mostly unrelated to how much the air warms, except
-  late in the century under RCP 8.5 (ρ 0.78). In mid-century, surface-temperature change forms its own pattern (PC4).
-- **Air warming is larger where it is colder today** (ρ −0.64 with air T, +0.45 with permafrost fraction; RCP 8.5,
+- **Levels are redundant:** projected air T and GIPL surface T are almost the same map in every period (ρ 0.96–0.97;
+  VIF 17–28).
+- **Changes largely are too:** where GIPL's surface warms most is where the air warms most (ρ 0.74–0.91); both
+  changes load on the main pattern (PC1) with the levels and permafrost fraction. What differs is the size: GIPL's
+  surface warms about 20 % less than the air ([PTI.md](PTI.md), section 2).
+- **Air warming is larger where it is colder today** (ρ −0.70 with air T, +0.51 with permafrost fraction; RCP 8.5,
   2051–2080), consistent with stronger warming in the far north.
-- 2026–2050 has levels only (it overlaps the 2026–2035 reference used for changes); its correlations match the later
-  periods (air T vs GIPL surface T: 0.96).
+- Changes are measured from 2014–2023 (today), so all three periods have them; 2026–2050 matches the later periods
+  (air T vs GIPL surface T 0.97; changes 0.74 / 0.87).
+- An earlier version of this document found the two changes mostly unrelated. That came from pairing GIPL years with
+  air-temperature years 20 years apart ([GIPL_ISSUE_3.md](GIPL_ISSUE_3.md)).
 
 Same figures for every period: `figures/t2_corr_pca_<rcp>_<period>.png`.
 
@@ -131,8 +135,8 @@ Four regions from the physiographic names in the USDA general soil map (STATSGO2
 
 | 2081–2100, ρ (RCP 4.5 / RCP 8.5) | Arctic | Interior | West | South |
 |---|---|---|---|---|
-| Air T vs surface T (GIPL) | 0.90 / 0.83 | 0.90 / 0.91 | 0.75 / 0.69 | 0.85 / 0.84 |
-| Air T change vs surface T change (GIPL) | 0.16 / 0.55 | 0.12 / 0.61 | 0.73 / 0.82 | −0.01 / 0.17 |
+| Air T vs surface T (GIPL) | 0.90 / 0.85 | 0.90 / 0.92 | 0.77 / 0.72 | 0.84 / 0.83 |
+| Air T change vs surface T change (GIPL) | 0.54 / 0.79 | 0.61 / 0.80 | 0.55 / 0.67 | 0.01 / 0.16 |
 
 - **Everywhere:** surface and 1 m ground temperature are the same map, and permafrost fraction follows ground
   temperature closely.
@@ -140,7 +144,8 @@ Four regions from the physiographic names in the USDA general soil map (STATSGO2
   fraction than in the Arctic and West. The statewide 0.82 mostly reflects the north–south gradient.
 - **Terrain:** the link between sun-facing terrain and ground temperature changes sign by region (positive in the
   Arctic and West, negative in the Interior and South), so the terrain term behaves differently across the state.
-- **Projected changes:** only in the West do air warming and GIPL surface warming follow each other closely.
+- **Projected changes:** air warming and GIPL surface warming follow each other in the Arctic, Interior and West
+  (ρ 0.54–0.80), but not in the South (0.01–0.16).
 
 ![PC1 by region, today](figures/t2_regional_pc1.png)
 
@@ -156,8 +161,9 @@ ground temperature and permafrost fraction; air temperature joins it strongly on
 - Surface and 1 m ground temperature are **interchangeable** for describing today's state.
 - Air temperature is **not a reliable substitute for ground temperature in the Interior and South**.
 - **Terrain and land cover add genuinely different information**, but the terrain relationship differs by region.
-- From GIPL, the **projected change** in surface temperature adds information; the projected level does not (it
-  repeats air temperature).
+- From GIPL, neither the projected level nor the *pattern* of its change adds much beyond air temperature (outside
+  the South). What differs is the *size* of the change: GIPL's surface warms about 20 % less than the air, which is
+  the difference between PTI V1 and V2 ([PTI.md](PTI.md)).
 
 ## Caveats
 
@@ -169,7 +175,8 @@ ground temperature and permafrost fraction; air temperature joins it strongly on
 - The South region is small (≈ 26,000 permafrost cells).
 
 <sub>Methods: 1 km GIPL grid; ESA sampled at cell centres; air temperature from the 2 km parent cell; terrain and land
-cover aggregated from 32 m / 30 m. Spearman on a 200,000-cell random sample; PCA on the correlation matrix of all
+cover aggregated from 32 m / 30 m; GIPL read on climate years (files labelled 20 years later) and changes measured
+from 2014–2023. Spearman on a 200,000-cell random sample; PCA on the correlation matrix of all
 cells (z-scored inputs); loadings = input–PC correlations; VIF = diagonal of the inverse correlation matrix. Land-cover
 barren and water fractions are left out because the fractions add up to 1. Scripts: `scripts/01_data/build_features.py`,
 `scripts/01_data/make_regions.py`, `scripts/02_tests/t2_correlation_pca.py`; tables in

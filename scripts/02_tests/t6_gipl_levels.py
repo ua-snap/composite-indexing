@@ -4,7 +4,8 @@ used as absolute values (frozen / thawed around 0 degC), or only as a change sig
 Stage `prep` (slurm/17): annual stacks on every valid GIPL cell (statewide_frozen_class > 0, ~1.46 M cells), so all
 later tests (start-up, drift, bias, 0 degC classes, site comparisons) read small arrays instead of 6000 GeoTIFFs.
   <data>/results/t6/cells.npz             cell index (flat index into the 1941 x 2471 grid), x, y, class, region, pfr_2023
-  <data>/results/t6/gipl_<run>_<rcp>_<depth>.npy   float16 (100, ncell), 2021-2120, degC (NaN = nodata)
+  <data>/results/t6/gipl_<run>_<rcp>_<depth>.npy   float16 (100, ncell), FILE years 2021-2120 (= climate years
+                                          2001-2100, GIPL_ISSUE_3.md), degC (NaN = nodata)
   <data>/results/t6/maat_<rcp>.npy        float16 (95, ncell), 2006-2100, SNAP 2 km 5modelAvg (parent cell)
   <data>/results/t6/maat_cru.npy          float16 (24, ncell), 2000-2023, CRU TS 4.08
   <data>/results/t6/esa_<var>.npy         float16 (24, ncell), 2000-2023, ESA CCI GST / T1m / T2m (nearest pixel), PFR
@@ -95,25 +96,25 @@ def prep():
 
 # ---------------------------------------------------------------------------------------------------------------------
 # Analysis stages (all read the stacks). Domain = ESA PFR 2023 > 0 & GIPL class 2 (stuck cells and their 2 km border
-# excluded, D17), as in T3. `analyze` runs them all. Outputs in <data>/results/t6/:
-#   startup:  startup_series.csv  annual medians per run / RCP / depth / region (GIPL; 5ModelAvg also GIPL - model air)
-#             startup_gap.csv     median |RCP 8.5 - RCP 4.5| per year and depth, GIPL 5ModelAvg vs model air
-#             shared_forcing.csv  per-cell correlation of year-to-year changes between runs / scenarios and with air
-#   bias:     bias.csv            GIPL vs ESA 2014-2023 per depth (surface/GST, 1 m/T1m, 2 m/T2m), run, RCP, region,
-#                                 for GIPL reference decades 2026-2035 and 2036-2045
-#             bias_by_level.csv   median excess offset in 1 degC bins of ESA level
-#   basestep: basestep.csv        GIPL change 2026-2035 -> 2036-2045 minus model air change (the 2036 switch)
+# excluded, D17), as in T3. GIPL is read on CLIMATE years: the stack row for climate year y is the file labelled
+# C.gipl_file_year(y, run, scen) (20 years later; GIPL_ISSUE_3.md). `analyze` runs them all. Outputs in <data>/results/t6/:
+#   startup:  startup_series.csv  annual medians per run / RCP / depth / region, by climate year 2001-2100
+#                                 (5ModelAvg also GIPL - air: CRU to 2015, model air from 2016)
+#             startup_gap.csv     median |RCP 8.5 - RCP 4.5| per climate year and depth, GIPL 5ModelAvg vs air
+#   bias:     bias.csv            GIPL - ESA for the same years: 2014-2023 (the delta-method reference decade) and
+#                                 2004-2015 (observed weather in both), per depth, run, RCP, region
+#             bias_by_level.csv   median offset (2014-2023) in 1 degC bins of ESA level
 #   drift:    drift.csv           extra GIPL warming under RCP 8.5 vs RCP 4.5 per degC of extra air warming
 #   classes:  classes_mid.csv     team scheme (<= -1 / -1..0 / > 0 degC) at 2051-2080: raw GIPL vs ESA-adjusted
-#             grids.npz           per-cell fields for maps
-#   trends:   trends.csv          ground vs air warming rates: ESA vs CRU 2003-2023; GIPL vs model air 2036-2070
+#                                 (ESA 2014-2023 + GIPL change from 2014-2023); grids.npz per-cell fields for maps
+#   trends:   trends.csv          warming rates: ESA vs CRU 2003-2023, GIPL vs ESA 2004-2023, GIPL vs model air 2036-2070
 REGIONS = {0: "Statewide", 1: "Arctic", 2: "Interior", 3: "West", 4: "South"}
 DEP_ESA = {"magtsurface": "GST", "magt1m": "T1m", "magt2m": "T2m"}
-BASE = (2026, 2035)
-BASE2 = (2036, 2045)  # first decade after the 2021-2035 stretch shared by runs and scenarios (startup)
-ESA_REF = (2014, 2023)
+REF = (2014, 2023)  # delta-method reference decade = ESA's last decade
+OBS = (2004, 2015)  # GIPL driven by observed (CRU) weather, after its start-up period (2001-2003)
 MID = (2051, 2080)
 LATE = (2081, 2100)
+CLIM_YEARS = np.arange(2001, 2101)
 EDGES = (-1.0, 0.0)  # team scheme: <= -1 good, -1..0 moderate, > 0 bad
 
 
@@ -127,8 +128,35 @@ def pmean(st, first_year, y0, y1, cols=None):
     return np.nanmean(np.asarray(a, "float32"), 0)
 
 
+def gipl_rows(run, scen, years):
+    return np.array([C.gipl_file_year(y, run, scen) - YEARS[0] for y in years])
+
+
 def gipl(run, scen, dep, y0, y1, cols=None):
-    return pmean(stack(f"gipl_{run}_{scen}_{dep}"), YEARS[0], y0, y1, cols)
+    """Mean over CLIMATE years y0-y1."""
+    r = gipl_rows(run, scen, [y0, y1])
+    return pmean(stack(f"gipl_{run}_{scen}_{dep}"), 0, r[0], r[1], cols)
+
+
+def gipl_series(run, scen, dep, cols, years=CLIM_YEARS):
+    """(climate year, cell) array; NaN where the run has no file for that year (GFDL-CM3 RCP 8.5 before 2002)."""
+    r = gipl_rows(run, scen, years)
+    ok = (r >= 0) & (r < YEARS.size)
+    out = np.full((len(years), len(cols)), np.nan, "float32")
+    out[ok] = np.asarray(stack(f"gipl_{run}_{scen}_{dep}")[r[ok]][:, cols], "float32")
+    return out
+
+
+def air_series(scen, cols, years=CLIM_YEARS):
+    """Air temperature by climate year: CRU TS 4.08 to 2015 (GIPL's observed stretch), model air from 2016."""
+    cru, mod = stack("maat_cru"), stack(f"maat_{scen}")
+    out = np.full((len(years), len(cols)), np.nan, "float32")
+    for k, y in enumerate(years):
+        if OBS_YEARS[0] <= y <= 2015:
+            out[k] = cru[y - OBS_YEARS[0]][cols]
+        elif y >= 2016:
+            out[k] = mod[y - MAAT_YEARS[0]][cols]
+    return out
 
 
 def maat(scen, y0, y1, cols=None):
@@ -163,16 +191,6 @@ def slope(a, years):
     return s
 
 
-def change_corr(a, b, y0, y1, lag=0):
-    """Per-cell correlation of year-to-year changes of two (year, cell) arrays starting in 2021; b shifted by lag."""
-    i0, i1 = y0 - YEARS[0], y1 - YEARS[0]
-    da = np.diff(a[i0:i1 + 1], axis=0)
-    db = np.diff(b[i0 + lag:i1 + 1 + lag], axis=0)
-    da, db = da - da.mean(0), db - db.mean(0)
-    with np.errstate(invalid="ignore", divide="ignore"):
-        return (da * db).sum(0) / np.sqrt((da ** 2).sum(0) * (db ** 2).sum(0))
-
-
 def domain():
     z = np.load(OUT / "cells.npz")
     cols = np.flatnonzero((z["cls"] == 2) & (z["pfr_2023"] > 0))
@@ -185,56 +203,27 @@ def startup():
     cols, rmask = domain()
     rows = []
     for scen in SCENS:
-        ma = np.asarray(stack(f"maat_{scen}")[YEARS[0] - MAAT_YEARS[0]:][:, cols], "float32")  # 2021-2100
+        ma = air_series(scen, cols)
         for run in RUNS:
             for dep in DEPTHS:
-                st = np.asarray(stack(f"gipl_{run}_{scen}_{dep}")[:, cols], "float32")
+                st = gipl_series(run, scen, dep, cols)
                 for k, rn in REGIONS.items():
                     g = np.nanmedian(st[:, rmask[k]], 1)
-                    d = np.full(YEARS.size, np.nan)
-                    if run == "5ModelAvg":
-                        d[:ma.shape[0]] = np.nanmedian(st[:ma.shape[0], rmask[k]] - ma[:, rmask[k]], 1)
+                    d = (np.nanmedian(st[:, rmask[k]] - ma[:, rmask[k]], 1) if run == "5ModelAvg"
+                         else np.full(CLIM_YEARS.size, np.nan))
                     rows += [dict(scen=scen, run=run, depth=dep, region=rn, year=int(yy), gipl_median=gv,
-                                  gipl_minus_maat_median=dv) for yy, gv, dv in zip(YEARS, g, d)]
+                                  gipl_minus_air_median=dv) for yy, gv, dv in zip(CLIM_YEARS, g, d)]
                 print(f"series {scen} {run} {dep}", flush=True)
     pd.DataFrame(rows).to_csv(OUT / "startup_series.csv", index=False)
 
     rows = []
-    m45, m85 = (np.asarray(stack(f"maat_{s}")[YEARS[0] - MAAT_YEARS[0]:][:, cols], "float32") for s in SCENS)
-    air_gap = np.nanmedian(np.abs(m85 - m45), 1)
+    m45, m85 = (air_series(s, cols) for s in SCENS)
+    air_gap = np.nanmedian(np.abs(m85 - m45), 1)  # 0 to 2015: both scenarios carry the same observed weather
     for dep in DEPTHS:
-        g45, g85 = (np.asarray(stack(f"gipl_5ModelAvg_{s}_{dep}")[:m45.shape[0]][:, cols], "float32") for s in SCENS)
+        g45, g85 = (gipl_series("5ModelAvg", s, dep, cols) for s in SCENS)
         gap = np.nanmedian(np.abs(g85 - g45), 1)
-        rows += [dict(depth=dep, year=int(y), gipl_gap=a, air_gap=b) for y, a, b in zip(YEARS, gap, air_gap)]
+        rows += [dict(depth=dep, year=int(y), gipl_gap=a, air_gap=b) for y, a, b in zip(CLIM_YEARS, gap, air_gap)]
     pd.DataFrame(rows).to_csv(OUT / "startup_gap.csv", index=False)
-
-    sub = cols[::10]
-    rows = []
-    for dep in ["magtsurface", "magt1m"]:
-        g = {(r, s): np.asarray(stack(f"gipl_{r}_{s}_{dep}")[:, sub], "float32") for r in RUNS for s in SCENS}
-        air = {s: np.asarray(stack(f"maat_{s}")[YEARS[0] - MAAT_YEARS[0]:][:, sub], "float32") for s in SCENS}
-        pairs = [(("5ModelAvg", "rcp45"), ("5ModelAvg", "rcp85"), 0), (("5ModelAvg", "rcp45"), ("GFDL-CM3", "rcp45"), 0),
-                 (("5ModelAvg", "rcp85"), ("GFDL-CM3", "rcp85"), 0), (("5ModelAvg", "rcp85"), ("GFDL-CM3", "rcp85"), -1),
-                 (("NCAR-CCSM4", "rcp45"), ("NCAR-CCSM4", "rcp85"), 0), (("5ModelAvg", "rcp45"), ("NCAR-CCSM4", "rcp45"), 0)]
-        for a, b, lag in pairs:
-            for y0, y1 in [(2021, 2035), (2036, 2060), (2061, 2099)]:
-                if lag < 0:  # b one year ahead of a: compare b(t) with a(t + 1)
-                    r = change_corr(g[b], g[a], y0, min(y1, 2119) - 1, 1)
-                else:
-                    r = change_corr(g[a], g[b], y0, y1)
-                rows.append(dict(depth=dep, a=" ".join(a), b=" ".join(b) + (" (1 yr ahead)" if lag else ""),
-                                 period=f"{y0}-{y1}", median_r=np.nanmedian(r), share_r_above_0p9=np.nanmean(r > 0.9)))
-        for r_ in RUNS:
-            for s in SCENS:
-                for y0, y1 in [(2021, 2035), (2036, 2060), (2061, 2099)]:
-                    r = change_corr(g[(r_, s)], air[s], y0, y1)
-                    rows.append(dict(depth=dep, a=f"{r_} {s}", b=f"model air (5modelAvg) {s}", period=f"{y0}-{y1}",
-                                     median_r=np.nanmedian(r), share_r_above_0p9=np.nanmean(r > 0.9)))
-        for y0, y1 in [(2021, 2035), (2036, 2060)]:
-            r = change_corr(air["rcp45"], air["rcp85"], y0, y1)
-            rows.append(dict(depth="air", a="model air rcp45", b="model air rcp85", period=f"{y0}-{y1}",
-                             median_r=np.nanmedian(r), share_r_above_0p9=np.nanmean(r > 0.9)))
-    pd.DataFrame(rows).to_csv(OUT / "shared_forcing.csv", index=False)
     print("startup done", flush=True)
 
 
@@ -243,78 +232,52 @@ def bias():
     import pandas as pd
     cols, rmask = domain()
     rows, lvl, grids = [], [], {}
-    esa_ref = {v: esa(v, *ESA_REF, cols) for v in DEP_ESA.values()}
-    esa_late = {v: esa(v, 2021, 2023, cols) for v in DEP_ESA.values()}
-    for scen in SCENS:
-        for base in (BASE, BASE2):
-            bridge = maat(scen, *base, cols) - maat(scen, *ESA_REF, cols)
+    for y0, y1 in (REF, OBS):
+        e_ = {v: esa(v, y0, y1, cols) for v in DEP_ESA.values()}
+        for scen in SCENS:
             for run in RUNS:
                 for dep, ev in DEP_ESA.items():
-                    gb = gipl(run, scen, dep, *base, cols)
-                    off = gb - esa_ref[ev]
-                    exc = off - bridge
-                    su = gipl(run, scen, dep, 2021, 2023, cols) - esa_late[ev]
+                    g = gipl(run, scen, dep, y0, y1, cols)
+                    off = g - e_[ev]
                     if run == "5ModelAvg":
-                        grids[f"excess_{scen}_{dep}_{base[0]}"] = exc
+                        grids[f"offset_{scen}_{dep}_{y0}"] = off
                     for k, rn in REGIONS.items():
-                        m = rmask[k] & np.isfinite(exc)
-                        rows.append(dict(scen=scen, base=f"{base[0]}-{base[1]}", run=run, depth=dep, esa_var=ev,
-                                         region=rn, rho=spearmanr(esa_ref[ev][m][::5], gb[m][::5]).statistic,
-                                         raw_offset=np.median(off[m]), bridge=np.median(bridge[m]),
-                                         startup_2021_2023_diff=np.nanmedian(su[m]), share_colder=np.mean(exc[m] < 0),
-                                         **{f"excess_{kk}": vv for kk, vv in qstats(exc[m]).items()}))
-                    if run == "5ModelAvg" and base == BASE:
-                        b = np.floor(esa_ref[ev])
+                        m = rmask[k] & np.isfinite(off)
+                        rows.append(dict(years=f"{y0}-{y1}", scen=scen, run=run, depth=dep, esa_var=ev, region=rn,
+                                         rho=spearmanr(e_[ev][m][::5], g[m][::5]).statistic,
+                                         share_colder=np.mean(off[m] < 0),
+                                         **{f"offset_{kk}": vv for kk, vv in qstats(off[m]).items()}))
+                    if run == "5ModelAvg" and (y0, y1) == REF:
+                        b = np.floor(e_[ev])
                         for lo in range(-10, 5):
-                            m = (b == lo) & np.isfinite(exc)
+                            m = (b == lo) & np.isfinite(off)
                             if m.sum() >= 200:
                                 lvl.append(dict(scen=scen, depth=dep, esa_bin=lo + 0.5, n=int(m.sum()),
-                                                excess_median=np.median(exc[m]), p25=np.percentile(exc[m], 25),
-                                                p75=np.percentile(exc[m], 75)))
-            print(f"bias {scen} {base}", flush=True)
+                                                offset_median=np.median(off[m]), p25=np.percentile(off[m], 25),
+                                                p75=np.percentile(off[m], 75)))
+            print(f"bias {scen} {y0}-{y1}", flush=True)
     pd.DataFrame(rows).to_csv(OUT / "bias.csv", index=False)
     pd.DataFrame(lvl).to_csv(OUT / "bias_by_level.csv", index=False)
     np.savez_compressed(OUT / "grids_bias.npz", cols=cols, **{k: v.astype("float32") for k, v in grids.items()})
 
 
-def basestep():
-    """Switching GIPL's reference decade from 2026-2035 to 2036-2045 changes a cell's delta-method warming by
-    -step, step = GIPL change between the decades minus the model air change between them."""
-    import pandas as pd
-    cols, rmask = domain()
-    rows = []
-    for scen in SCENS:
-        dair = maat(scen, *BASE2, cols) - maat(scen, *BASE, cols)
-        for dep in DEPTHS:
-            step = gipl("5ModelAvg", scen, dep, *BASE2, cols) - gipl("5ModelAvg", scen, dep, *BASE, cols) - dair
-            for k, rn in REGIONS.items():
-                m = rmask[k] & np.isfinite(step)
-                rows.append(dict(scen=scen, depth=dep, region=rn, air_change=np.median(dair[m]),
-                                 share_abs_above_0p5=np.mean(np.abs(step[m]) > 0.5),
-                                 share_abs_above_1=np.mean(np.abs(step[m]) > 1.0),
-                                 **{f"step_{kk}": vv for kk, vv in qstats(step[m]).items()}))
-    pd.DataFrame(rows).to_csv(OUT / "basestep.csv", index=False)
-    print("basestep done", flush=True)
-
-
 def drift():
-    """How much more GIPL warms under RCP 8.5 than RCP 4.5, per degC of extra air warming (2081-2100, from each
-    reference decade). 1 = GIPL passes on all extra air warming."""
+    """How much more GIPL warms under RCP 8.5 than RCP 4.5 by 2081-2100 (from 2014-2023), per degC of extra air
+    warming. 1 = GIPL passes on all extra air warming."""
     import pandas as pd
     cols, rmask = domain()
     rows = []
-    for base in (BASE, BASE2):
-        dm = {s: maat(s, *LATE, cols) - maat(s, *base, cols) for s in SCENS}
-        for dep in DEPTHS:
-            dg = {s: gipl("5ModelAvg", s, dep, *LATE, cols) - gipl("5ModelAvg", s, dep, *base, cols) for s in SCENS}
-            ex_air, ex_g = dm["rcp85"] - dm["rcp45"], dg["rcp85"] - dg["rcp45"]
-            for k, rn in REGIONS.items():
-                m = rmask[k] & np.isfinite(ex_g) & np.isfinite(ex_air)
-                rows.append(dict(base=f"{base[0]}-{base[1]}", depth=dep, region=rn,
-                                 gipl_change_rcp45=np.median(dg["rcp45"][m]), gipl_change_rcp85=np.median(dg["rcp85"][m]),
-                                 air_change_rcp45=np.median(dm["rcp45"][m]), air_change_rcp85=np.median(dm["rcp85"][m]),
-                                 extra_air=np.median(ex_air[m]), extra_gipl=np.median(ex_g[m]),
-                                 ratio_of_medians=np.median(ex_g[m]) / np.median(ex_air[m])))
+    dm = {s: maat(s, *LATE, cols) - maat(s, *REF, cols) for s in SCENS}
+    for dep in DEPTHS:
+        dg = {s: gipl("5ModelAvg", s, dep, *LATE, cols) - gipl("5ModelAvg", s, dep, *REF, cols) for s in SCENS}
+        ex_air, ex_g = dm["rcp85"] - dm["rcp45"], dg["rcp85"] - dg["rcp45"]
+        for k, rn in REGIONS.items():
+            m = rmask[k] & np.isfinite(ex_g) & np.isfinite(ex_air)
+            rows.append(dict(base=f"{REF[0]}-{REF[1]}", depth=dep, region=rn,
+                             gipl_change_rcp45=np.median(dg["rcp45"][m]), gipl_change_rcp85=np.median(dg["rcp85"][m]),
+                             air_change_rcp45=np.median(dm["rcp45"][m]), air_change_rcp85=np.median(dm["rcp85"][m]),
+                             extra_air=np.median(ex_air[m]), extra_gipl=np.median(ex_g[m]),
+                             ratio_of_medians=np.median(ex_g[m]) / np.median(ex_air[m])))
     pd.DataFrame(rows).to_csv(OUT / "drift.csv", index=False)
     print("drift done", flush=True)
 
@@ -323,16 +286,15 @@ def classes():
     import pandas as pd
     cols, rmask = domain()
     rows, grids = [], {}
-    esa_ref = {v: esa(v, *ESA_REF, cols) for v in DEP_ESA.values()}
+    esa_ref = {v: esa(v, *REF, cols) for v in DEP_ESA.values()}
     for scen in SCENS:
-        bridge = maat(scen, *BASE, cols) - maat(scen, *ESA_REF, cols)
         for dep in DEPTHS:
             gm = gipl("5ModelAvg", scen, dep, *MID, cols)
             c_raw = classify(gm)
             grids[f"mid_raw_{scen}_{dep}"] = gm
             c_adj = np.full(cols.size, np.nan, "float32")
             if dep in DEP_ESA:
-                adj = esa_ref[DEP_ESA[dep]] + bridge + (gm - gipl("5ModelAvg", scen, dep, *BASE, cols))
+                adj = esa_ref[DEP_ESA[dep]] + (gm - gipl("5ModelAvg", scen, dep, *REF, cols))
                 c_adj = classify(adj)
                 grids[f"mid_adj_{scen}_{dep}"] = adj
             for k, rn in REGIONS.items():
@@ -369,14 +331,22 @@ def trends():
             m = rmask[k] & np.isfinite(s) & np.isfinite(cru)
             rows.append(dict(source="ESA vs CRU", period="2003-2023", scen="obs", depth=ev, region=rn,
                              ground_trend=np.median(s[m]) * 10, air_trend=np.median(cru[m]) * 10))
+    yrs = np.arange(2004, 2024)  # same years in both: GIPL 2004-2015 observed weather, 2016-2023 projected
     for scen in SCENS:
-        for y0, y1 in [(2036, 2070), (2026, 2060)]:
+        for dep, ev in DEP_ESA.items():
+            g = slope(gipl_series("5ModelAvg", scen, dep, cols, yrs), yrs)
+            e = slope(np.asarray(stack(f"esa_{ev}")[yrs[0] - OBS_YEARS[0]:][:, cols], "float32"), yrs)
+            for k, rn in REGIONS.items():
+                m = rmask[k] & np.isfinite(g) & np.isfinite(e)
+                rows.append(dict(source="GIPL vs ESA", period="2004-2023", scen=scen, depth=dep, region=rn,
+                                 ground_trend=np.median(g[m]) * 10, air_trend=np.nan, esa_trend=np.median(e[m]) * 10))
+    for scen in SCENS:
+        for y0, y1 in [(2036, 2070), (2016, 2050)]:
             yrs = np.arange(y0, y1 + 1)
             ma = slope(np.asarray(stack(f"maat_{scen}")[y0 - MAAT_YEARS[0]:y1 + 1 - MAAT_YEARS[0]][:, cols],
                                   "float32"), yrs)
             for dep in DEPTHS:
-                s = slope(np.asarray(stack(f"gipl_5ModelAvg_{scen}_{dep}")[y0 - YEARS[0]:y1 + 1 - YEARS[0]][:, cols],
-                                     "float32"), yrs)
+                s = slope(gipl_series("5ModelAvg", scen, dep, cols, yrs), yrs)
                 for k, rn in REGIONS.items():
                     m = rmask[k] & np.isfinite(s) & np.isfinite(ma)
                     rows.append(dict(source="GIPL vs model air", period=f"{y0}-{y1}", scen=scen, depth=dep,
@@ -387,10 +357,8 @@ def trends():
     print("trends done", flush=True)
 
 
-STAGES = {"prep": prep, "startup": startup, "bias": bias, "basestep": basestep, "drift": drift, "classes": classes,
-          "trends": trends}
+STAGES = {"prep": prep, "startup": startup, "bias": bias, "drift": drift, "classes": classes, "trends": trends}
 
 if __name__ == "__main__":
-    for st_ in (["startup", "bias", "basestep", "drift", "classes", "trends"] if sys.argv[1] == "analyze"
-                else sys.argv[1:]):
+    for st_ in (["startup", "bias", "drift", "classes", "trends"] if sys.argv[1] == "analyze" else sys.argv[1:]):
         STAGES[st_]()

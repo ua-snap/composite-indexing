@@ -42,135 +42,120 @@
 {\fontsize{17}{20}\selectfont\bfseries Can we trust the GIPL 2.0 permafrost projections?\par}
 \vspace{2pt}
 {\color{ink2}GIPL 2.0 ground temperature projections for Alaska (SNAP, University of Alaska Fairbanks): 1\,km,
-2021--2120, three climate inputs (5-model average, GFDL-CM3, NCAR-CCSM4), RCP 4.5 and 8.5.\par}
+files labelled 2021--2120, three climate inputs (5-model average, GFDL-CM3, NCAR-CCSM4), RCP 4.5 and 8.5.\par}
 \vspace{5pt}
 
 \noindent\colorbox{boxbg}{\parbox{\dimexpr\linewidth-2\fboxsep}{\raggedright\vspace{2pt}%
-{\bfseries Short answer: not as delivered.}
-We compared GIPL 2.0 with a satellite-based product (ESA CCI Permafrost), 90 boreholes and about 3,000 CUSP field
-sites, and checked how the model behaves over time. We found four problems:
+{\bfseries Short answer: yes, with care, once its years are read correctly.}
+We compared GIPL 2.0 with a satellite-based product (ESA CCI Permafrost), 90 boreholes, about 2,800 CUSP field sites
+and the climate data that drove it. We found four problems:
 \begin{enumerate}[label=\textbf{\textcolor{accent}{\arabic*}}, leftmargin=1.2em, topsep=1pt]
-  \item \textbf{Stuck cells.} Across 46,000\,km², mostly in the Interior, the ground from 1\,m down never warms in
-    100 years while the surface does.
-  \item \textbf{Too cold.} About 1--2\,°C colder than every independent reference, by different amounts in different
-    places.
-  \item \textbf{Start-up and duplicated runs.} The first years jump about 2\,°C, and through 2035, runs that should
-    differ do not.
-  \item \textbf{Out of step with the air.} GIPL's warming does not follow the air temperature projections for the
-    same scenarios.
+  \item \textbf{Mislabelled years.} Every file is labelled 20 years late: ``2021'' holds the climate of 2001.
+  \item \textbf{Stuck cells.} Across 46,000\,km², mostly in the Interior, the ground from 1\,m down never warms.
+  \item \textbf{Right on average, not cell by cell.} Single cells differ from other estimates by up to about 2\,°C.
+  \item \textbf{An unexplained start, and two unexplained runs} (NCAR-CCSM4).
 \end{enumerate}
 \vspace{1pt}
-These problems are in every model and scenario. The run is undocumented, so they can be neither explained nor
-corrected.\vspace{2pt}}}
+Problems 1 and 3 can be worked around. Problems 2 and 4 sit in the delivered data, and the run is undocumented, so
+their causes cannot be identified.\vspace{2pt}}}
 
-\problem{1}{Stuck cells: ground that never warms}
+\problem{1}{Mislabelled years}
+GIPL turns monthly air temperature and snow into ground temperature, so its warm and cold years should follow those of
+the climate data that drove it. As labelled, they do not (Fig.~1a). Shifted by 20 years, they line up almost exactly
+(Fig.~1b): for GFDL-CM3, the year-to-year match is 0.94--0.95 in every cell, and a separately downscaled version of the
+same climate model confirms the shift. Read on the right years:
+\begin{itemize}
+  \item The data cover \textbf{2001--2100}, not 2021--2120. The first 15 years are \textbf{observed weather
+    (2001--2015)}, the same in every run; the projections start in 2016. One run (GFDL-CM3, RCP 8.5) is shifted 19
+    years, and its last file repeats the one before.
+  \item GIPL was driven by SNAP's 2\,km downscaled climate, the same product we compare it with.
+  \item Taken at face value, the labels set GIPL against the wrong years: in our first audit, that made GIPL look
+    1--2\,°C too cold and its warming out of step with the air. Neither holds on the right years.
+\end{itemize}
+\fig{\linewidth}{figures/gipl_trust_1_years.pdf}
+\figcap{\textbf{Figure 1.} Year-to-year change of GIPL's ground surface temperature (GFDL-CM3, RCP 4.5, statewide
+median) next to the air temperature that drove it. (a) As labelled. (b) GIPL moved 20 years earlier; dashed: observed
+air. r: median correlation per cell.}
+
+\problem{2}{Stuck cells: ground that never warms}
 In 1,172 patches covering \textbf{46,000\,km² (4.6\,\% of Alaska's permafrost area)}, GIPL's temperature at 1\,m
-changes by less than 0.1\,°C from 2021 to 2120, under every climate model and scenario. \textbf{88\,\% of this area is
+changes by less than 0.1\,°C over the whole run, under every climate model and scenario. \textbf{88\,\% of this area is
 in the Interior, where it covers 10\,\% of the permafrost area, or 19\,\% with the 2\,km border.}
 The ground temperature is also stuck at every deeper level we checked (2, 3 and 5\,m), and 0.5\,m warms only 0.4\,°C over the
-century (about 5\,°C elsewhere). Each cell holds its own fixed value (−5 to −1\,°C at 1\,m). Yet their surface warms \emph{faster} than nearby cells' (1.5--3.5\,°C
-warmer by 2081--2100), and cells within 2\,km are partly affected. Satellite data show nothing unusual
-there, and soil and land-cover maps do not explain the pattern.
-\fig{\linewidth}{figures/gipl_trust_1_stuck.pdf}
-\figcap{\textbf{Figure 1.} (a) Cells where 1\,m temperature changes by < 0.1\,°C, 2021--2120. (b, c) A stuck and a
-normal cell 4\,km apart (5-model average, RCP 8.5).}
-
-\problem{2}{Too cold, by different amounts in different places}
-Three independent checks agree:
-\begin{itemize}
-  \item \textbf{Satellite-based product (ESA CCI):} allowing for about 1\,°C of warming between the two products'
-    decades, GIPL is 1.2\,°C colder at the surface and 1.9\,°C colder at 1 and 2\,m (statewide median), and colder in
-    82--91\,\% of permafrost cells (Fig.~2a).
-  \item \textbf{90 monitoring boreholes} (mostly 2015--2024): GIPL is 2.2, 2.1 and 1.6\,°C too cold at the surface,
-    1\,m and 2\,m; ESA CCI is within 0.5\,°C (Fig.~2b). Even GIPL's 2026--2035 values, a decade later, are colder than
-    what the boreholes measured.
-  \item \textbf{About 3,000 field sites} from the CUSP database, where crews recorded whether permafrost was
-    present: at 1\,m, GIPL shows frozen ground at 71\,\% of the 1,532 sites where none was found (ESA CCI: 19\,\%;
-    Fig.~2c).
-\end{itemize}
-The error varies by about 3\,°C from cell to cell and is largest (2--3\,°C) near 0\,°C (the frozen/thawed
-threshold). No single correction can remove it.
-\fig{\linewidth}{figures/gipl_trust_2_cold.pdf}
-\figcap{\textbf{Figure 2.} (a) GIPL 2026--2035 minus ESA CCI 2014--2023 at 1\,m, after removing the projected warming
-in between (RCP 8.5). (b) Measured vs.\ dataset temperature, same years. (c) CUSP field sites where crews found no permafrost.}
+century (about 5\,°C elsewhere). Each cell holds its own fixed value (−5 to −1\,°C at 1\,m). Yet their surface warms
+\emph{faster} than nearby cells' (1.5--3.5\,°C warmer by the end of the century), and cells within 2\,km are partly
+affected. Satellite data show nothing unusual there, and soil and land-cover maps do not explain the pattern.
+\fig{\linewidth}{figures/gipl_trust_2_stuck.pdf}
+\figcap{\textbf{Figure 2.} (a) Cells where 1\,m temperature changes by < 0.1\,°C over the run. (b, c) A stuck and a
+normal cell 4\,km apart (5-model average, RCP 8.5; years shifted as in problem 1; air: observed to 2015, then
+projected).}
 
 \newpage
 
-\problem{3}{An unexplained start-up, and runs that should differ but do not}
-GIPL starts in 2021 far from where it settles. At 1\,m the statewide median climbs 1.8\,°C in two years (Fig.~3a);
-real ground does not warm that fast. The starting points are mixed up: the 5-model average's two
-scenarios start from different ground temperatures although their climates are still nearly the same in 2021
-(Fig.~3a), yet four of the six runs (5-model average and GFDL-CM3 under RCP 4.5, NCAR-CCSM4 under both) start from
-identical values in every cell (Fig.~3b). In 2023 the NCAR-CCSM4 run's surface spikes to +3.6\,°C (RCP 4.5) and
-+5.1\,°C (RCP 8.5), then drops back (Fig.~3b). Its air temperature shows no such jump: under RCP 8.5, 2023 is the
-coldest year of 2021--2035. Then, \textbf{through 2035, runs that should differ share one sequence of warm and cold
-years:}
+\problem{3}{Right on average, not cell by cell}
+On the right years, three independent checks agree that GIPL's temperatures are about right on average:
 \begin{itemize}
-  \item GFDL-CM3 (one climate model) is \textbf{identical} to the 5-model average under RCP 4.5, in every cell and
-    year (Fig.~3c).
-  \item GFDL-CM3 under RCP 8.5 repeats nearly the same values one year earlier (typically within 0.05\,°C; Fig.~3d).
-  \item The 5-model average's two scenarios rise and fall together (correlation 0.97; Fig.~3a), although their air temperatures
-    do not (−0.08).
+  \item \textbf{Satellite-based product (ESA CCI)}, 2004--2015 (both driven by observed weather): within 0.2\,°C at
+    1 and 2\,m, and 0.9\,°C warmer at the ground surface (statewide median).
+  \item \textbf{90 monitoring boreholes}, same years: median error −0.3, −0.5 and −0.05\,°C at the surface, 1\,m
+    and 2\,m; ESA CCI −0.5, +0.3 and +0.4\,°C (Fig.~3b).
+  \item \textbf{About 2,800 CUSP field sites}, where crews recorded whether permafrost was present: at 1\,m, the
+    temperature that best separates the two groups is −0.2\,°C in GIPL (ESA CCI: +1.4\,°C; Fig.~3c).
 \end{itemize}
-The runs separate only from 2036. GIPL's 2021--2035 values are therefore not projections for a particular model or
-scenario, and comparing them with observations is unreliable.
-\fig{\linewidth}{figures/gipl_trust_3_startup.pdf}
-\figcap{\textbf{Figure 3.} Statewide median of permafrost cells (stuck cells excluded). (a) Start-up at 1\,m, then
-lockstep. (b) NCAR-CCSM4's surface (solid) spikes in 2023; its air temperature (dashed) does not. (c, d) Until 2035,
-GFDL-CM3 matches the 5-model average: exactly under RCP 4.5, one year apart under RCP 8.5.}
+But single cells differ from ESA CCI by −1.5 to +1.9\,°C (middle 80\,\%, 1\,m), in a clear regional pattern
+(Fig.~3a). Where ESA CCI puts the ground at +1 to +3\,°C, GIPL is 1.4--2.1\,°C colder: it holds thawing ground near
+0\,°C while the ice melts, so small errors decide whether a cell reads frozen or thawed.
+\fig{\linewidth}{figures/gipl_trust_3_levels.pdf}
+\figcap{\textbf{Figure 3.} (a) GIPL minus ESA CCI at 1\,m, 2004--2015 (RCP 8.5). (b) Measured vs.\ dataset temperature,
+same years. (c) GIPL's 1\,m temperature at field sites with and without permafrost.}
 
-\problem{4}{Out of step with the air}
+\problem{4}{An unexplained start, and two unexplained runs}
 \noindent\begin{minipage}[t]{0.505\linewidth}
 \vspace{0pt}\raggedright
-GIPL converts air temperature and snow into ground temperature, so its warming should broadly follow the air warming
-of each scenario, damped or amplified by snow. It does not:
 \begin{itemize}
-  \item From 2036 to 2070, GIPL's surface warms 0.5\,°C per decade under \emph{both} scenarios, while SNAP's air
-    projections warm 0.3 (RCP 4.5) and 0.9\,°C (RCP 8.5) per decade (Fig.~4).
-  \item By 2081--2100, the extra 2.6\,°C of air warming under RCP 8.5 shows up as only 1.5\,°C of extra warming at
-    the surface and 0.9\,°C at 1\,m.
-  \item GIPL's year-to-year swings barely follow the air's (median correlation per cell between −0.45 and +0.49).
+  \item \textbf{A three-year start-up.} At 1\,m the statewide median climbs 1.8\,°C from 2001 to 2003 (Fig.~4a);
+    real ground does not warm that fast. 2001--2003 should not be used.
+  \item \textbf{Mixed-up starting points.} The two scenarios start up to 1.7\,°C apart although their weather is
+    the same (observed) until 2015, while four of the six runs start from identical values in every cell.
+  \item \textbf{NCAR-CCSM4.} Both runs match no climate data we could find (SNAP's CCSM4 at 2\,km or 771\,m, a
+    separately downscaled CCSM4, observations), and their surface spikes 3.6--5.1\,°C in 2003 (Fig.~4b).
 \end{itemize}
-Snow explains part of this: the projected air warming is strongest in winter, under the snowpack. The rest may mean
-that GIPL was driven by different climate data than SNAP's published air temperature projections for the same
-models. Without documentation this cannot be checked.
 \end{minipage}\hfill
 \begin{minipage}[t]{0.475\linewidth}
 \vspace{0pt}
-\includegraphics[width=\linewidth]{figures/gipl_trust_4_air.pdf}
-\figcap{\textbf{Figure 4.} Warming since 2026--2035, statewide median of permafrost cells, 5-model average. (a) SNAP 2\,km
-air temperature projections. (b) GIPL ground surface.}
+\includegraphics[width=\linewidth]{figures/gipl_trust_4_runs.pdf}
+\figcap{\textbf{Figure 4.} Statewide median of permafrost cells (stuck cells excluded), climate years. (a) Start-up
+at 1\,m. (b) NCAR-CCSM4's surface against the other runs.}
 \end{minipage}
 
-\vspace{4pt}
+\vspace{2pt}
 \noindent\colorbox{boxbg}{\parbox{\dimexpr\linewidth-2\fboxsep}{\raggedright\vspace{3pt}%
 \textbf{What still holds.} GIPL's spatial pattern is sound: it ranks colder and warmer places as well as ESA CCI does
-when checked against the field sites. Its long-term warming is plausible in size. Two workarounds reduce the damage
-but do not remove it. Masking stuck cells and their 2\,km border drops about 9\,\% of Alaska's permafrost area and
-cannot rule out milder effects elsewhere. Using only GIPL's change over time, added to an observation-based starting level,
-removes the cold bias but keeps problems 3 and 4.\par\vspace{4pt}
-\textbf{Bottom line.} GIPL 2.0 ground temperatures should not be used as absolute values (how cold the ground is, or
-whether it is frozen) anywhere in Alaska, and its projected changes only with the caveats above. The problems sit in
-the delivered data, and their causes cannot be identified: no documentation exists for this 1\,km run (the only
-method reference describes an earlier, coarser run), including its climate inputs, starting conditions, and soil and
+at the field sites. Its warming follows the scenarios, damped: over 2036--2070 its surface warms 0.3 (RCP 4.5) and
+0.7\,°C (RCP 8.5) per decade, against 0.3 and 0.9\,°C for the projected air, and less at depth. Snow and soil can
+explain such a lag, but the recent record points the other way: over 2003--2023 the satellite-based ground surface
+warmed faster than the observed air (0.62 vs 0.37\,°C per decade).\par\vspace{4pt}
+\textbf{Bottom line.} GIPL 2.0 is usable for Alaska's ground temperatures and their change, on four conditions: read
+every file as the climate of the year in its name minus 20 (minus 19 for GFDL-CM3, RCP 8.5); skip 2001--2003; mask the
+stuck cells and their 2\,km border (about 9\,\% of Alaska's permafrost area); and treat single-cell values as
+uncertain by up to about 2\,°C. Use the NCAR-CCSM4 runs with caution. The causes of problems 2 and 4 cannot be
+identified: no documentation exists for this 1\,km run, including its climate inputs, starting conditions, and soil and
 snow settings.\vspace{3pt}}}
 
 \vspace{3pt}
 {\footnotesize\color{ink2}
 \textbf{Sources and methods.} GIPL 2.0 (SNAP, University of Alaska Fairbanks): mean annual ground temperature at the
-surface, 0.5, 1 and 2\,m, from SNAP's source GeoTIFFs (identical to its Rasdaman service).
-ESA CCI Permafrost v5.0, 1\,km, 2003--2023. SNAP 2\,km downscaled air temperature (CMIP5 5-model average and NCAR-CCSM4; CRU TS 4.08
-for observed years). Boreholes: Thermal State of Permafrost in North America, UAF Permafrost Laboratory (Arctic Data
-Center); 90 Alaska sites with at least one full year of data, outside stuck cells and their border. Field sites: CUSP v1.2
-(CommUnity near-Surface Permafrost), 3,012 GIPL cells with records from 2000 on and searches reaching at least 1\,m.
-Stuck cell: annual 1\,m temperature range over 2021--2120 below 0.1\,°C in at least one run (97\,\% of the area is
-stuck in all six); 2, 3 and 5\,m checked in the 5-model average, RCP 8.5. Regions: USDA general soil map
-physiography. Comparisons use permafrost cells (ESA CCI permafrost fraction > 0) outside stuck cells and their
-2\,km border (724,326 cells) and report medians. Because GIPL and ESA CCI describe different decades, the projected
-air warming between them (about +1\,°C) is removed before comparing; the borehole result holds without this step.
-A borehole or field site is a point and a cell is 1\,km², so single sites can differ from their cell by several
-degrees; medians over many sites are the meaningful numbers. ESA CCI is itself model-based and not error-free (about
-0.5\,°C on average against the boreholes). Ranking skill against field sites (area under the ROC curve): GIPL 0.81, ESA CCI
-0.80--0.82. Detailed technical notes are available on request.\par}
+surface, 0.5, 1 and 2\,m, from SNAP's source GeoTIFFs, read on climate years (year in the file name − 20). ESA CCI
+Permafrost v5.0, 1\,km, 2003--2023. Air temperature: SNAP 2\,km and 771\,m downscaled CMIP5 projections, CRU TS 4.08
+(observed), SNAP's WRF-downscaled GFDL-CM3 and CCSM4; year shift = correlation of year-to-year changes per cell, for
+shifts of −5 to 30 years. Boreholes: Thermal State of Permafrost in North America, UAF Permafrost Laboratory (Arctic
+Data Center); 90 Alaska sites outside stuck cells and their border. Field sites: CUSP v1.2 (CommUnity near-Surface
+Permafrost), 2,802 GIPL cells with records from 2002 on and searches reaching at least 1\,m. Stuck cell: annual 1\,m
+temperature range over the run below 0.1\,°C in at least one run (97\,\% of the area is stuck in all six). Comparisons
+use permafrost cells (ESA CCI permafrost fraction > 0) outside stuck cells and their 2\,km border (724,326 cells) and
+report medians; after 2015, GIPL's weather is projected, so only multi-year means are compared with observations. A
+borehole or field site is a point and a cell is 1\,km², so single sites can differ from their cell by several degrees.
+ESA CCI is itself model-based. Ranking skill at the field sites (area under the ROC curve): GIPL 0.81, ESA CCI
+0.82--0.84. Detailed technical notes are available on request.\par}
 
 \end{document}

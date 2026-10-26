@@ -415,8 +415,8 @@ def yearmap():
 
 
 def bias20():
-    """GIPL 2026-2035 against ESA, with GIPL's years taken at face value (old excess offset, GIPL_ISSUE_2 section 2) and
-    shifted by the forcing offset (GIPL 2026-2035 = forcing 2006-2015, observed CRU: compare with ESA 2006-2015)."""
+    """GIPL against ESA, with GIPL's years taken at face value (old excess offset: GIPL 2026-2035 - ESA 2014-2023 -
+    model air warming) and on climate years (GIPL climate 2004-2015 = observed weather, vs ESA 2004-2015)."""
     import pandas as pd
     z, dom, sub = cells()
     reg = z["region"][dom]
@@ -434,7 +434,8 @@ def bias20():
                 expected = ma[12:].mean(0) - ma[:10].mean(0)
                 old = g - e1423 - expected
                 off = OFFSET.get((run, scen))
-                new = g - e[2026 - off - 2000:2036 - off - 2000].mean(0) if off else np.full_like(g, np.nan)
+                new = (gipl(run, scen, dep, dom, 2004 + off, 2015 + off).mean(0) - e[2004 - 2000:2016 - 2000].mean(0)
+                       if off else np.full_like(g, np.nan))
                 for k, rn in REGIONS.items():
                     sel = np.ones(dom.size, bool) if k == 0 else reg == k
                     rows.append(dict(depth=dep, esa=ev, run=run, scen=scen, region=rn,

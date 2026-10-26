@@ -109,7 +109,7 @@ def fig_bias():
     for i, (dep, lab) in enumerate(deps):
         d = b[b.depth == dep].set_index("region")
         for k, (col, c, name) in enumerate([("old_excess_offset", OLD_C, "Years as labelled (GIPL_ISSUE_2)"),
-                                            ("new_offset_vs_esa_same_years", NEW_C, "Same climate years")]):
+                                            ("new_offset_vs_esa_same_years", NEW_C, "Same climate years (2004–2015)")]):
             x = i + (k - 0.5) * (w + 0.04)
             v, rv = d.loc["Statewide", col], d.loc[regions, col]
             ax.bar(x, v, width=w, color=c, label=name if i == 0 else None)

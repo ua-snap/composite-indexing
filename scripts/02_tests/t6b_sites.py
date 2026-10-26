@@ -158,11 +158,11 @@ def cusp():
 
 def compare():
     """Needs the t6 stacks (t6_gipl_levels.py prep). GIPL comparisons only on good cells (class 1 or 2).
-    GIPL has no usable years before 2026 (start-up), so for an observation year y GIPL's implied value is
-    GIPL 2026-2035 - (model MAAT 2026-2035 - model MAAT around y): the same bridge as in ESA_GIPL_SPLICING.md.
+    GIPL is read on climate years (files labelled 20 years later, GIPL_ISSUE_3.md), so an observation in year y is
+    compared with GIPL's value for the same climate year; GIPL's start-up years (climate 2001-2003) are not used.
     -> borehole_compare.csv (site x depth), cusp_compare.csv (cell table), cusp_skill.csv (skill per predictor)"""
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from t6_gipl_levels import BASE, BASE2, MAAT_YEARS, OBS_YEARS, OUT as T6, YEARS, classify, stack
+    from t6_gipl_levels import OBS_YEARS, OUT as T6, classify, gipl_rows, stack
 
     z = np.load(T6 / "cells.npz")
     idx, cls = z["idx"], z["cls"]
@@ -172,26 +172,18 @@ def compare():
         k = np.clip(k, 0, idx.size - 1)
         return np.where((cell >= 0) & (idx[k] == cell), k, -1)
 
-    def win(st, first, cols, y0, y1):
-        a = np.asarray(st[y0 - first: y1 - first + 1][:, cols], "float32")
-        return np.nanmean(a, 0)
-
     deps = {"sfc": "magtsurface", "d1m": "magt1m", "d2m": "magt2m"}
-    scen = "rcp85"  # base period differs by < 0.1 degC between RCPs
-    g_base = {k: win(stack(f"gipl_5ModelAvg_{scen}_{d}"), YEARS[0], slice(None), *BASE) for k, d in deps.items()}
-    g_base["d05"] = win(stack(f"gipl_5ModelAvg_{scen}_magt0.5m"), YEARS[0], slice(None), *BASE)
     deps2 = {**deps, "d05": "magt0.5m"}
-    g_base2 = {k: win(stack(f"gipl_5ModelAvg_{scen}_{d}"), YEARS[0], slice(None), *BASE2) for k, d in deps2.items()}
-    g_all = {k: stack(f"gipl_5ModelAvg_{scen}_{d}") for k, d in deps.items()}
-    m_all = np.asarray(stack(f"maat_{scen}"), "float32")
-    m_base = m_all[BASE[0] - MAAT_YEARS[0]: BASE[1] - MAAT_YEARS[0] + 1].mean(0)
-    m_base2 = m_all[BASE2[0] - MAAT_YEARS[0]: BASE2[1] - MAAT_YEARS[0] + 1].mean(0)
+    scen = "rcp85"  # GIPL's observed-weather years (to 2015) are the same in both RCPs; later years differ slightly
+    g_all = {k: stack(f"gipl_5ModelAvg_{scen}_{d}") for k, d in deps2.items()}
     e_all = {v: np.asarray(stack(f"esa_{v}"), "float32") for v in ["GST", "T1m", "T2m", "PFR"]}
     ev = {"sfc": "GST", "d1m": "T1m", "d2m": "T2m"}
 
-    def maat_years(c, years):
-        ys = [y for y in years if MAAT_YEARS[0] <= y <= MAAT_YEARS[-1]] or list(range(2006, 2011))
-        return m_all[np.array(ys) - MAAT_YEARS[0], c].mean(0)
+    def gipl_years(k, c, years):
+        ys = [y for y in years if y >= C.GIPL_START_OK]
+        if not ys:
+            return np.nan
+        return float(np.nanmean(np.asarray(g_all[k][gipl_rows("5ModelAvg", scen, ys), c], "float32")))
 
     def esa_years(var, c, years):
         ys = [y for y in years if OBS_YEARS[0] <= y <= OBS_YEARS[-1]]
@@ -209,67 +201,44 @@ def compare():
             for k in deps:
                 if not np.isfinite(r[k]):
                     continue
-                e = esa_years(ev[k], c, cal)
-                bridge = m_base[c] - maat_years(c, cal)
-                bridge2 = m_base2[c] - maat_years(c, cal)
-                same = [y for y in cal if y >= YEARS[0]]  # GIPL as delivered for the same years (start-up only)
-                g_same = (float(np.mean([g_all[k][y - YEARS[0], c] for y in same])) if len(same) == len(cal)
-                          else np.nan)
                 rows.append(dict(site=s.site, name=s["name"], lat=s.lat, lon=s.lon, gipl_class=int(cls[c]),
-                                 hy=int(r.hy), depth=k, obs=r[k], esa=e, gipl_base=g_base[k][c], bridge=bridge,
-                                 gipl_implied=g_base[k][c] - bridge, gipl_implied2=g_base2[k][c] - bridge2,
-                                 gipl_same_year=g_same))
+                                 hy=int(r.hy), depth=k, obs=r[k], esa=esa_years(ev[k], c, cal),
+                                 gipl=gipl_years(k, c, cal)))
     b = pd.DataFrame(rows)
     b.to_csv(OUT / "borehole_compare_years.csv", index=False)
     site_mean = (b.groupby(["site", "name", "lat", "lon", "gipl_class", "depth"])
-                 .agg(n_years=("hy", "nunique"), obs=("obs", "mean"), esa=("esa", "mean"),
-                      gipl_base=("gipl_base", "mean"), gipl_implied=("gipl_implied", "mean"),
-                      gipl_implied2=("gipl_implied2", "mean"),
-                      bridge=("bridge", "mean")).reset_index())
+                 .agg(n_years=("hy", "nunique"), obs=("obs", "mean"), esa=("esa", "mean"), gipl=("gipl", "mean"))
+                 .reset_index())
     site_mean.to_csv(OUT / "borehole_compare.csv", index=False)
     good = site_mean[site_mean.gipl_class.isin([1, 2])]
-    print("Boreholes (site means), good GIPL cells; error = dataset - observed:")
+    print("Boreholes (site means), good GIPL cells, same years; error = dataset - observed:")
     for k in deps:
-        g = good[(good.depth == k) & good.esa.notna() & good.gipl_implied.notna()]
+        g = good[(good.depth == k) & good.esa.notna() & good.gipl.notna()]
         if len(g):
             print(f"  {k}: n={len(g)} sites | ESA error median {np.median(g.esa - g.obs):+.2f} "
-                  f"(MAE {np.mean(np.abs(g.esa - g.obs)):.2f}) | GIPL error median "
-                  f"{np.median(g.gipl_implied - g.obs):+.2f} (MAE {np.mean(np.abs(g.gipl_implied - g.obs)):.2f}) | "
-                  f"GIPL (2036-2045 ref.) error median {np.median(g.gipl_implied2 - g.obs):+.2f} | GIPL 2026-2035 "
-                  f"as delivered (no warming adjustment) {np.median(g.gipl_base - g.obs):+.2f}")
-    sy_ = b[b.gipl_class.isin([1, 2]) & b.gipl_same_year.notna()]
-    for k in deps:
-        g = sy_[sy_.depth == k]
-        if len(g):
-            print(f"  {k}: GIPL start-up years vs same-year observations: {len(g)} site-years at {g.site.nunique()} "
-                  f"sites, median error {np.median(g.gipl_same_year - g.obs):+.2f}, ESA {np.nanmedian(g.esa - g.obs):+.2f}")
+                  f"(MAE {np.mean(np.abs(g.esa - g.obs)):.2f}) | GIPL error median {np.median(g.gipl - g.obs):+.2f} "
+                  f"(MAE {np.mean(np.abs(g.gipl - g.obs)):.2f}) | GIPL colder at {np.mean(g.gipl < g.obs):.0%} of sites")
 
     # --- CUSP: permafrost found / not found ------------------------------------------------------------------------
     cc = pd.read_csv(OUT / "cusp_cells.csv")
     cc["colk"] = col_of(cc.cell.values)
     cc = cc[cc.colk >= 0].copy()
     cc["gipl_class"] = cls[cc.colk.values]
-    out = {k: [] for k in ["esa_sfc", "esa_d1m", "esa_d2m", "esa_pfr", "bridge", "bridge2"]}
+    out = {k: [] for k in ["esa_sfc", "esa_d1m", "esa_d2m", "esa_pfr"] + [f"gipl_{k}" for k in deps2]}
     for _, r in cc.iterrows():
         c, y = int(r.colk), int(r.year_median)
         years = list(range(y - 2, y + 3))
         for k in deps:
             out[f"esa_{k}"].append(esa_years(ev[k], c, years))
         out["esa_pfr"].append(esa_years("PFR", c, years))
-        out["bridge"].append(m_base[c] - maat_years(c, years))
-        out["bridge2"].append(m_base2[c] - maat_years(c, years))
+        for k in deps2:
+            out[f"gipl_{k}"].append(gipl_years(k, c, years))
     for k, v in out.items():
         cc[k] = v
-    for k in ["sfc", "d05", "d1m", "d2m"]:
-        cc[f"gipl_raw_{k}"] = g_base[k][cc.colk.values]
-        cc[f"gipl_implied_{k}"] = cc[f"gipl_raw_{k}"] - cc.bridge
-        cc[f"gipl_implied2_{k}"] = g_base2[k][cc.colk.values] - cc.bridge2
     cc["pf_obs"] = (cc.pf_share >= 0.5).astype(int)
     cc.to_csv(OUT / "cusp_compare.csv", index=False)
 
-    preds = ([f"esa_{k}" for k in deps] + [f"gipl_raw_{k}" for k in ["sfc", "d05", "d1m", "d2m"]]
-             + [f"gipl_implied_{k}" for k in ["sfc", "d05", "d1m", "d2m"]]
-             + [f"gipl_implied2_{k}" for k in ["sfc", "d05", "d1m", "d2m"]])
+    preds = [f"esa_{k}" for k in deps] + [f"gipl_{k}" for k in ["sfc", "d05", "d1m", "d2m"]]
     ok = cc.gipl_class.isin([1, 2]) & cc[preds + ["esa_pfr"]].notna().all(axis=1)
     d = cc[ok]
     rows = []

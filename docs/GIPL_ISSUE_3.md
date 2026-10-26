@@ -1,9 +1,9 @@
 # GIPL 2.0 (1 km), issue 3: which climate data, and which years?
 ## Was GIPL driven by different climate data than the air temperatures we compared it with?
 
-**Question:** our GIPL audit ([GIPL_ISSUE_2.md](GIPL_ISSUE_2.md), [ESA_GIPL_SPLICING.md](ESA_GIPL_SPLICING.md),
-[GIPL_TRUST.pdf](GIPL_TRUST.pdf)) compared GIPL with SNAP's **2 km** downscaled air temperature and found that GIPL's
-year-to-year swings barely follow it. SNAP also publishes the same climate models at **771 m**. Was GIPL driven by the
+**Question:** our first GIPL audit (the first versions of [GIPL_ISSUE_2.md](GIPL_ISSUE_2.md),
+[ESA_GIPL_SPLICING.md](ESA_GIPL_SPLICING.md) and [GIPL_TRUST.pdf](GIPL_TRUST.pdf)) compared GIPL with SNAP's **2 km**
+downscaled air temperature and found that GIPL's year-to-year swings barely follow it. SNAP also publishes the same climate models at **771 m**. Was GIPL driven by the
 771 m data, or by something else?
 
 ---
@@ -18,18 +18,19 @@ year-to-year swings barely follow it. SNAP also publishes the same climate model
   8.5: Y − 19). GIPL "2021–2035" is **observed climate of 2001–2015**. GIPL "2036–2120" is the CMIP5 projection for
   **2016–2100**. Shifted this way, GIPL's year-to-year swings follow its climate model's air temperature almost
   exactly (GFDL-CM3: correlation 0.94–0.95 in every cell, against 0.11 / −0.40 as labelled).
-- **This explains most of the oddities in GIPL_ISSUE_2.** The "shared weather" through 2035 is the observed weather of
+- **This explains most of the oddities in the first audit.** The "shared weather" through 2035 is the observed weather of
   2001–2015, the same in every scenario. The 2036 switch is where the projections start. The start-up period is
   2001–2003. Warming rates and the scenario response look normal once the years are shifted. And the files run to 2120
   although the projections stop in 2100.
-- **The cold bias largely disappears.** Compared with ESA CCI for the *same climate years*, GIPL is **within 0.2 °C at
-  1 m and 2 m** and **1.0 °C warmer at the surface** (statewide medians). GIPL_ISSUE_2 reported −1.9 and −1.2 °C.
-  Against boreholes (RCP 8.5, as in GIPL_ISSUE_2), GIPL is now within 0.6 °C at all three depths, close to ESA.
-  GIPL_ISSUE_2 reported 1.6–2.2 °C too cold.
+- **The cold bias largely disappears.** Compared with ESA CCI for the *same climate years* (2004–2015, when both
+  were driven by observed weather), GIPL is **within 0.2 °C at 1 m and 2 m** and **0.9 °C warmer at the surface**
+  (statewide medians). The first audit reported −1.9 and −1.2 °C. Against boreholes (RCP 8.5), GIPL is now within
+  0.6 °C at all three depths, close to ESA; the first audit reported 1.6–2.2 °C too cold.
 - **The two NCAR-CCSM4 runs match no available climate data**, at any shift: not SNAP's CCSM4 at 2 km or 771 m, not
   the WRF-downscaled CCSM4, and not observations. Their forcing is unknown; treat them with caution.
-- **Read every GIPL year as Y − 20.** The dataset effectively covers 2001–2100, not 2021–2120. Several earlier
-  findings and PTI V2 need revising (section 5).
+- **Read every GIPL year as Y − 20.** The dataset effectively covers 2001–2100, not 2021–2120. The affected documents
+  and PTI V2 have been revised (section 6). The biggest consequence: on matched years, GIPL's ground surface warms
+  about 20 % less than the air, so PTI V2 now differs clearly from V1.
 
 ---
 
@@ -106,21 +107,21 @@ GIPL 2.0 set-up runs from August to August (2010 GIPL/SNAP presentation). The da
 
 ![GIPL minus ESA with years as labelled and with matched climate years](figures/gipl3_bias.png)
 
-| Finding in [GIPL_ISSUE_2.md](GIPL_ISSUE_2.md) | With GIPL year Y = climate year Y − 20 |
+| Finding in the first version of [GIPL_ISSUE_2.md](GIPL_ISSUE_2.md) | With GIPL year Y = climate year Y − 20 |
 |---|---|
-| Ground 1.2 / 1.9 / 1.9 °C colder than ESA (surface / 1 m / 2 m) | **+1.0 / −0.1 / −0.2 °C** vs ESA 2006–2015 (RCP 8.5; RCP 4.5 +1.0 / −0.1 / −0.25). Colder in 20 / 52 / 56 % of cells |
+| Ground 1.2 / 1.9 / 1.9 °C colder than ESA (surface / 1 m / 2 m) | **+0.9 / −0.1 / −0.2 °C** vs ESA for the same years, 2004–2015 (RCP 8.5; RCP 4.5 +0.9 / −0.2 / −0.3). Colder in 24 / 53 / 57 % of cells |
 | 2.2 / 2.1 / 1.6 °C colder than boreholes | **−0.3 / −0.5 / −0.05 °C** (RCP 8.5; RCP 4.5 −0.8 / −0.7 / −0.3); ESA −0.5 / +0.3 / +0.4 |
-| CUSP field sites, 1 m: 68 % of sites without permafrost read as frozen; best split −1.4 °C | **31 %; best split −0.2 °C** (ESA: 15 %, +1.4 °C). Ranking skill unchanged (0.82) |
+| CUSP field sites, 1 m: 68 % of sites without permafrost read as frozen; best split −1.4 °C | **31 %; best split −0.2 °C** (ESA: 15 %, +1.4 °C). Ranking skill unchanged (0.81) |
 | Shared weather sequence through 2035 | Observed weather 2001–2015, the same in every scenario |
 | Start-up period 2021–2023 | 2001–2003: the model starts from a steady-state ground profile |
 | Surface warms 0.53 °C/decade under both scenarios (2036–2070) | Those years are 2016–2050, when the scenarios barely differ (air +0.66 / +0.67). For 2036–2070 itself: GIPL +0.27 / +0.73, air +0.29 / +0.90 °C/decade |
-| Only 58 % of the extra RCP 8.5 air warming reaches the surface by 2081–2100 (1 m: 35 %; our recomputation 55 / 33 %) | **87 %** at the surface, 53 % at 1 m, 47 % at 2 m |
+| Only 58 % of the extra RCP 8.5 air warming reaches the surface by 2081–2100 (1 m: 35 %) | **74 %** at the surface, 46 % at 1 m, 42 % at 2 m (from 2014–2023) |
 | Data run to 2120 | Climate runs to 2100; GIPL 2101–2120 = 2081–2100 |
 
 - **Most of the cold bias came from comparing the wrong years.** The old comparison treated GIPL 2026–2035 as 12 years
   *after* ESA's 2014–2023 and expected it to be about 1 °C warmer. In fact it is the climate of 2006–2015, 8 years
   *before*, and observed air warmed 1.1 °C between those decades. The 2 °C swing is the size of the reported bias.
-- **The surface now reads warm against ESA** (+1.0 °C) but slightly cold against boreholes (−0.3 °C). ESA's surface
+- **The surface now reads warm against ESA** (+0.9 °C) but slightly cold against boreholes (−0.3 °C). ESA's surface
   temperature is itself 0.5 °C cold at the boreholes. Treat the surface level as uncertain by about ±1 °C.
 - **Still unexplained:** the identical first-year maps of four runs, and the different starting ground temperatures of
   the two scenarios (they get the same 2001–2015 weather but start apart; the gap closes by "2023").
@@ -135,17 +136,24 @@ Its year-to-year swings must come from climate data we do not have. This adds to
 the sawtooth in stuck cells). **Use NCAR-CCSM4 runs only with that caveat**, and keep the 5-model average as the
 headline.
 
-## 6. What needs revising
+## 6. Revisions made
 
-- **PTI V2 and the delta change method** ([PTI.md](PTI.md), [ESA_GIPL_SPLICING.md](ESA_GIPL_SPLICING.md)): the GIPL
-  change used for "2051–2080" is really the change from 2006–2015 to 2031–2060. The fix is simple and removes the
-  air-temperature bridge: ESA 2014–2023 + (GIPL "2071–2100" − GIPL "2034–2043"). Both GIPL periods are then the same
-  climate years as their labels minus 20, and the reference matches ESA's decade. For 2081–2100, use GIPL "2101–2120".
-- **[GIPL_ISSUE_2.md](GIPL_ISSUE_2.md) and [GIPL_TRUST.pdf](GIPL_TRUST.pdf):** the cold-bias sections, the borehole and
-  CUSP results, the shared-weather and scenario-response sections, and the 0 °C scheme comparison (it used
-  ESA-adjusted values built with the old bridge).
-- **[CORRELATION.md](CORRELATION.md):** the projected comparisons of air warming with GIPL warming paired eras 20 years
-  apart.
+All GIPL-based results were recomputed with GIPL read on climate years (file year − 20), and the documents revised
+(2026-10-26):
+- **The delta change method and PTI V2** ([ESA_GIPL_SPLICING.md](ESA_GIPL_SPLICING.md), [PTI.md](PTI.md),
+  [PTI_COMPOSITE.md](PTI_COMPOSITE.md)): GIPL and ESA now share the reference decade 2014–2023, so the
+  air-temperature bridge is gone: future = ESA 2014–2023 + (GIPL era − GIPL 2014–2023), read from the files labelled
+  20 years later. On matched years, GIPL's ground surface warms about 20 % less than the air. V1 and V2 now give
+  different classes for up to 57 % of cells (RCP 4.5, 2051–2080), where they used to agree for 80–100 %.
+- **[GIPL_ISSUE_2.md](GIPL_ISSUE_2.md)**: rewritten. GIPL's levels below the surface are close to ESA and the
+  boreholes on average; its 0 °C line at 1 m is close to the best split at the CUSP sites; change only (PTI V2) is
+  still recommended for the index.
+- **[CORRELATION.md](CORRELATION.md)**: GIPL's projected warming now follows the air's pattern closely (ρ 0.74–0.91);
+  only its size differs.
+- **[GIPL_TRUST.pdf](GIPL_TRUST.pdf)**: rewritten with the updated analysis.
+- **[PTI_EXPERIMENTS.md](PTI_EXPERIMENTS.md)** (archive): GIPL-based variants and numbers updated.
+- **Not revised:** [GIPL_ISSUE_1.md](GIPL_ISSUE_1.md): the stuck cells are stuck in every year, so its findings stand;
+  its figures and dates label GIPL by file year.
 
 ## Caveats
 
@@ -169,8 +177,8 @@ Values from the source cell under each GIPL cell centre; annual value = mean of 
 Pearson correlation of first differences, median over cells. Fine-scale test: GIPL surface and air (both 2036–2065 means,
 5-model average) minus their local mean over 3 / 5 / 9 km windows; partial correlation of GIPL with each product given
 the other. Block test: median |difference| of adjacent GIPL cells, grouped by whether they share a 2 km parent cell, or
-whether their 771 m cells are adjacent or one apart. Bias: GIPL "2026–2035" − ESA 2006–2015 (old: GIPL 2026–2035 − ESA
-2014–2023 − model air warming 2014–2023 → 2026–2035). Boreholes and CUSP as in [GIPL_ISSUE_2.md](GIPL_ISSUE_2.md), with
+whether their 771 m cells are adjacent or one apart. Bias: GIPL climate 2004–2015 (files 2024–2035) − ESA 2004–2015
+(old: GIPL 2026–2035 − ESA 2014–2023 − model air warming 2014–2023 → 2026–2035). Boreholes and CUSP as in [GIPL_ISSUE_2.md](GIPL_ISSUE_2.md), with
 each observation year y compared with GIPL year y + 20 (CUSP: visit year ± 2, GIPL "2024" and later only). Scripts:
 `scripts/02_tests/t7_gipl_forcing.py` (stages prep, mask, pairs, highpass, yty, lagscan, season, levels, yearmap,
 bias20, offsets, reinterp, sites20), `scripts/03_report/gipl_forcing_figures.py`; `slurm/19_t7_prep.slurm`,

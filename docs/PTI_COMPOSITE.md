@@ -18,12 +18,13 @@ projected warming, a cell scores higher when more of it is flat or shaded, or co
 - **Why only these inputs:** most gridded permafrost and climate layers measure the same thing (see section 1), so
   adding them would count the same information several times. Terrain and land cover are the exceptions, which is
   why they get their own terms.
-- **Temperature drives the score:** today's temperature and projected warming make up 73–83 % of the statewide
+- **Temperature drives the score:** today's temperature and projected warming make up 71–83 % of the statewide
   mean score. Terrain and land cover can move a cell by at most 0.2, enough to cross one class. Most cells are
   largely flat or shaded (median 83 %), so the terrain term raises nearly every score by a similar amount.
-- **Through 2050, mostly Moderate** (statewide 77–80 % of cells), with Low in the colder half of the Arctic. By
-  2081–2100 under RCP 8.5, 60–67 % of cells are High.
-- **Scores bunch in the middle:** Moderate holds 63–80 % of cells statewide in every era and scenario except
+- **Through 2050, mostly Moderate** (statewide 73–80 % of cells), with Low in the colder half of the Arctic. By
+  2081–2100 under RCP 8.5, 50–67 % of cells are High (V2 lower, because GIPL's ground surface warms less than the air;
+  [PTI.md](PTI.md), section 2).
+- **Scores bunch in the middle:** Moderate holds 63–85 % of cells statewide in every era and scenario except
   2081–2100 under RCP 8.5, and Low appears almost only in the Arctic. Averaging four terms pulls scores toward the
   middle.
 - **Permafrost fraction (PFR) is the gate, not a term:** only cells where ESA shows permafrost get a score (section
@@ -67,8 +68,8 @@ Section 6 has example data sentences for three test areas.
 - **Projected warming:** how much the ground surface warms from today to an era (2026–2050, 2051–2080, 2081–2100),
   under RCP 4.5 (moderate) or RCP 8.5 (high), using the 5-climate-model average. Exactly as in PTI.md.
 - **V1 / V2:** as in PTI.md. V1 takes projected warming from air temperature; V2 from GIPL's ground surface
-  (delta change method, [ESA_GIPL_SPLICING.md](ESA_GIPL_SPLICING.md)), with air warming where GIPL has no usable
-  values (flagged).
+  (delta change method, [ESA_GIPL_SPLICING.md](ESA_GIPL_SPLICING.md); GIPL read on the climate years it carries,
+  [GIPL_ISSUE_3.md](GIPL_ISSUE_3.md)), with air warming where GIPL has no usable values (flagged).
 - **% flat or shaded:** share of the cell's land that is flat or on a shaded (mostly north-facing) slope, from the
   32 m terrain insolation index (TII of +0.1 or less, i.e. receiving no more sun than level ground). Only sunlit
   slopes are left out. These are the same pixels that the TII thaw transform (ArcticDEM-PISR) scores as 0.
@@ -95,10 +96,10 @@ used.
 | ESA active-layer thickness | ρ 0.87 with ESA surface temperature | No: same information |
 | ESA permafrost fraction (PFR) | ρ −0.86 with ESA surface temperature | **Gate only** (see below) |
 | Air temperature, historical (CRU TS 4.08, 2 km) | ρ 0.82 with ESA surface temperature | No: same information |
-| Air temperature, projected (SNAP 2 km), *level* | ρ 0.95 with GIPL surface temperature | No: same information |
-| **Air temperature, projected, *warming*** | ρ −0.64 with air temperature level (colder places warm more) | **Yes: "warming" term, V1** |
-| GIPL ground surface temperature, *level* | ρ 0.95 with air temperature | No: same information, and ~1.2 °C colder than ESA |
-| **GIPL ground surface temperature, *warming*** | weakest overlap of all layers (VIF 1.2) | **Yes: "warming" term, V2** |
+| Air temperature, projected (SNAP 2 km), *level* | ρ 0.96 with GIPL surface temperature | No: same information |
+| **Air temperature, projected, *warming*** | ρ −0.70 with air temperature level (colder places warm more) | **Yes: "warming" term, V1** |
+| GIPL ground surface temperature, *level* | ρ 0.96 with air temperature | No: same information, and differs from ESA by up to about 2 °C cell by cell |
+| **GIPL ground surface temperature, *warming*** | ρ 0.91 with air-temperature warming (VIF 6.5) | **Yes: "warming" term, V2 (in place of air warming)** |
 | GIPL 0.5 m and 1 m temperature, permafrost top, talik | stuck cells ([GIPL_ISSUE_1.md](GIPL_ISSUE_1.md)) | No: unusable in parts of the Interior |
 | **Terrain (32 m terrain insolation index): % flat or shaded** | ρ −0.11 with ESA surface temperature; 0.30 with warming | **Yes: "% flat or shaded" term** |
 | **Land cover (NLCD 2016, 30 m): % favorable cover** | ρ −0.26 with ESA surface temperature; 0.54 with warming | **Yes: "% favorable cover" term** |
@@ -137,14 +138,14 @@ capped.
 | Input | Range in permafrost cells | Middle of the range | Bounds used | Cells capped |
 |---|---|---|---|---|
 | Today's surface temperature | −13.8 to +4.4 °C | 5th–95th percentile: −6.7 to +1.8 °C | **−6 to +2 °C** | 9 % at 0 (coldest Arctic), 3 % at 1 |
-| Projected warming (all eras, scenarios, V1 and V2) | +0.8 to +7.8 °C | 98 % of values below +6.1 °C | **0 to 6 °C** | 2.5 % at 1, all in 2081–2100 |
+| Projected warming (all eras, scenarios, V1 and V2) | +0.3 to +7.8 °C | 98 % of values below +6.1 °C | **0 to 6 °C** | 2.3 % at 1, all in 2081–2100 |
 
 - **Today:** the bounds trim only the extremes, so a few very cold or very warm cells do not compress everyone
   else into a narrow band. They also make physical sense: −6 °C is cold, stable permafrost, and above about +2 °C
   ESA shows almost no permafrost.
 - **Warming:** the upper bound is the top of the data. The lower bound is 0 rather than the smallest value
-  (+0.8 °C), so that 0 means "no warming". Capping happens only late in the century: in 2081–2100 under RCP 8.5,
-  24 % of cells (V1) and 6 % (V2) warm by more than 6 °C and get the full 1.
+  (+0.3 °C), so that 0 means "no warming". Capping happens only late in the century: in 2081–2100 under RCP 8.5,
+  24 % of cells (V1) and 4 % (V2) warm by more than 6 °C and get the full 1.
 
 ![How each input is scaled to 0–1](figures/ptic_scaling.png)
 
@@ -169,9 +170,10 @@ version, scenario and era, the others do not.*
 
 PTI-C uses the same two warming sources as PTI.md: **V1** air-temperature warming, **V2** GIPL ground-surface
 warming with air warming where GIPL has no usable values (about 1 in 5 Interior cells, flagged). Why there are two,
-and why GIPL warms differently from the air, is explained in [PTI.md](PTI.md) (sections 2 and 4). In PTI-C the
-warming term carries 40 % of the weight, so the two versions differ less than in the table: a warming difference of
-0.5 °C moves the score by about 0.03.
+and why GIPL's ground surface warms less than the air (about 20 % less), is explained in [PTI.md](PTI.md)
+(sections 2 and 4). In PTI-C the warming term carries 40 % of the weight, so a warming difference of 0.5 °C moves the
+score by about 0.03. V2's median scores are 0.02–0.07 lower than V1's statewide, and from 2051 on V2 puts about half
+as many cells in High.
 
 ## 4. Results, area by area
 
@@ -188,19 +190,19 @@ grey. Each table gives the median score and the share of the area's permafrost c
 
 | Era, scenario | Score, median (V1 / V2) | Low | Moderate | High |
 |---|---|---|---|---|
-| 2026–2050, RCP 4.5 | 0.49 / 0.49 | 19 / 22 % | 80 / 77 % | 1 / 1 % |
-| 2026–2050, RCP 8.5 | 0.49 / 0.50 | 20 / 20 % | 80 / 79 % | 1 / 2 % |
-| 2051–2080, RCP 4.5 | 0.55 / 0.57 | 7 / 5 % | 80 / 76 % | 13 / 19 % |
-| 2051–2080, RCP 8.5 | 0.62 / 0.61 | 2 / 3 % | 63 / 66 % | 35 / 31 % |
-| 2081–2100, RCP 4.5 | 0.58 / 0.62 | 4 / 1 % | 72 / 64 % | 24 / 35 % |
-| 2081–2100, RCP 8.5 | 0.74 / 0.71 | 0 / 0 % | 33 / 40 % | 67 / 60 % |
+| 2026–2050, RCP 4.5 | 0.49 / 0.47 | 19 / 23 % | 80 / 76 % | 1 / 0 % |
+| 2026–2050, RCP 8.5 | 0.49 / 0.46 | 20 / 27 % | 80 / 73 % | 1 / 0 % |
+| 2051–2080, RCP 4.5 | 0.55 / 0.52 | 7 / 10 % | 80 / 85 % | 13 / 5 % |
+| 2051–2080, RCP 8.5 | 0.62 / 0.57 | 2 / 3 % | 63 / 78 % | 35 / 19 % |
+| 2081–2100, RCP 4.5 | 0.58 / 0.55 | 4 / 5 % | 72 / 82 % | 24 / 13 % |
+| 2081–2100, RCP 8.5 | 0.74 / 0.67 | 0 / 0 % | 33 / 50 % | 67 / 50 % |
 
-- **Through 2050, mostly Moderate (77–80 %) and Low (19–22 %).** Low covers the colder half of the Arctic; High
-  2 % or less.
-- **By 2051–2080, High grows to 13–19 % (RCP 4.5) or about a third (31–35 %, RCP 8.5) of cells.**
-- **By 2081–2100, High reaches 24–35 % (RCP 4.5) and 60–67 % (RCP 8.5).**
-- **V1 vs V2:** median scores differ by 0.04 or less; class shares differ most in 2081–2100 (High under RCP 4.5:
-  24 vs 35 %, V2 warms more; under RCP 8.5: 67 vs 60 %, V1 warms more).
+- **Through 2050, mostly Moderate (73–80 %) and Low (19–27 %).** Low covers the colder half of the Arctic; High
+  1 % or less.
+- **By 2051–2080, High grows to 5–13 % (RCP 4.5) or 19–35 % (RCP 8.5) of cells.**
+- **By 2081–2100, High reaches 13–24 % (RCP 4.5) and 50–67 % (RCP 8.5).**
+- **V1 vs V2:** V2's median scores are 0.02–0.07 lower, because GIPL's ground surface warms less than the air. From
+  2051 on, V2 puts about half as many cells in High (for example RCP 8.5, 2051–2080: 35 vs 19 %).
 
 ### 4.2 Arctic
 
@@ -210,21 +212,22 @@ grey. Each table gives the median score and the share of the area's permafrost c
 
 | Era, scenario | Score, median (V1 / V2) | Low | Moderate | High |
 |---|---|---|---|---|
-| 2026–2050, RCP 4.5 | 0.35 / 0.33 | 44 / 50 % | 56 / 50 % | 0 / 0 % |
-| 2026–2050, RCP 8.5 | 0.34 / 0.34 | 45 / 45 % | 55 / 54 % | 0 / 0 % |
-| 2051–2080, RCP 4.5 | 0.42 / 0.43 | 15 / 11 % | 81 / 83 % | 4 / 5 % |
-| 2051–2080, RCP 8.5 | 0.51 / 0.46 | 4 / 6 % | 84 / 85 % | 13 / 9 % |
-| 2081–2100, RCP 4.5 | 0.45 / 0.49 | 10 / 3 % | 82 / 86 % | 8 / 11 % |
-| 2081–2100, RCP 8.5 | 0.63 / 0.61 | 0 / 0 % | 63 / 73 % | 37 / 27 % |
+| 2026–2050, RCP 4.5 | 0.35 / 0.33 | 44 / 52 % | 56 / 48 % | 0 / 0 % |
+| 2026–2050, RCP 8.5 | 0.34 / 0.31 | 45 / 59 % | 55 / 41 % | 0 / 0 % |
+| 2051–2080, RCP 4.5 | 0.42 / 0.39 | 15 / 22 % | 81 / 77 % | 4 / 1 % |
+| 2051–2080, RCP 8.5 | 0.51 / 0.46 | 4 / 6 % | 84 / 88 % | 13 / 6 % |
+| 2081–2100, RCP 4.5 | 0.45 / 0.43 | 10 / 11 % | 82 / 85 % | 8 / 4 % |
+| 2081–2100, RCP 8.5 | 0.63 / 0.59 | 0 / 0 % | 63 / 78 % | 37 / 22 % |
 
-- **Through 2050, Low and Moderate about evenly** (Low 44–50 %). The cold surface keeps the "today" term small
+- **Through 2050, Low and Moderate about evenly** (Low 44–59 %). The cold surface keeps the "today" term small
   (about 0.11 of the score).
-- **2051–2100, mostly Moderate** (81–86 %), except under RCP 8.5 in 2081–2100.
+- **2051–2100, mostly Moderate** (77–88 %), except under RCP 8.5 in 2081–2100.
 - **Terrain and land cover matter most here:** the Arctic has the most flat or shaded ground and favorable cover,
   and the two terms add about 0.15 to its scores, more than today's temperature does.
-- **2081–2100, RCP 8.5:** warming of +5.5 to +6.1 °C (median) lifts 27–37 % of the cells to High; the rest stay
+- **2081–2100, RCP 8.5:** warming of +5.1 to +6.1 °C (median) lifts 22–37 % of the cells to High; the rest stay
   Moderate.
-- **V1 vs V2:** largest difference under RCP 8.5, 2051–2080 (V1 warms more: +4.0 vs +3.4 °C).
+- **V1 vs V2:** largest difference under RCP 8.5 (V1 warms more: +4.0 vs +3.3 °C in 2051–2080, +6.1 vs +5.1 °C in
+  2081–2100).
 
 ### 4.3 Interior
 
@@ -235,16 +238,16 @@ cells; the rest use air warming and are flagged.
 
 | Era, scenario | Score, median (V1 / V2) | Low | Moderate | High |
 |---|---|---|---|---|
-| 2026–2050, RCP 4.5 | 0.53 / 0.54 | 4 / 4 % | 94 / 94 % | 2 / 2 % |
-| 2026–2050, RCP 8.5 | 0.53 / 0.54 | 4 / 4 % | 95 / 94 % | 1 / 3 % |
-| 2051–2080, RCP 4.5 | 0.59 / 0.62 | 2 / 1 % | 83 / 74 % | 15 / 25 % |
-| 2051–2080, RCP 8.5 | 0.65 / 0.65 | 0 / 1 % | 56 / 57 % | 43 / 42 % |
-| 2081–2100, RCP 4.5 | 0.62 / 0.66 | 1 / 0 % | 72 / 55 % | 27 / 45 % |
-| 2081–2100, RCP 8.5 | 0.77 / 0.76 | 0 / 0 % | 16 / 21 % | 84 / 78 % |
+| 2026–2050, RCP 4.5 | 0.53 / 0.52 | 4 / 5 % | 94 / 94 % | 2 / 1 % |
+| 2026–2050, RCP 8.5 | 0.53 / 0.50 | 4 / 6 % | 95 / 94 % | 1 / 0 % |
+| 2051–2080, RCP 4.5 | 0.59 / 0.56 | 2 / 3 % | 83 / 90 % | 15 / 8 % |
+| 2051–2080, RCP 8.5 | 0.65 / 0.61 | 0 / 1 % | 56 / 73 % | 43 / 26 % |
+| 2081–2100, RCP 4.5 | 0.62 / 0.59 | 1 / 2 % | 72 / 81 % | 27 / 18 % |
+| 2081–2100, RCP 8.5 | 0.77 / 0.71 | 0 / 0 % | 16 / 34 % | 84 / 65 % |
 
 - **Through 2050, almost all Moderate (94–95 %):** a warm surface today, but little warming yet.
-- **2051–2080:** High for 15–25 % of cells under RCP 4.5 and 42–43 % under RCP 8.5.
-- **2081–2100:** High for 27–45 % under RCP 4.5 and 78–84 % under RCP 8.5.
+- **2051–2080:** High for 8–15 % of cells under RCP 4.5 and 26–43 % under RCP 8.5 (V2 lower).
+- **2081–2100:** High for 18–27 % under RCP 4.5 and 65–84 % under RCP 8.5.
 - Nearly as much flat or shaded ground as the Arctic, but much less favorable cover, so the two terms add about 0.11.
 
 ### 4.4 West
@@ -255,18 +258,19 @@ cells; the rest use air warming and are flagged.
 
 | Era, scenario | Score, median (V1 / V2) | Low | Moderate | High |
 |---|---|---|---|---|
-| 2026–2050, RCP 4.5 | 0.58 / 0.57 | 0 / 0 % | 99 / 99 % | 1 / 1 % |
-| 2026–2050, RCP 8.5 | 0.57 / 0.59 | 0 / 0 % | 100 / 98 % | 0 / 2 % |
-| 2051–2080, RCP 4.5 | 0.65 / 0.66 | 0 / 0 % | 67 / 59 % | 33 / 41 % |
-| 2051–2080, RCP 8.5 | 0.71 / 0.69 | 0 / 0 % | 18 / 31 % | 82 / 69 % |
-| 2081–2100, RCP 4.5 | 0.68 / 0.70 | 0 / 0 % | 36 / 23 % | 64 / 77 % |
-| 2081–2100, RCP 8.5 | 0.85 / 0.79 | 0 / 0 % | 0 / 2 % | 100 / 98 % |
+| 2026–2050, RCP 4.5 | 0.58 / 0.54 | 0 / 0 % | 99 / 100 % | 1 / 0 % |
+| 2026–2050, RCP 8.5 | 0.57 / 0.53 | 0 / 0 % | 100 / 100 % | 0 / 0 % |
+| 2051–2080, RCP 4.5 | 0.65 / 0.60 | 0 / 0 % | 67 / 94 % | 33 / 6 % |
+| 2051–2080, RCP 8.5 | 0.71 / 0.65 | 0 / 0 % | 18 / 64 % | 82 / 36 % |
+| 2081–2100, RCP 4.5 | 0.68 / 0.63 | 0 / 0 % | 36 / 75 % | 64 / 25 % |
+| 2081–2100, RCP 8.5 | 0.85 / 0.75 | 0 / 0 % | 0 / 8 % | 100 / 92 % |
 
 - **The highest scores of any region:** a warm surface today combined with plenty of flat or shaded ground and
   favorable cover.
-- **Through 2050, almost all Moderate** (98–100 %).
-- **From 2051 on, High grows fastest here:** 33–41 % (RCP 4.5) and 69–82 % (RCP 8.5) by 2051–2080; 64–77 % and
-  98–100 % by 2081–2100. Under RCP 8.5, 2051–2080, V1 warms more, so more of its cells cross the 2/3 break.
+- **Through 2050, almost all Moderate** (99–100 %).
+- **From 2051 on, High grows fastest here under V1:** 33 % (RCP 4.5) and 82 % (RCP 8.5) by 2051–2080; 64 % and 100 %
+  by 2081–2100. GIPL's surface warms 0.8–1.5 °C less than the air here, so fewer V2 cells cross the 2/3 break: 6 % and
+  36 % by 2051–2080, 25 % and 92 % by 2081–2100.
 
 ### 4.5 South
 
@@ -276,16 +280,16 @@ cells; the rest use air warming and are flagged.
 
 | Era, scenario | Score, median (V1 / V2) | Low | Moderate | High |
 |---|---|---|---|---|
-| 2026–2050, RCP 4.5 | 0.48 / 0.48 | 2 / 2 % | 97 / 97 % | 2 / 2 % |
-| 2026–2050, RCP 8.5 | 0.47 / 0.49 | 2 / 1 % | 97 / 97 % | 1 / 2 % |
-| 2051–2080, RCP 4.5 | 0.53 / 0.54 | 0 / 0 % | 92 / 89 % | 8 / 11 % |
-| 2051–2080, RCP 8.5 | 0.58 / 0.57 | 0 / 0 % | 83 / 84 % | 17 / 16 % |
-| 2081–2100, RCP 4.5 | 0.56 / 0.58 | 0 / 0 % | 87 / 81 % | 12 / 18 % |
-| 2081–2100, RCP 8.5 | 0.69 / 0.65 | 0 / 0 % | 35 / 57 % | 65 / 43 % |
+| 2026–2050, RCP 4.5 | 0.48 / 0.45 | 2 / 3 % | 97 / 96 % | 2 / 1 % |
+| 2026–2050, RCP 8.5 | 0.47 / 0.43 | 2 / 5 % | 97 / 95 % | 1 / 0 % |
+| 2051–2080, RCP 4.5 | 0.53 / 0.49 | 0 / 1 % | 92 / 95 % | 8 / 4 % |
+| 2051–2080, RCP 8.5 | 0.58 / 0.52 | 0 / 1 % | 83 / 92 % | 17 / 8 % |
+| 2081–2100, RCP 4.5 | 0.56 / 0.52 | 0 / 1 % | 87 / 92 % | 12 / 7 % |
+| 2081–2100, RCP 8.5 | 0.69 / 0.60 | 0 / 0 % | 35 / 77 % | 65 / 23 % |
 
 - **Mostly Moderate until late century:** mountainous ground with sunlit slopes (the least flat or shaded ground of
   any region) and little favorable cover; the two terms add about 0.08, the least of any region.
-- **2081–2100, RCP 8.5:** High for 43–65 % of cells; V1 warms more (+4.6 vs +4.0 °C).
+- **2081–2100, RCP 8.5:** High for 23–65 % of cells; V1 warms much more (+4.6 vs +3.1 °C).
 
 ## 5. What drives the score
 
@@ -298,7 +302,7 @@ cells; the rest use air warming and are flagged.
 *Mean score per area, split into the contribution of each weighted input (V2, RCP 8.5). Dotted lines are the class
 breaks.*
 
-- **Today's temperature and warming make up most of the score** (statewide 73–83 %). Today's temperature sets
+- **Today's temperature and warming make up most of the score** (statewide 71–83 %). Today's temperature sets
   the starting point; warming is what changes between eras and scenarios.
 - **Terrain and land cover add about 0.13 statewide**, more in the Arctic and West (0.14–0.15) and least in the
   South (0.08).
@@ -321,9 +325,9 @@ an ArcticDEM hillshade (lit from the south, so north-facing slopes are in shadow
 Black square: the 10 × 10 km test area; small outlined cell: the centre cell described by the data sentence
 below.*
 
-> **Brooks Range test area:** PTI-C: ![Moderate](figures/badges/pti_moderate.svg) 0.47 (2051–2080, RCP 8.5):
-> surface cool today (−3.9 °C), projected to warm +3.4 °C; 82 % of the cell flat or shaded; 51 %
-> permafrost-favorable cover. Permafrost extent: continuous (PFR 100 %). *Score = 0.11 (today) + 0.23 (warming) +
+> **Brooks Range test area:** PTI-C: ![Moderate](figures/badges/pti_moderate.svg) 0.44 (2051–2080, RCP 8.5):
+> surface cool today (−3.9 °C), projected to warm +3.0 °C; 82 % of the cell flat or shaded; 51 %
+> permafrost-favorable cover. Permafrost extent: continuous (PFR 100 %). *Score = 0.11 (today) + 0.20 (warming) +
 > 0.08 (flat or shaded) + 0.05 (cover).*
 
 > **Fairbanks test area:** PTI-C: ![High](figures/badges/pti_high.svg) 0.69 (2051–2080, RCP 8.5): surface above
@@ -331,9 +335,9 @@ below.*
 > cover. Permafrost extent: sparse (PFR 14 %). Note: GIPL unavailable here; air-temperature warming used instead.
 > *Score = 0.38 + 0.21 + 0.03 + 0.06.*
 
-> **Denali test area:** PTI-C: ![Moderate](figures/badges/pti_moderate.svg) 0.58 (2051–2080, RCP 8.5): surface
-> above 0 °C today (+0.2 °C), projected to warm +2.8 °C; 88 % of the cell flat or shaded; 0 % permafrost-favorable
-> cover. Permafrost extent: extensive (PFR 71 %). *Score = 0.31 + 0.18 + 0.09 + 0.00.*
+> **Denali test area:** PTI-C: ![Moderate](figures/badges/pti_moderate.svg) 0.52 (2051–2080, RCP 8.5): surface
+> above 0 °C today (+0.2 °C), projected to warm +1.9 °C; 88 % of the cell flat or shaded; 0 % permafrost-favorable
+> cover. Permafrost extent: extensive (PFR 71 %). *Score = 0.31 + 0.13 + 0.09 + 0.00 (rounded).*
 
 ## Open questions
 
@@ -341,7 +345,7 @@ below.*
 2. **Scaling bounds:** today −6 to +2 °C, warming 0 to 6 °C, set from the range of the data in the permafrost cells
    (section 2). Moving a bound changes every score. A higher warming bound would stop a quarter of V1 cells being
    capped in 2081–2100 under RCP 8.5, but would lower every other score.
-3. **Class breaks:** equal thirds (1/3, 2/3) put most cells in Moderate until late century (statewide 63–80 %).
+3. **Class breaks:** equal thirds (1/3, 2/3) put most cells in Moderate until late century (statewide 63–85 %).
    Keep them, or set breaks that spread the classes more evenly?
 4. **favorable vegetation:** which NLCD classes count (shrub/scrub and deciduous forest are left out), and whether
    they should raise the score at all (insulating cover protects permafrost, but its ground is often ice-rich and

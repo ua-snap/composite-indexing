@@ -23,6 +23,18 @@ GIPL_NX, GIPL_NY = 2471, 1941
 TAS_X0, TAS_Y0, TAS_RES = -2_173_223.206087799, 176_412.93264414696, 2000.0
 TAS_NX, TAS_NY = 3218, 1186
 
+# GIPL 2.0 year labels are 20 years late (docs/GIPL_ISSUE_3.md): the file labelled year Y carries the climate of year
+# Y - shift. Files 2021-2035 = observed CRU 2001-2015 (2021-2023 = start-up), 2036-2120 = CMIP5 2016-2100. GFDL-CM3
+# RCP 8.5 is one year further along (its 2120 file repeats 2119). NCAR-CCSM4: forcing unidentified, 20 assumed.
+GIPL_SHIFT = {("GFDL-CM3", "rcp85"): 19}
+GIPL_START_OK = 2004  # first climate year after GIPL's start-up period
+
+
+def gipl_file_year(year, run="5ModelAvg", scen="rcp45"):
+    """GIPL file year that carries the climate of `year`."""
+    return year + GIPL_SHIFT.get((run, scen), 20)
+
+
 # TII sample areas from ArcticDEM-PISR (label, lon, lat); 60 km boxes, north to south
 REGIONS = [
     ("brooks", "Brooks Range", -150.6, 68.1),

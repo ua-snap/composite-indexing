@@ -3,6 +3,9 @@
 **Status:** archived. These are the index designs tested before the two-way table was chosen. The recommended design
 is in [PTI.md](PTI.md). This page records what was tried and why it was set aside.
 
+*Updated 2026-10-26: the GIPL-based variants (G1–G3) were recomputed with GIPL read on the climate years it carries
+(file year − 20, [GIPL_ISSUE_3.md](GIPL_ISSUE_3.md)); their numbers and the maps below reflect that.*
+
 **Short answer:**
 - A single fixed scale of projected ground surface temperature was tested first, in seven variants (with and without
   GIPL, with and without extra inputs).
@@ -10,7 +13,7 @@ is in [PTI.md](PTI.md). This page records what was tried and why it was set asid
   look at risk even when little changes. This led to the two-way table in PTI.md.
 - Folding permafrost extent, terrain or land cover into the number moved most cells to other classes without adding
   much information, so those went into the data sentence.
-- With or without GIPL, the single-scale maps mostly agreed (87–95 % same class).
+- With or without GIPL, the single-scale maps mostly agreed (79–87 % same class).
 
 ---
 
@@ -55,7 +58,7 @@ permafrost is scarce today as the most at risk, which does not follow.
 | **N1** Today only | ESA 2014–2023 (no future) | no | 100 % | 100 % |
 | **N2** ESA + air warming | ESA + air-temperature change (delta change method) | no | 100 % | 100 % |
 | **N3** Weighted blend | 0.5 × ground temperature + 0.25 × air temperature + 0.25 × (1 − PFR), each on a fixed 0–1 scale | no | 100 % | 100 % |
-| **G1** ESA + GIPL warming | ESA + bridge + GIPL surface change (delta change method) | yes | 91 % | 81 % |
+| **G1** ESA + GIPL warming | ESA + GIPL surface change from 2014–2023 (delta change method) | yes | 91 % | 81 % |
 | **G2** G1, gaps filled | G1 where GIPL is available, otherwise N2 with a flag | yes | 100 % | 100 % |
 | **G3** GIPL as delivered | GIPL's own surface temperature | yes | 91 % | 81 % |
 | **X1** Context inside the index | 0.8 × N2 + 0.1 × terrain + 0.1 × (1 − black spruce / wetland share) | no | 100 % | 100 % |
@@ -80,7 +83,7 @@ Class maps for every variant (rows) and era (columns), one figure per scenario. 
 | N1 today | 25 % | 9 % | 18 % | 38 % | 11 % |
 | N2, RCP 4.5 | 5 % | 14 % | 13 % | 8 % | **60 %** |
 | N2, RCP 8.5 | 0 % | 7 % | 18 % | 8 % | **67 %** |
-| G1, RCP 8.5 | 2 % | 11 % | 19 % | 7 % | **62 %** |
+| G1, RCP 8.5 | 1 % | 12 % | 20 % | 9 % | **58 %** |
 | N3, RCP 8.5 | 1 % | 20 % | 20 % | 48 % | 10 % |
 | X1, RCP 8.5 | 0 % | 7 % | 20 % | 65 % | 7 % |
 
@@ -88,9 +91,9 @@ Class maps for every variant (rows) and era (columns), one figure per scenario. 
 
 | Variant | Same class as N2 | Spearman ρ with N2 |
 |---|---|---|
-| G1 ESA + GIPL warming | 87–95 % | 0.93–0.99 |
-| G2 G1, gaps filled | 88–95 % | 0.93–0.99 |
-| G3 GIPL as delivered | 39–73 % | 0.80–0.86 |
+| G1 ESA + GIPL warming | 79–87 % | 0.91–0.98 |
+| G2 G1, gaps filled | 81–88 % | 0.91–0.98 |
+| G3 GIPL as delivered | 61–83 % | 0.81–0.89 |
 | N3 weighted blend | 16–35 % | 0.75–0.95 |
 | X1 context inside the index | 25–49 % | 0.62–0.89 |
 
@@ -102,9 +105,10 @@ What this showed:
 - **The future pushes most cells into the top class.** By 2051–2080 under RCP 8.5, 67 % of permafrost cells are Very
   high in N2 (median projected surface temperature in that class: +4 °C); under RCP 4.5, 60 %. Only the Arctic keeps a
   spread of classes.
-- **GIPL changes little at the class level** on this scale: G1 and N2 put 87–95 % of cells in the same class.
-- **G3 (GIPL as delivered) looks less susceptible** only because GIPL runs about 1.2 °C colder than ESA
-  ([ESA_GIPL_SPLICING.md](ESA_GIPL_SPLICING.md)); it is not new information.
+- **GIPL changes little at the class level** on this scale: G1 and N2 put 79–87 % of cells in the same class
+  (GIPL's surface warms somewhat less than the air, [PTI.md](PTI.md) section 2).
+- **G3 (GIPL as delivered) differs more** (61–83 % same class), mainly because GIPL's levels differ from ESA's cell by
+  cell ([ESA_GIPL_SPLICING.md](ESA_GIPL_SPLICING.md)); it is not new information.
 - **N3 and X1 change classes for most cells** (N3: 65–84 % of cells; X1: 51–75 %). Diluting the temperature with other
   inputs pulls cells out of the top class, and a class no longer corresponds to a temperature. Because ground
   temperature, air temperature and permafrost fraction largely carry the same information
@@ -127,8 +131,8 @@ What this showed:
 - Later, the Interior, West and South end up High or Very high either way. The Arctic differs most: the table puts
   fewer of its cells in the top two classes in 2051–2080 (29 % vs 40 %) and more by 2081–2100 (100 % vs 84 %), when
   its "over 5 °C" column applies (see the open questions in PTI.md).
-- GIPL vs air warming matters more with the table (same class for 58–100 % of the cells where GIPL is used, against
-  87–95 % on the single scale), because a half-degree difference in warming can move a cell across a warming band.
+- GIPL vs air warming matters more with the table (same class for 43–100 % of the cells where GIPL is used, against
+  79–87 % on the single scale), because a half-degree difference in warming can move a cell across a warming band.
 
 ## Caveats
 

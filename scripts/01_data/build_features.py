@@ -5,10 +5,10 @@ State (historical):
   esa_gst_recent (2014-2023 mean, for the T3 splice), maat_hist (CRU TS 4.08, 2000-2020),
   TII: tii_mean, tii_std, thaw_mean, sun_share, shade_share, water_frac (aggregate_tii.py),
   NLCD 2016 class-group fractions: lc_forest, lc_shrub, lc_herb_moss, lc_wetland, lc_barren_other, lc_water.
-Projected (5ModelAvg / 5modelAvg; per RCP 4.5 / 8.5 and period base 2026-2035, 2026-2050, 2051-2080, 2081-2100):
+Projected (5ModelAvg / 5modelAvg; per RCP 4.5 / 8.5 and period base 2014-2023, 2026-2050, 2051-2080, 2081-2100):
   maat_<rcp>_<period>, gipl_sfc_<rcp>_<period> (GIPL magtsurface, MASKED to class 2, D17), and changes vs the base
-  dmaat_<rcp>_<period>, dgipl_sfc_<rcp>_<period> for 2051-2080 and 2081-2100 only. Era 1 starts in 2026 (GIPL spin-up
-  2021-2025 excluded) and contains the base, so it has levels but no change.
+  dmaat_<rcp>_<period>, dgipl_sfc_<rcp>_<period>. Periods are CLIMATE years: GIPL is read from the files labelled
+  20 years later (GIPL_ISSUE_3.md; base 2014-2023 = GIPL files 2034-2043, the same decade as ESA's esa_gst_recent).
 Masks: pfr_pos (ESA PFR 2023 > 0; the index gate, D12), gipl_class (statewide_frozen_class.tif).
 ESA is sampled at cell centres (nearest 0.01 deg pixel); MAAT = 2 km parent cell.
 Output: <data>/features/features_1km.nc
@@ -30,8 +30,8 @@ from t1_maat_vs_magt import cell_centres, maat_mean, to_gipl
 OUT = C.DATA / "features"
 ESA_DIRS = [C.ESA_AK, C.DATA / "esa/alaska_2021_2023"]
 SCENS = ["rcp45", "rcp85"]
-PERIODS = {"base": (2026, 2035), "2026_2050": (2026, 2050), "2051_2080": (2051, 2080), "2081_2100": (2081, 2100)}
-CHANGE_PERIODS = ["2051_2080", "2081_2100"]  # periods that do not overlap the base
+PERIODS = {"base": (2014, 2023), "2026_2050": (2026, 2050), "2051_2080": (2051, 2080), "2081_2100": (2081, 2100)}
+CHANGE_PERIODS = ["2026_2050", "2051_2080", "2081_2100"]  # periods that do not overlap the base
 LC_GROUPS = {"lc_forest": [41, 42, 43], "lc_shrub": [51, 52], "lc_herb_moss": [71, 72, 74], "lc_wetland": [90, 95],
              "lc_barren_other": [12, 21, 22, 23, 24, 31, 81, 82], "lc_water": [11]}
 
@@ -67,9 +67,11 @@ class ESASampler:
 
 
 def gipl_sfc_mean(scen, y0, y1):
+    """Mean GIPL surface temperature over CLIMATE years y0-y1 (files labelled 20 years later)."""
     acc = 0.0
     for y in range(y0, y1 + 1):
-        with rasterio.open(C.DATA / f"gipl_tif/magtsurface/gipl_5ModelAvg_{scen}_magtsurface_degC_{y}.tif") as s:
+        fy = C.gipl_file_year(y, "5ModelAvg", scen)
+        with rasterio.open(C.DATA / f"gipl_tif/magtsurface/gipl_5ModelAvg_{scen}_magtsurface_degC_{fy}.tif") as s:
             a = s.read(1).astype("float32")
         a[a < -9000] = np.nan
         acc = acc + a
@@ -124,7 +126,8 @@ def main():
     ds["gipl_class"] = (("y", "x"), cls)
     ds["pfr_pos"] = (("y", "x"), (v["pfr_2023"] > 0).astype("uint8"))
     ds.attrs.update(crs=C.CRS, grid="GIPL 2.0 1 km (SNAP)", source="composite-indexing build_features.py",
-                    note="gipl_* masked to gipl_class == 2 (D17); changes vs base = 2026-2035")
+                    note="gipl_* masked to gipl_class == 2 (D17); periods are climate years (GIPL files + 20, "
+                         "GIPL_ISSUE_3.md); changes vs base = 2014-2023")
     enc = {k: {"zlib": True, "complevel": 4} for k in ds.data_vars}
     ds.to_netcdf(OUT / "features_1km.nc", encoding=enc)
     dom = (ds.pfr_pos.values == 1)

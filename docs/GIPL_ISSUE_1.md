@@ -1,7 +1,9 @@
 # GIPL 2.0 (1 km): "stuck" cells — frozen subsurface, drifting surface
 
 **Dataset:** SNAP GIPL 2.0 permafrost model output, 1 km, 2021–2120, 3 runs (5ModelAvg, GFDL-CM3, NCAR-CCSM4) ×
-RCP 4.5 / 8.5. Same values in the Rasdaman coverage `crrel_gipl_outputs_nc` and in the source GeoTIFFs.
+RCP 4.5 / 8.5. Same values in the Rasdaman coverage `crrel_gipl_outputs_nc` and in the source GeoTIFFs. Years in this
+document are the years in GIPL's file names; the climate they carry is 20 years earlier
+([GIPL_ISSUE_3.md](GIPL_ISSUE_3.md)). The stuck-cell findings do not depend on the years.
 
 **Issue:** across ~46,000 km² of Alaska, GIPL's mean annual ground temperature at 1 m (MAGT 1 m) stays fixed for
 the entire century while the ground surface above it warms by several °C. These cells are called "stuck" below
@@ -169,7 +171,8 @@ Stuck cells lean towards black-spruce forest and woody wetlands, but most of tha
 - **No documentation** exists for this 1 km CMIP5 run. The only method reference (Marchenko, Romanovsky & Tipenko
   2008, NICOP) describes an earlier 0.5° run. The cause therefore cannot be identified or verified without more information.
 
-Other GIPL behaviour seen in the same tests (start-up period, cold bias against ESA CCI and field data) is described in
+Other GIPL behaviour seen in the same tests (start-up period, temperature levels against ESA CCI and field data, the
+20-year shift in GIPL's year labels) is described in [GIPL_ISSUE_3.md](GIPL_ISSUE_3.md),
 [GIPL_ISSUE_2.md](GIPL_ISSUE_2.md) and [ESA_GIPL_SPLICING.md](ESA_GIPL_SPLICING.md).
 
 ---

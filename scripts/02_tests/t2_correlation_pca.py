@@ -5,8 +5,8 @@ Sets:
               pfr_2023, esa_gst_hist, esa_t1m_hist, esa_alt_hist, maat_hist, thaw_mean, lc_forest, lc_shrub,
               lc_herb_moss, lc_wetland (barren/other and water omitted: fractions sum to 1)
   <rcp>_<era> - projected (5ModelAvg), domain = PFR > 0 & GIPL class 2 (D17):
-              maat, dmaat, gipl_sfc, dgipl_sfc (changes vs 2026-2035), pfr_2023, thaw_mean, lc_* (4).
-              Era 2026_2050 contains the 2026-2035 base: levels only (no change variables).
+              maat, dmaat, gipl_sfc, dgipl_sfc (changes vs 2014-2023), pfr_2023, thaw_mean, lc_* (4).
+              Eras are climate years (GIPL read from files labelled 20 years later, GIPL_ISSUE_3.md).
 Regional: the same per region (features/regions_1km.tif: Arctic, Interior, West, South; make_regions.py).
 PC signs are anchored (esa_gst_hist / maat loads positive on PC1) so PCs compare across sets and regions.
 PCA = eigen-decomposition of the correlation matrix of z-scored variables (full domain). Loadings are
@@ -39,7 +39,7 @@ FIG = C.REPO / "docs/figures"
 SUBSAMPLE = 200_000
 NPC_SHOW = 4
 ERAS = ["2026_2050", "2051_2080", "2081_2100"]
-CHANGE_ERAS = ["2051_2080", "2081_2100"]
+CHANGE_ERAS = ERAS  # base 2014-2023 overlaps no era
 REGIONS = {1: "Arctic", 2: "Interior", 3: "West", 4: "South"}
 REGION_C = {"Arctic": "#2a78d6", "Interior": "#eb6834", "West": "#1baf7a", "South": "#eda100"}
 REGION_M = {"Arctic": "o", "Interior": "s", "West": "^", "South": "D"}

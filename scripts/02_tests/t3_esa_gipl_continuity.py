@@ -1,5 +1,7 @@
-"""T3 (first look): can ESA CCI (2000-2023) and GIPL 5ModelAvg (2021-2120) be joined into one ground-temperature
-record? Compared at two depth pairs: ESA GST <-> GIPL magtsurface, ESA T1m <-> GIPL magt1m, on the pilot 1 km cells.
+"""T3 (first look): can ESA CCI (2000-2023) and GIPL 5ModelAvg (files 2021-2120 = climate years 2001-2100,
+GIPL_ISSUE_3.md) be joined into one ground-temperature record? Compared at two depth pairs: ESA GST <-> GIPL
+magtsurface, ESA T1m <-> GIPL magt1m, on the pilot 1 km cells. GIPL is plotted on climate years (start-up 2001-2003
+not shown); the two records share 2004-2023 (2004-2015 = observed weather in both).
 
 Also characterizes the GIPL "stuck" magt1m cells (100-yr range < 0.1 degC) and what ESA shows there.
 Outputs: docs/figures/t3_continuity.png, docs/figures/t3_stuck_cells.png, <data>/results/t3_*.csv
@@ -58,6 +60,7 @@ def main():
     esa = xr.open_dataset(C.DATA / "esa/esa_pilot_cells.nc")
     ey = esa.year.values
     gipl, gy = load_gipl(cells)
+    gc = gy - 20  # climate years carried by the 5ModelAvg files (C.gipl_file_year)
     g1 = gipl["magt1m_degC"]
     stuck = (np.nanmax(g1, axis=(1, 2)) - np.nanmin(g1, axis=(1, 2))) < STUCK
     cells["stuck"] = stuck
@@ -68,18 +71,22 @@ def main():
         m = (cells.region == region).values
         for ev, gv, label in PAIRS:
             e = esa[ev].values[m]
-            g = gipl[gv][m].mean(1)  # scenarios are near-identical early on
-            e_ov = e[:, np.isin(ey, [2021, 2022, 2023])].mean(1)
-            g_ov = g[:, np.isin(gy, [2021, 2022, 2023])].mean(1)
+            g = gipl[gv][m][:, 1]  # RCP 8.5
+            e_ov = e[:, (ey >= 2014) & (ey <= 2023)].mean(1)
+            g_ov = g[:, (gc >= 2014) & (gc <= 2023)].mean(1)
             ok = np.isfinite(e_ov) & np.isfinite(g_ov)
+            ys = np.arange(2004, 2016)  # observed weather in both records
+            es = np.nanmedian(e[:, np.isin(ey, ys)], 0)
+            gs = np.nanmedian(g[:, np.isin(gc, ys)], 0)
             rows.append(dict(
                 region=region, depth=label, n=int(ok.sum()),
-                esa_2021_23=np.median(e_ov[ok]), gipl_2021_23=np.median(g_ov[ok]),
+                esa_2014_23=np.median(e_ov[ok]), gipl_2014_23=np.median(g_ov[ok]),
                 bias_median=np.median(g_ov[ok] - e_ov[ok]), mae=np.mean(np.abs(g_ov[ok] - e_ov[ok])),
                 spearman_r=spearmanr(e_ov[ok], g_ov[ok]).statistic,
-                esa_trend_2000_23=np.nanmedian(trend(e, ey.astype(float))),
-                gipl_trend_2021_50_rcp45=np.nanmedian(trend(gipl[gv][m][:, 0, (gy <= 2050)], gy[gy <= 2050].astype(float))),
-                gipl_trend_2021_50_rcp85=np.nanmedian(trend(gipl[gv][m][:, 1, (gy <= 2050)], gy[gy <= 2050].astype(float))),
+                yty_r_2004_15=np.corrcoef(np.diff(es), np.diff(gs))[0, 1],
+                esa_trend_2004_23=np.nanmedian(trend(e[:, ey >= 2004], ey[ey >= 2004].astype(float))),
+                gipl_trend_2004_23=np.nanmedian(trend(g[:, (gc >= 2004) & (gc <= 2023)],
+                                                      gc[(gc >= 2004) & (gc <= 2023)].astype(float))),
             ))
     stats = pd.DataFrame(rows)
     stats.to_csv(RES / "t3_overlap_stats.csv", index=False)
@@ -108,7 +115,7 @@ def main():
     plt.rcParams.update({"font.size": 9, "axes.edgecolor": INK2, "axes.labelcolor": INK2, "xtick.color": INK2,
                          "ytick.color": INK2, "axes.spines.top": False, "axes.spines.right": False})
     labels = {r[0]: r[1] for r in C.REGIONS}
-    gm = gy <= 2100
+    gm = gc >= C.GIPL_START_OK  # climate years after GIPL's start-up period
     fig, axs = plt.subplots(3, 2, figsize=(10, 8.4), sharex=True)
     for i, region in enumerate(["brooks", "fairbanks", "denali"]):
         m = (cells.region == region).values
@@ -118,8 +125,8 @@ def main():
             ax.axhline(0, color=INK2, lw=0.8, ls=(0, (2, 2)))
             for k, (sc, col) in enumerate(RCP_C.items()):
                 a = gipl[gv][m][:, k][:, gm]
-                ax.fill_between(gy[gm], *np.nanpercentile(a, [10, 90], 0), color=col, alpha=0.15, lw=0)
-                ax.plot(gy[gm], np.nanmedian(a, 0), color=col, lw=2)
+                ax.fill_between(gc[gm], *np.nanpercentile(a, [10, 90], 0), color=col, alpha=0.15, lw=0)
+                ax.plot(gc[gm], np.nanmedian(a, 0), color=col, lw=2)
             e = esa[ev].values[m]
             ax.fill_between(ey, *np.nanpercentile(e, [10, 90], 0), color=ESA_C, alpha=0.2, lw=0)
             ax.plot(ey, np.nanmedian(e, 0), color=ESA_C, lw=2)
@@ -134,15 +141,17 @@ def main():
                             va="center")
     for ax in axs[-1]:
         ax.set_xlim(1999, 2112)
+        ax.set_xlabel("Year (GIPL: climate year it carries = file year − 20)")
     handles = [plt.Line2D([], [], color=ESA_C, lw=2, label="ESA CCI v5 (2000–2023)")] + [
-        plt.Line2D([], [], color=c, lw=2, label=f"GIPL 5ModelAvg {s}") for s, c in RCP_C.items()]
+        plt.Line2D([], [], color=c, lw=2, label=f"GIPL 5ModelAvg {s} (2004–2100)") for s, c in RCP_C.items()]
     fig.legend(handles=handles, loc="upper center", ncol=3, frameon=False, bbox_to_anchor=(0.5, 1.0))
     fig.text(0.5, -0.01, "Lines: median of the 100 cells in each 10 × 10 km test area; bands: 10th–90th percentile.",
              ha="center", color=INK2, fontsize=8)
     fig.tight_layout(rect=(0, 0, 1, 0.97))
     fig.savefig(FIG / "t3_continuity.png", dpi=150, bbox_inches="tight")
 
-    # --- figure 2: Fairbanks stuck vs not-stuck cells, 1 m and surface
+    # --- figure 2: Fairbanks stuck vs not-stuck cells, 1 m and surface (GIPL_ISSUE_1; file years as labelled)
+    gm = gy <= 2100
     fig, axs = plt.subplots(1, 2, figsize=(10, 3.6), sharey=True)
     for ax, (name, m) in zip(axs, [("GIPL 1 m stuck", fb & stuck), ("GIPL 1 m responsive", fb & ~stuck)]):
         ax.grid(axis="y", color=GRID, lw=0.6)

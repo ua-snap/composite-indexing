@@ -10,8 +10,8 @@ Variants (T per cell, per RCP and era 2026-2050 / 2051-2080 / 2081-2100):
   N1 today only        T = ESA GST 2014-2023
   N2 ESA + air warming  T = ESA GST 2014-2023 + [model MAAT(era) - model MAAT(2014-2023)]        (no GIPL)
   N3 weighted blend     score = 0.5 s(T_N2) + 0.25 s(MAAT) + 0.25 (1 - PFR/100) (fixed linear s(); classes by score)
-  G1 ESA + GIPL change  T = ESA GST 2014-2023 + bridge + [GIPL(era) - GIPL(2026-2035)]           (delta change method;
-                        bridge = model MAAT(2026-2035) - model MAAT(2014-2023)); NoData where GIPL is masked (D17)
+  G1 ESA + GIPL change  T = ESA GST 2014-2023 + [GIPL(era) - GIPL(2014-2023)]                    (delta change method;
+                        climate years, GIPL files + 20, GIPL_ISSUE_3.md); NoData where GIPL is masked (D17)
   G2 = G1, masked cells filled with N2 (flagged)
   G3 GIPL as delivered  T = GIPL surface MAGT (era)                                              (NoData where masked)
   X1 context inside     score = 0.8 s(T_N2) + 0.1 terrain + 0.1 (1 - insulating cover)           (illustration)
@@ -117,14 +117,13 @@ def variants(f, prof, insul, scen, era):
     y0, y1 = ERAS[era]
     m_ref = to_gipl(maat_mean(scen, 2014, 2023), X, Y)
     m_era = f[f"maat_{scen}_{era}"].values
-    m_base = f[f"maat_{scen}_base"].values
     esa = f.esa_gst_recent.values
     good = f.gipl_class.values == 2
-    g_era, g_base = f[f"gipl_sfc_{scen}_{era}"].values, f[f"gipl_sfc_{scen}_base"].values
+    g_era, g_base = f[f"gipl_sfc_{scen}_{era}"].values, f[f"gipl_sfc_{scen}_base"].values  # base = 2014-2023, as ESA
     T = {}
     T["N1"] = esa
     T["N2"] = esa + (m_era - m_ref)
-    T["G1"] = np.where(good, esa + (m_base - m_ref) + (g_era - g_base), np.nan)
+    T["G1"] = np.where(good, esa + (g_era - g_base), np.nan)
     T["G2"] = np.where(good, T["G1"], T["N2"])
     T["G3"] = np.where(good, g_era, np.nan)
     terrain = np.clip(f.thaw_mean.values / 0.5, 0, 1)
