@@ -46,7 +46,6 @@ files labelled 2021--2120, three climate inputs (5-model average, GFDL-CM3, NCAR
 \vspace{5pt}
 
 \noindent\colorbox{boxbg}{\parbox{\dimexpr\linewidth-2\fboxsep}{\raggedright\vspace{2pt}%
-{\bfseries Short answer: yes, with care, once its years are read correctly.}
 We compared GIPL 2.0 with a satellite-based product (ESA CCI Permafrost), 90 boreholes, about 2,800 CUSP field sites
 and the climate data that drove it. We found four problems:
 \begin{enumerate}[label=\textbf{\textcolor{accent}{\arabic*}}, leftmargin=1.2em, topsep=1pt]
@@ -135,10 +134,10 @@ at the field sites. Its warming follows the scenarios, damped: over 2036--2070 i
 0.7\,°C (RCP 8.5) per decade, against 0.3 and 0.9\,°C for the projected air, and less at depth. Snow and soil can
 explain such a lag, but the recent record points the other way: over 2003--2023 the satellite-based ground surface
 warmed faster than the observed air (0.62 vs 0.37\,°C per decade).\par\vspace{4pt}
-\textbf{Bottom line.} GIPL 2.0 is usable for Alaska's ground temperatures and their change, on four conditions: read
-every file as the climate of the year in its name minus 20 (minus 19 for GFDL-CM3, RCP 8.5); skip 2001--2003; mask the
-stuck cells and their 2\,km border (about 9\,\% of Alaska's permafrost area); and treat single-cell values as
-uncertain by up to about 2\,°C. Use the NCAR-CCSM4 runs with caution. The causes of problems 2 and 4 cannot be
+\textbf{If GIPL 2.0 is used,} four steps follow from these findings: read every file as the climate of the year in
+its name minus 20 (minus 19 for GFDL-CM3, RCP 8.5); skip 2001--2003; mask the stuck cells and their 2\,km border
+(about 9\,\% of Alaska's permafrost area); and treat single-cell values as uncertain by up to about 2\,°C. The
+NCAR-CCSM4 runs need extra caution. The causes of problems 2 and 4 cannot be
 identified: no documentation exists for this 1\,km run, including its climate inputs, starting conditions, and soil and
 snow settings.\vspace{3pt}}}
 
