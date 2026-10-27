@@ -21,6 +21,7 @@ N_STRIPS = 4
 X0, X1 = C.GIPL_X0, C.GIPL_X0 + C.GIPL_NX * C.GIPL_RES
 Y0, Y1 = C.GIPL_Y0, C.GIPL_Y0 + C.GIPL_NY * C.GIPL_RES
 FLAM_Y0 = 444_412.932644  # flammability coverage's southern edge (DescribeCoverage), north of the GIPL box edge
+FLAM_HIST = dict(era=1, model=0, scenario=0)  # 1980-2008, MODEL-SPINUP, historical (ras:Encoding)
 
 
 def strips():
@@ -28,10 +29,15 @@ def strips():
     return [(Y0 + i * step, Y0 + (i + 1) * step) for i in range(N_STRIPS)]
 
 
-def flam_path():
+def flam_path(sel=FLAM, label="toy_state_flam", fetch=True):
     return R.get_coverage("alfresco_relative_flammability_30yr",
-                          [(k, v) for k, v in FLAM.items()] + [("X", X0, X1), ("Y", max(Y0, FLAM_Y0), Y1)],
-                          label="toy_state_flam", fmt="image/tiff", timeout=600)
+                          [(k, v) for k, v in sel.items()] + [("X", X0, X1), ("Y", max(Y0, FLAM_Y0), Y1)],
+                          label=label, fmt="image/tiff", timeout=600, fetch=fetch)
+
+
+def flam_hist_path(fetch=True):
+    """toy_delta baseline: 1980-2008, MODEL-SPINUP, historical (1 request, ~19 MB; needs the user's OK)."""
+    return flam_path(FLAM_HIST, "toy_state_flam_hist", fetch)
 
 
 def dot_paths():

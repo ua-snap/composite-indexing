@@ -78,6 +78,8 @@ input[type=range] { width: 100%; margin: 0; }
 .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
 .tabs button { border-radius: 6px; padding: 4px 12px; }
 .tabs button[aria-pressed=true] { background: var(--ink); color: #fff; border-color: var(--ink); }
+.modesw { display: flex; align-items: center; gap: 8px; margin-left: auto; font-size: 14px; }
+.modesw button { font-size: 15px; font-weight: 600; padding: 5px 14px; }
 .maps { display: grid; grid-template-columns: 1.273fr 1fr 1fr; gap: 10px; margin-top: 10px; }
 @media (max-width: 800px) { .maps { grid-template-columns: minmax(0, 1fr); } }
 .panel { min-width: 0; }
@@ -113,6 +115,8 @@ input[type=range] { width: 100%; margin: 0; }
   <h1>Toy Environmental Hazard Index</h1>
   <span class="sub">Mid-century · middle-of-the-road emissions · multi-model average where available ·
     fingerpaint prototype, not for decisions</span>
+  <div class="modesw"><span class="small">Classes built on</span>
+    <div class="tabs" role="group" aria-label="What the classes are built on" id="modeTabs"></div></div>
 </header>
 
 <div id="selftest"></div>
@@ -190,16 +194,19 @@ const CLS = ["Low", "Medium", "High"];
 const MISSING = 3, SEA = 255;
 const COLOR = { 0: "#0072b2", 1: "#f0e442", 2: "#d55e00", 3: "#d6d5ce", 255: "#fcfcfb" };
 const N = META.nx * META.ny;
-const STORE = "toyIndex.v1";
+const STORE = "toyIndex.v2";  // v2: per-mode breaks (raw / delta)
+const MODES = Object.keys(META.modes), NA = "na";  // NA: fixed-class cell without a value
+const IDX = () => META.modes[S.mode].indices;
 
 // ---------- defaults & state ----------
 function defaults() {
   const custom = [];
   for (let w = 0; w < 3; w++) for (let e = 0; e < 3; e++) for (let p = 0; p < 3; p++) custom.push(Math.max(w, e, p));
   return {
-    breaks: Object.fromEntries(KEYS.map(k => [k, META.indices[k].breaks.slice()])),
+    breaks: Object.fromEntries(MODES.map(md => [md,
+      Object.fromEntries(KEYS.map(k => [k, META.modes[md].indices[k].breaks.slice()]))])),
     rule: "worst", weights: { wildfire: 1, erosion: 1, permafrost: 1 }, avgCuts: [1.5, 2.5], prodCuts: [4, 12],
-    countHigh: 2, countMed: 1, custom, missing: "low", layer: "hazard", regionKm: 300, localKm: 40,
+    countHigh: 2, countMed: 1, custom, missing: "low", layer: "hazard", regionKm: 300, localKm: 40, mode: "raw",
     point: { ...META.points[0] },
   };
 }
@@ -231,7 +238,8 @@ const cellXY = (c, r) => [META.x0 + (c + 0.5) * META.res, META.ytop - (r + 0.5) 
 const inGrid = (c, r) => c >= 0 && r >= 0 && c < META.nx && r < META.ny;
 
 // ---------- data ----------
-const codes = {}, cls = {}, hist = {};
+const DATA = {}, cls = {};
+let codes, hist;  // the current mode's DATA
 let land, hazard;
 function readPNG(id) {
   const img = document.getElementById(id), c = document.createElement("canvas");
@@ -243,20 +251,28 @@ function readPNG(id) {
 function loadData() {
   const L = readPNG("png-land"); land = new Uint8Array(N);
   for (let i = 0; i < N; i++) land[i] = L[4 * i] > 127 ? 1 : 0;
-  for (const k of KEYS) {
-    const d = readPNG("png-" + k), a = new Uint16Array(N), h = new Uint32Array(META.indices[k].maxcode + 1);
-    for (let i = 0; i < N; i++) { const v = (d[4 * i] << 8) | d[4 * i + 1]; a[i] = land[i] ? v : 0; if (land[i] && v) h[v]++; }
-    codes[k] = a; hist[k] = h; cls[k] = new Uint8Array(N);
+  for (const md of MODES) {
+    DATA[md] = { codes: {}, hist: {} };
+    for (const k of KEYS) {
+      const d = readPNG(`png-${md}-${k}`), a = new Uint16Array(N), h = new Uint32Array(META.modes[md].indices[k].maxcode + 1);
+      for (let i = 0; i < N; i++) { const v = (d[4 * i] << 8) | d[4 * i + 1]; a[i] = land[i] ? v : 0; if (land[i] && v) h[v]++; }
+      DATA[md].codes[k] = a; DATA[md].hist[k] = h;
+    }
   }
+  for (const k of KEYS) cls[k] = new Uint8Array(N);
+  ({ codes, hist } = DATA[S.mode]);
   hazard = new Uint8Array(N);
 }
-const decode = (k, c) => (c - 1) / META.indices[k].scale - META.indices[k].offset;
-const classify = (k, v) => v == null || Number.isNaN(v) ? MISSING : v <= S.breaks[k][0] + 1e-9 ? 0 : v <= S.breaks[k][1] + 1e-9 ? 1 : 2;
-const fmt = (k, v) => v == null ? "–" : v.toFixed(META.indices[k].digits) + " " + META.indices[k].unit;
+const decode = (k, c) => (c - 1) / IDX()[k].scale - IDX()[k].offset;
+const valueOf = (k, c) => !c ? null : c === IDX()[k].na_code ? NA : decode(k, c);
+const classify = (k, v) => v == null || Number.isNaN(v) ? MISSING : v === NA ? IDX()[k].na_class
+  : v <= S.breaks[S.mode][k][0] + 1e-9 ? 0 : v <= S.breaks[S.mode][k][1] + 1e-9 ? 1 : 2;
+const fmt = (k, v) => { const m = IDX()[k]; if (v == null) return "–"; if (v === NA) return m.na_label;
+  const s = v.toFixed(m.digits); return (m.signed && +s > 0 ? "+" : "") + s + " " + m.unit; };
 
 function lut(k) {
-  const m = META.indices[k], t = new Uint8Array(m.maxcode + 1); t[0] = MISSING;
-  for (let c = 1; c <= m.maxcode; c++) t[c] = classify(k, decode(k, c));
+  const m = IDX()[k], t = new Uint8Array(m.maxcode + 1); t[0] = MISSING;
+  for (let c = 1; c <= m.maxcode; c++) t[c] = classify(k, valueOf(k, c));
   return t;
 }
 function computeClasses(k) {
@@ -354,7 +370,7 @@ const ui = {};
 function buildIndexCards() {
   const host = document.getElementById("indexCards");
   for (const k of KEYS) {
-    const m = META.indices[k], step = Math.pow(10, -m.digits);
+    const m = IDX()[k], step = Math.pow(10, -m.digits);
     const card = document.createElement("section"); card.className = "card";
     card.innerHTML = `
       <div class="spread"><h2>${m.name} index</h2><span class="small num" data-r="pt"></span></div>
@@ -376,7 +392,7 @@ function buildIndexCards() {
     ui[k] = { card, hist: q("canvas"), pt: q('[data-r="pt"]'), bar: q('[data-r="bar"]'), shares: q('[data-r="shares"]'),
       ranges: [q('[data-b="0"]'), q('[data-b="1"]')], nums: [q('[data-n="0"]'), q('[data-n="1"]')] };
     for (const j of [0, 1]) {
-      const set = (v) => { if (!Number.isFinite(v)) return; const b = S.breaks[k]; b[j] = v;
+      const set = (v) => { if (!Number.isFinite(v)) return; const b = S.breaks[S.mode][k]; b[j] = v;
         if (j === 0 && b[1] < v) b[1] = v; if (j === 1 && b[0] > v) b[0] = v; changed(k); };
       ui[k].ranges[j].addEventListener("input", e => set(+(+e.target.value).toFixed(m.digits)));
       ui[k].nums[j].addEventListener("input", e => set(parseFloat(e.target.value)));
@@ -384,19 +400,19 @@ function buildIndexCards() {
   }
 }
 function syncBreakInputs(k) {
-  const m = META.indices[k];
+  const m = IDX()[k];
   for (const j of [0, 1]) {
-    ui[k].ranges[j].value = S.breaks[k][j];
-    if (document.activeElement !== ui[k].nums[j]) ui[k].nums[j].value = (+S.breaks[k][j]).toFixed(m.digits);
+    ui[k].ranges[j].value = S.breaks[S.mode][k][j];
+    if (document.activeElement !== ui[k].nums[j]) ui[k].nums[j].value = (+S.breaks[S.mode][k][j]).toFixed(m.digits);
   }
 }
 function drawHist(k) {
-  const m = META.indices[k], cv = ui[k].hist, dpr = window.devicePixelRatio || 1;
+  const m = IDX()[k], cv = ui[k].hist, dpr = window.devicePixelRatio || 1;
   cv.width = Math.round(cv.clientWidth * dpr); cv.height = Math.round(70 * dpr);
   const ctx = cv.getContext("2d"), W = cv.width, H = cv.height, NB = 60, bins = new Float64Array(NB), h = hist[k];
   const byCls = Array.from({ length: NB }, () => [0, 0, 0]), t = lut(k);
   let total = 0;
-  for (let c = 1; c < h.length; c++) { if (!h[c]) continue; const v = decode(k, c);
+  for (let c = 1; c < h.length; c++) { if (!h[c] || c === m.na_code) continue; const v = decode(k, c);
     const b = Math.min(NB - 1, Math.max(0, Math.floor((v - m.lo) / (m.hi - m.lo) * NB))); bins[b] += h[c]; byCls[b][t[c]] += h[c]; total += h[c]; }
   const sorted = Array.from(bins).sort((a, b) => b - a);
   const clipped = sorted[0] > 3 * sorted[1], ymax = clipped ? sorted[1] * 1.25 : sorted[0];
@@ -415,10 +431,10 @@ function drawHist(k) {
     }
   }
   ctx.strokeStyle = "#0b0b0b"; ctx.lineWidth = 2 * dpr;
-  for (const v of S.breaks[k]) { const x = (v - m.lo) / (m.hi - m.lo) * W; if (x < 0 || x > W) continue;
+  for (const v of S.breaks[S.mode][k]) { const x = (v - m.lo) / (m.hi - m.lo) * W; if (x < 0 || x > W) continue;
     ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
   const pv = pointValue(k);
-  if (pv != null) { const x = Math.min(W, Math.max(0, (pv - m.lo) / (m.hi - m.lo) * W));
+  if (pv != null && pv !== NA) { const x = Math.min(W, Math.max(0, (pv - m.lo) / (m.hi - m.lo) * W));
     ctx.fillStyle = "#0b0b0b"; ctx.beginPath(); ctx.moveTo(x - 6 * dpr, 0); ctx.lineTo(x + 6 * dpr, 0); ctx.lineTo(x, 9 * dpr); ctx.fill(); }
 }
 function classShares(a) {
@@ -435,21 +451,23 @@ function sharesFromHist(k) {
 function showShares(k) {
   const n = sharesFromHist(k), tot = n[0] + n[1] + n[2];
   ui[k].bar.innerHTML = [0, 1, 2].map(c => `<div style="width:${100 * n[c] / tot}%;background:${COLOR[c]}"></div>`).join("");
-  ui[k].shares.textContent = [0, 1, 2].map(c => `${CLS[c]} ${Math.round(100 * n[c] / tot)}%`).join(" · ") + " of mapped land";
+  const m = IDX()[k], na = m.na_code ? hist[k][m.na_code] : 0;
+  ui[k].shares.textContent = [0, 1, 2].map(c => `${CLS[c]} ${Math.round(100 * n[c] / tot)}%`).join(" · ") + " of mapped land"
+    + (na ? ` (${CLS[m.na_class]} includes ${Math.round(100 * na / tot)}% ${m.na_label})` : "");
 }
 
 // ---------- point ----------
 const huc = {};  // "lat,lon" -> value | null; presets carry a value fetched at build time
-for (const p of META.points) if (p.huc != null) huc[`${p.lat.toFixed(4)},${p.lon.toFixed(4)}`] = p.huc;
+for (const p of META.points) if (p.huc != null) huc[`${p.lat.toFixed(4)},${p.lon.toFixed(4)}`] = p.huc;  // {raw, delta}
 let hucState = "idle";
 function pointCell() { return cellOf(S.point.x, S.point.y); }
 function pixelValue(k) {
   const [c, r] = pointCell(); if (!inGrid(c, r)) return null;
-  const v = codes[k][r * META.nx + c]; return v ? decode(k, v) : null;
+  return valueOf(k, codes[k][r * META.nx + c]);
 }
 function hucKey() { return `${S.point.lat.toFixed(4)},${S.point.lon.toFixed(4)}`; }
 function pointValue(k) {
-  if (k === "wildfire") { const h = huc[hucKey()]; if (h != null) return h; }
+  if (k === "wildfire") { const h = huc[hucKey()]; if (h != null) return h[S.mode]; }
   return pixelValue(k);
 }
 async function fetchHuc() {
@@ -459,8 +477,9 @@ async function fetchHuc() {
   try {
     const r = await fetch(`https://earthmaps.io/alfresco/flammability/local/${S.point.lat.toFixed(4)}/${S.point.lon.toFixed(4)}`);
     const j = r.ok ? await r.json() : null;
-    const v = j && j["2040-2069"] && j["2040-2069"]["5modelAvg"] ? j["2040-2069"]["5modelAvg"]["rcp45"] : null;
-    huc[key] = typeof v === "number" ? v : null; hucState = huc[key] == null ? "none" : "ok";
+    const v = j?.["2040-2069"]?.["5modelAvg"]?.["rcp45"], b = j?.["1980-2008"]?.["MODEL-SPINUP"]?.["historical"];
+    huc[key] = typeof v === "number" && typeof b === "number" ? { raw: v, delta: v - b } : null;
+    hucState = huc[key] == null ? "none" : "ok";
   } catch (e) { huc[key] = null; hucState = "error"; }
   if (key === hucKey()) { renderPoint(); drawHist("wildfire"); }
 }
@@ -473,11 +492,11 @@ function renderPoint() {
   document.getElementById("badgeWhere").innerHTML =
     `${S.point.name}<br>${Math.abs(S.point.lat).toFixed(3)}° N, ${Math.abs(S.point.lon).toFixed(3)}° W`;
   const rows = KEYS.map((k, i) => {
-    const m = META.indices[k]; let src = "";
+    const m = IDX()[k]; let src = "";
     if (k === "wildfire") {
       const pix = pixelValue(k), hv = huc[hucKey()];
       src = hucState === "loading" ? "asking SNAP API for the watershed average…"
-        : hv != null ? `watershed (HUC-12) average, SNAP API · pixel: ${pix == null ? "not burnable" : pix.toFixed(4)}`
+        : hv != null ? `watershed (HUC-12) average, SNAP API · pixel: ${pix == null ? "not burnable" : fmt(k, pix)}`
         : hucState === "error" ? `SNAP API not reachable from this page: using pixel${pix == null ? " (not burnable)" : ""}`
         : `API gave no watershed value: using pixel${pix == null ? " (not burnable)" : ""}`;
     } else src = "1 km pixel";
@@ -486,7 +505,7 @@ function renderPoint() {
       <td><span class="chip c${pcls[i]}">${pcls[i] === MISSING ? "No value" : CLS[pcls[i]]}</span></td></tr>`;
   });
   document.getElementById("ptab").innerHTML = rows.join("");
-  const miss = KEYS.filter((k, i) => pcls[i] === MISSING).map(k => META.indices[k].name);
+  const miss = KEYS.filter((k, i) => pcls[i] === MISSING).map(k => IDX()[k].name);
   document.getElementById("pnote").textContent = miss.length
     ? `No ${miss.join(" / ")} value here: ${S.missing === "low" ? "counted as Low" : "hazard left blank"} (see rule settings).` : "";
   renderMatrices(pcls);
@@ -520,7 +539,7 @@ function numCtl(label, get, set, min, max, step) {
 function renderRuleCtl() {
   const box = document.getElementById("ruleCtl"); let ctls = [];
   if (S.rule === "avg") ctls = [
-    ...KEYS.map(k => numCtl(`${META.indices[k].name} weight`, () => S.weights[k], v => S.weights[k] = v, 0, 3, 0.5)),
+    ...KEYS.map(k => numCtl(`${IDX()[k].name} weight`, () => S.weights[k], v => S.weights[k] = v, 0, 3, 0.5)),
     numCtl("Low below", () => S.avgCuts[0], v => S.avgCuts[0] = v, 1, 3, 0.01),
     numCtl("High from", () => S.avgCuts[1], v => S.avgCuts[1] = v, 1, 3, 0.01)];
   if (S.rule === "product") ctls = [numCtl("Low up to", () => S.prodCuts[0], v => S.prodCuts[0] = v, 1, 27, 1),
@@ -565,14 +584,14 @@ document.getElementById("matrices").addEventListener("click", e => {
 // ---------- legend, tabs, tooltip ----------
 function renderLegend() {
   const n = S.layer === "hazard" ? classShares(hazard) : sharesFromHist(S.layer), tot = n[0] + n[1] + n[2] + n[3];
-  const name = S.layer === "hazard" ? "Environmental Hazard" : META.indices[S.layer].name;
+  const name = S.layer === "hazard" ? "Environmental Hazard" : IDX()[S.layer].name;
   document.getElementById("legend").innerHTML = `<b>${name}</b>` + [0, 1, 2, 3].map(c =>
     `<span><span class="sw" style="background:${COLOR[c]}"></span>${c === 3 ? "No value" : CLS[c]} <span class="muted num">${(100 * n[c] / tot).toFixed(0)}%</span></span>`).join("")
     + `<span class="muted">of Alaska land</span>`;
 }
 function buildTabs() {
   const t = document.getElementById("tabs");
-  t.innerHTML = [["hazard", "Environmental Hazard"], ...KEYS.map(k => [k, META.indices[k].name])]
+  t.innerHTML = [["hazard", "Environmental Hazard"], ...KEYS.map(k => [k, IDX()[k].name])]
     .map(([k, l]) => `<button data-layer="${k}" aria-pressed="${S.layer === k}">${l}</button>`).join("");
   t.onclick = e => { const b = e.target.closest("button"); if (!b) return; S.layer = b.dataset.layer; save();
     t.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x.dataset.layer === S.layer));
@@ -587,7 +606,7 @@ for (const name in maps) {
     const i = r * META.nx + c, [lat, lon] = ALB.inv(...cellXY(c, r));
     const lab = v => v === MISSING ? "No value" : CLS[v];
     tip.innerHTML = `<div class="num">${lat.toFixed(3)}° N, ${Math.abs(lon).toFixed(3)}° W</div><table>` + KEYS.map(k => {
-      const v = codes[k][i]; return `<tr><td>${META.indices[k].name}</td><td class="num">${v ? fmt(k, decode(k, v)) : "–"}</td><td><span class="chip c${cls[k][i]}">${lab(cls[k][i])}</span></td></tr>`; }).join("")
+      const v = codes[k][i]; return `<tr><td>${IDX()[k].name}</td><td class="num">${fmt(k, valueOf(k, v))}</td><td><span class="chip c${cls[k][i]}">${lab(cls[k][i])}</span></td></tr>`; }).join("")
       + `<tr><td><b>Hazard</b></td><td></td><td><span class="chip c${hazard[i]}">${lab(hazard[i])}</span></td></tr></table>`;
     tip.style.display = "block";
     const x = ev.clientX + 14, y = ev.clientY + 14, w = tip.offsetWidth, h = tip.offsetHeight;
@@ -599,6 +618,19 @@ for (const name in maps) {
     const [x, y] = cellXY(c, r), [lat, lon] = ALB.inv(x, y);
     setPoint({ name: "Map click", lat, lon, x, y });
   });
+}
+
+// ---------- mode switch (future values / change over time) ----------
+function buildModeTabs() {
+  const t = document.getElementById("modeTabs");
+  t.innerHTML = MODES.map(md => `<button data-mode="${md}" aria-pressed="${S.mode === md}">${META.modes[md].label}</button>`).join("");
+  t.onclick = e => { const b = e.target.closest("button"); if (b && b.dataset.mode !== S.mode) applyMode(b.dataset.mode); };
+}
+function applyMode(md) {
+  S.mode = md; ({ codes, hist } = DATA[md]);
+  document.querySelectorAll("#modeTabs button").forEach(x => x.setAttribute("aria-pressed", x.dataset.mode === md));
+  document.getElementById("indexCards").innerHTML = ""; buildIndexCards();
+  KEYS.forEach(k => pending.idx.add(k)); pending.hazard = true; flush();
 }
 
 // ---------- update cycle ----------
@@ -616,23 +648,26 @@ function changed(k) { pending.idx.add(k); schedule(); }
 function ruleChanged(rebuildCtl) { if (rebuildCtl) renderRuleCtl(); pending.hazard = true; schedule(); }
 
 function settingsText() {
-  const L = ["Toy Environmental Hazard Index settings", `Saved ${new Date().toISOString().slice(0, 16).replace("T", " ")}`, ""];
-  for (const k of KEYS) { const m = META.indices[k], b = S.breaks[k];
+  const L = ["Toy Environmental Hazard Index settings", `Saved ${new Date().toISOString().slice(0, 16).replace("T", " ")}`,
+    `Classes built on: ${META.modes[S.mode].label}`, ""];
+  for (const k of KEYS) { const m = IDX()[k], b = S.breaks[S.mode][k];
     L.push(`${m.name}: Low ≤ ${b[0]} ${m.unit} < Medium ≤ ${b[1]} ${m.unit} < High   (${m.source}; ${m.details})`); }
   L.push("", "Rule: " + document.getElementById("rule").selectedOptions[0].text, ruleSentence(),
     "Missing index: " + document.getElementById("missing").selectedOptions[0].text);
   if (S.rule === "custom") for (let i = 0; i < 27; i++)
     L.push(`  W ${CLS[Math.floor(i / 9)]}, E ${CLS[Math.floor(i / 3) % 3]}, P ${CLS[i % 3]} -> ${CLS[S.custom[i]]}`);
   const pc = pointClasses(); L.push("", `Point: ${S.point.name} (${S.point.lat.toFixed(4)}, ${S.point.lon.toFixed(4)})`);
-  KEYS.forEach((k, i) => L.push(`  ${META.indices[k].name}: ${fmt(k, pointValue(k))} -> ${pc[i] === MISSING ? "No value" : CLS[pc[i]]}`));
+  KEYS.forEach((k, i) => L.push(`  ${IDX()[k].name}: ${fmt(k, pointValue(k))} -> ${pc[i] === MISSING ? "No value" : CLS[pc[i]]}`));
   const hz = TABLE[(pc[0] << 4) | (pc[1] << 2) | pc[2]]; L.push(`  Environmental Hazard: ${hz === MISSING ? "No value" : CLS[hz]}`);
   return L.join("\n");
 }
 
 // ---------- init ----------
 function init() {
+  const hm = location.hash.match(/mode=(\w+)/);  // e.g. #mode=delta opens in that mode
+  if (hm && META.modes[hm[1]]) S.mode = hm[1];
   loadData();
-  buildIndexCards(); buildTabs();
+  buildIndexCards(); buildTabs(); buildModeTabs();
   const sel = document.getElementById("preset");
   sel.innerHTML = `<option value="">(custom point)</option>` + META.points.map(p => `<option>${p.name}</option>`).join("");
   sel.onchange = () => { const p = META.points.find(q => q.name === sel.value); if (p) setPoint({ ...p }); };
@@ -653,8 +688,9 @@ function init() {
   resetBtn.onclick = () => {
     if (!armed) { resetBtn.textContent = "Click again to reset"; armed = setTimeout(() => { armed = 0; resetBtn.textContent = "Reset all"; }, 4000); return; }
     clearTimeout(armed); armed = 0; resetBtn.textContent = "Reset all";
-    S = defaults(); save();
-    rule.value = S.rule; miss.value = S.missing;
+    S = defaults(); ({ codes, hist } = DATA[S.mode]); save();
+    rule.value = S.rule; miss.value = S.missing; buildModeTabs();
+    document.getElementById("indexCards").innerHTML = ""; buildIndexCards();
     document.getElementById("regionKm").value = String(S.regionKm); document.getElementById("localKm").value = String(S.localKm);
     document.querySelectorAll("#tabs button").forEach(x => x.setAttribute("aria-pressed", x.dataset.layer === S.layer));
     renderRuleCtl(); KEYS.forEach(k => pending.idx.add(k)); pending.hazard = true; flush(); setPoint(S.point);
@@ -670,15 +706,20 @@ function init() {
   flush();
   setPoint(S.point);
   window.addEventListener("resize", () => { drawMaps(); KEYS.forEach(drawHist); });
-  if (location.hash === "#selftest") selfTest();
+  if (location.hash.includes("selftest")) selfTest();
 }
 function selfTest() {
   const L = ["SELF-TEST: projection vs pyproj (m), inverse (deg), values at the cell"];
-  for (const p of META.points) {
-    const [x, y] = ALB.fwd(p.lat, p.lon), [la, lo] = ALB.inv(p.x, p.y), [c, r] = cellOf(p.x, p.y);
-    const vals = KEYS.map(k => { const v = inGrid(c, r) ? codes[k][r * META.nx + c] : 0; return v ? decode(k, v).toFixed(4) : "nan"; });
-    L.push(`${p.name.padEnd(22)} dx=${(x - p.x).toFixed(3)} dy=${(y - p.y).toFixed(3)} dlat=${(la - p.lat).toExponential(1)} dlon=${(lo - p.lon).toExponential(1)} cell=${c},${r} W/E/P=${vals.join(" / ")}`);
+  const mode0 = S.mode;
+  for (const md of MODES) { S.mode = md; ({ codes, hist } = DATA[md]);
+    for (const p of META.points) {
+      const [x, y] = ALB.fwd(p.lat, p.lon), [la, lo] = ALB.inv(p.x, p.y), [c, r] = cellOf(p.x, p.y);
+      const vals = KEYS.map(k => { const v = valueOf(k, inGrid(c, r) ? codes[k][r * META.nx + c] : 0);
+        return v == null ? "nan" : v === NA ? "NA" : v.toFixed(4); });
+      L.push(`${md.padEnd(5)} ${p.name.padEnd(22)} dx=${(x - p.x).toFixed(3)} dy=${(y - p.y).toFixed(3)} dlat=${(la - p.lat).toExponential(1)} dlon=${(lo - p.lon).toExponential(1)} cell=${c},${r} W/E/P=${vals.join(" / ")} huc=${JSON.stringify(p.huc)}`);
+    }
   }
+  S.mode = mode0; ({ codes, hist } = DATA[mode0]);
   const keep = JSON.stringify(S), tab = () => Array.from({ length: 27 }, (_, i) =>
     CLS[TABLE[(Math.floor(i / 9) << 4) | ((Math.floor(i / 3) % 3) << 2) | (i % 3)]][0]).join("");
   for (const r of ["worst", "avg", "product", "count", "custom"]) {
@@ -687,7 +728,7 @@ function selfTest() {
   }
   S.rule = "worst"; renderRuleCtl();
   const num = ui.erosion.nums[1]; num.value = "6.5"; num.dispatchEvent(new Event("input")); flush();
-  L.push(`typed erosion "High above" 6.5 -> breaks ${S.breaks.erosion}, ${ui.erosion.shares.textContent}`);
+  L.push(`typed erosion "High above" 6.5 -> breaks ${S.breaks[S.mode].erosion}, ${ui.erosion.shares.textContent}`);
   document.querySelector('#matrices button[data-w="0"][data-e="0"][data-p="0"]').click(); flush();
   L.push(`clicked cell W L / E L / P L -> rule ${S.rule}, that cell now ${CLS[S.custom[0]]}, sentence: ${document.getElementById("sentence").textContent}`);
   S = JSON.parse(keep); save();
