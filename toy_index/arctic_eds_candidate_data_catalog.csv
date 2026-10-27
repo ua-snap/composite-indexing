@@ -1,0 +1,74 @@
+Topic,,,,,,Dataset ,,,,,,,API,,,App
+Topic,Hazard,Asset,Domain,,ID,Name,Spatial,Temporal,SNAP owned?,Notes,,Endpoint,Query types,Notes,,In Arctic-EDS?
+,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,
+Climate,"extreme cold/heat, rain in winter, drought, wind chill, snow load, freeze/thaw, icing conditions, freezing spray","General infrastructure (buildings, roads, airstrips, water/sewer, etc), personnel, equipment, travel by land/air/sea vehicles","Land, Sea",,,,,,,,,,,,,
+,,,,,C1,WRF-downscaled ERA5,"AK + western CA (12km), sub-AK (4km)","1960-2023, hourly",Yes,Chris Waigl data,,https://earthmaps.io/era5wrf/,"Point, Polygon",,,No / NA
+,,,,,C2,CMIP6 Regridded,Pan-Arctic (100km),"1950-2100, monthly",Yes,Produced by SNAP,,https://earthmaps.io/cmip6/,Point,,,No / NA
+,,,,,C3,CMIP6 Statistically Downscaled,AK + western CA (12km),"1965-2100, daily",Yes,Produced by SNAP,,TBD,TBD,,,No / NA
+,,,,,C4,CMIP6 Statistically Downscaled,Sub-AK (4km),"1965-2100, daily",Yes,Produced by SNAP,,https://earthmaps.io/cmip6_downscaled/,"TBD, Point","Only temp + precip variables, others in progress",,No / NA
+,,,,,C5,CMIP5 Dynamically Downscaled Temp + Precip,AK + western CA (2km),"1901-2100, annual, decadal, seasonal",Yes,Produced by SNAP,,https://earthmaps.io/taspr/,"Point, Polygon",,,Yes
+,,,,,C6,CMIP5 Dynamically Downscaled Precipitation Frequency,AK + western CA (2km),"1901-2100, annual, decadal, seasonal",Yes,Produced by SNAP,,https://earthmaps.io/taspr/,Point,,,Yes
+,,,,,C7,CMIP6 Regridded / Berkeley Earth Temperature Anomalies,Pan-Arctic (0.25° x 0.25° [~25km] / 100km),1850-2024 / 2025-2100,Yes,Produced by SNAP,,https://earthmaps.io/temperature_anomalies/,Point,,,No / NA
+,,,,,C8,CMIP6 Regridded Indicators,Pan-Arctic (100km),"1950-2100, monthly",Yes,Produced by SNAP,,https://earthmaps.io/indicators/,Point,,,No / NA
+,,,,,C9,CMIP6 Statistically Downscaled Indicators,"AK + western CA (12km), sub-AK (4km)","1965-2100, daily",In progress,In progress,,TBD,NA,,,No / NA
+,,,,,C10,CMIP5 Statistically Downscaled Indicators,AK + western CA (12km),"1980-2099, ?",Yes,Produced by SNAP,,https://earthmaps.io/indicators/,"Point, Polygon",,,No / NA
+,,,,,C11,CMIP5 Statistically Downscaled Degree Days (+ Daymet Degree Days),AK + western CA (12km),"1950-2099/1980-2017, annual",Yes,Produced by SNAP,,https://earthmaps.io/degree_days/,Point,,,Yes
+,,,,,C12,CMIP5 Statistically Downscaled Snowfall Equivalent,AK (<1km),"1910-2099, decadal",Yes,Produced by SNAP,,https://earthmaps.io/snow/,Point,,,Yes
+,,,,,C13,CMIP5 Dynamically Downscaled Wet Days Per Year + ERA5-Interim,AK (20km),1980-2100,Yes,Produced by SNAP,,https://earthmaps.io/wet_days_per_year/,Point,,,No / NA
+,,,,,C14,AZCOT,Pan-Arctic (30km),"1991-2020, 6h, daily, weekly, biweekly, monthly, annual, seasonal",In progress,,,TBD,TBD,,,No / NA
+,,,,,C15,ERA5,Pan-Arctic (30km),"1940-present, hourly",?,Could be used as pan-Arctic historical baseline; AKCASC has some of this data,,NA,NA,,,No / NA
+,,,,,C16,ERA5 Land,Pan-Arctic (9km),"1940-present, hourly",?,Could be used as pan-Arctic historical baseline; AKCASC has some of this data,,NA,NA,,,No / NA
+,,,,,C17,CMIP6 Statistically Downscaled Climatologies,"AK + western CA (12km), sub-AK (4km)","1965-2100, monthly",In progress,In progress,,TBD,TBD,,,No / NA
+,,,,,C18,CMIP6 Regridded Climatologies,Pan-Arctic (100km),"1950-2100, monthly",No,Idea,,NA,TBD,,,No / NA
+,,,,,C19,CMIP6 Dynamically Downscaled,"AK + western CA (12km), sub-AK (4km and 1km)","1980-2100, ?",In progress,New Peter Bieniek data,,TBD,TBD,,,No / NA
+,,,,,C20,CMIP6 Dynamically Downscaled Indicators,"AK + western CA (12km), sub-AK (4km and 1km)","1980-2100, ?",No,Idea for new Peter Bieniek data,,NA,NA,,,No / NA
+,,,,,C21,CMIP6 Dynamically Downscaled Climatologies,"AK + western CA (12km), sub-AK (4km and 1km)","1980-2100, ?",No,Idea for new Peter Bieniek data,,NA,NA,,,No / NA
+,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,
+Permafrost,"Thermokarst, thaw, erosion, travel surface degradation, presence/absence prediction","General infrastructure (buildings, roads, airstrips, water/sewer, etc), travel by land vehicles",Land,,,,,,,,,,,,,
+,,,,,P1,CMIP5 GIPL 2.0,AK (1km),"2021–2120, annual",Yes,no historical,,https://earthmaps.io/permafrost/,Point,,,Yes
+,,,,,P2,ESA Permafrost Climate Change Initiative Datasets,Pan-Boreal (1km),1997-2023,Yes,"MAGT, presence/absence, ALT; on CEDA archive ; project page; SNAP EDA here; can show historical trend",,NA,NA,,,No / NA
+,,,,,P3,Permafrost Thaw Index,Pan-Boreal (1km),1997-2023,No,Guo et al 2026; on zenodo; based on ESA PCCI data above,,,NA,,,No / NA
+,,,,,P4,DVM-DOS-TEM,NA,NA,No,"This is a model, but may have been used to create datasets. We should contact the authors and investigate this further.",,NA,NA,,,No / NA
+,,,,,P5,CMIP5 Projections of Permafrost Thaw and Carbon Release,Northern Hemisphere permafrost domain 25-90 deg latitude (0.5° x 0.5° [~50km]),"1901-2299, monthly",No,McGuire et al (2022) produced by NASA ABOVE: soil temp variable might be most important,,NA,NA,,,
+,,,,,P6,CMIP5 Active Layer Thickness and Permafrost Area Projections,Northern Hemisphere (0.5° x 0.5° [~50km]),1850-2100,No,Peng et al (2023): ALT and thawing index,,NA,NA,,,
+,,,,,P7,CMIP6 Active Layer Thickness Changes From 2000 to 2018 and Future Simulations,"Northern Hemisphere (1km ERA5, 1km CMIP6, 1km Obu baseline)","2000-2018, 2100",No,Li et al (2022): ALT and thawing index,,NA,NA,,,
+,,,,,P8,Categorical map(s) of permafrost zones / soil types,Northern Hemisphere (1km),snapshot representing 2000-2016 equilibrium,Yes,Obu et al 2019; shows historical snapshot only,,,,,,
+,,,,,P9,Distribution of Thermokrast Landscapes,Pan-Arctic,Vector representing terrain characteristics,No,"Olefeldt et al 2016, vector data here",,,,,,
+,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,
+Wildfire,"Fire, smoke, visibility, travel surface obstruction","Above ground infrastructure, personnel, equipment, travel by land/air vehicles",Land,,,,,,,,,,,,,
+,,,,,F1,Historical fire perimeters (AICC),AK (vector),"1940-2021, annual",Yes,,,https://earthmaps.io/fire/,Point,,,No / NA
+,,,,,F2,Land Cover Types (NLCD),AK (vector),2015 snapshot,Yes,,,https://earthmaps.io/alfresco/,Point,,,No / NA
+,,,,,F3,ALFRESCO Projected Flammability,AK + western CA (1km),"1950-2100, multi-decadal",Yes,Uses dynamically downscaled CMIP5 as input,,https://earthmaps.io/alfresco/,"Point, Polygon",,,No / NA
+,,,,,F4,CMIP6 CFFDRS Fire Weather Indices,North American boreal zone (0.25° x 0.25° [~25km]),"1980-2100, daily",Yes,,,https://earthmaps.io/fire_weather/,"Point, Polygon",,,No / NA
+,,,,,F5,PM2.5 GEOS Modeled Historical,Pan-Arctic (0.25° x 0.25° [~25km]),2018-present,No,Idea,,NA,NA,,,No / NA
+,,,,,F6,PM2.5 GEOS-Chem Modeled Historical (+ indicators),Pan-Arctic (0.5° x 0.625° [~60km]),"2003-2020, daily, seasonal, annual, multi-decadal",No,"Hahn et al, 2025",,NA,NA,,,No / NA
+,,,,,F7,Arctic Boreal Burned Area (ABBA),Pan-Boreal (~500m),"2002-2022, annual",No,"Chen et al, 2026",,NA,NA,,,No / NA
+,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,
+Hydrology,"Flooding, erosion, ice breakup, change in water supply, change in river navigation ","General infrastructure (buildings, roads, airstrips, water/sewer, etc), travel by land/sea vehicles",Land,,,,,,,,,,,,,
+,,,,,H1,CMIP5 statistically downscaled VIC hydrology,AK + western CA (12km),"1950 -2100, decadal monthly summaries",Yes,,,https://earthmaps.io/hydrology/,Point,,,Yes
+,,,,,H2,CMIP6 dynamically downscaled Arctic Stream Flow and Stream Temperature,AK minus SE (vector); input data 4km,"1990-2021 / 2034-2065, daily climatologies and multi-decadal statistics",Yes,,,https://earthmaps.io/arctic_hydrology/,Streamline,,,No / NA
+,,,,,H3,CMIP5 CONUS Stream Flow,CONUS (vector); input data ,"1976-2005 / 2016-2100, daily climatologies and multi-decadal statistics",Yes,,,https://earthmaps.io/conus_hydrology/,Streamline,,,No / NA
+,,,,,H4,NG-IDF ,CONUS (6km) + Alaska (TBD),"1989-2021 / 2033-2065, multidecadal summaries",In progress,includes rain on snow and has a GUI,,NA,NA,,,No / NA
+,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,
+Sea Ice,Increased asset exposure via Arctic Ocean,"General infrastructure adjacent to Arctic Ocean, travel by air/sea vehicles",Sea,,,,,,,,,,,,,
+,,,,,I1,CMIP6 Regridded,Pan-Arctic (100km),"1950-2100, monthly",Yes,Produced by SNAP; siconc variable,,https://earthmaps.io/cmip6/,Point,,,No / NA
+,,,,,I2,Pan-Arctic Sea Ice Concentration,Pan-Arctic (17km),"1850-2021, monthly",Yes,historical + remote sensing observations,,https://earthmaps.io/seaice/,Point,,,No / NA
+,,,,,I3,Landfast Sea Ice Extent,Beaufort Sea + Chukchi Sea (100m),"1996-2023, daily",Yes,"remote sensing observations, presence / absence / land only",,https://earthmaps.io/landfastice/,Point,,,No / NA
+,,,,,I4,Vessel Mobility in Bering Strait,"Bering Strait, ?",?,No,Greta Ferloni data from this thesis: https://etheses.durham.ac.uk/id/eprint/15509/,,,,,,
+,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,
+Sea Level,Increased coastal asset exposure,"General infrastructure adjacent to coastlines, travel by air/sea vehicles",Sea,,,,,,,,,,,,,
+,,,,,S1,US EPA Sea Level Rise Projections,US including AK (30m),2020-2150,No,"Konfirst 2026, and here",,,,,,
+,,,,,S2,"Extreme Sea Levels, Tides, and Storm Surges, Future Projections",Global (2.5km),1979-2100,No,Muis et al 2020,,,,,,
