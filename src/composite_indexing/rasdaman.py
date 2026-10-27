@@ -46,8 +46,8 @@ def _log(row):
         w.writerow(row)
 
 
-def get_coverage(coverage, subsets, fields=None, label="", fmt="application/netcdf", timeout=180):
-    """Return the cached file path for this request, fetching it once if needed."""
+def get_coverage(coverage, subsets, fields=None, label="", fmt="application/netcdf", timeout=180, fetch=True):
+    """Return the cached file path for this request, fetching it once if needed (fetch=False: cache only, else raise)."""
     global _last
     CACHE.mkdir(parents=True, exist_ok=True)
     url = build_url(coverage, subsets, fields, fmt)
@@ -58,6 +58,8 @@ def get_coverage(coverage, subsets, fields=None, label="", fmt="application/netc
         _log(dict(utc=now, coverage=coverage, label=label, status="cache", bytes=path.stat().st_size, seconds=0,
                   file=path.name, url=url))
         return path
+    if not fetch:
+        raise FileNotFoundError(f"{coverage} {label}: not cached and fetch=False")
     wait = MIN_GAP - (time.monotonic() - _last)
     if wait > 0:
         time.sleep(wait)
