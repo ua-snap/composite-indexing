@@ -1,61 +1,66 @@
 # Toy Environmental Hazard Index
 
-A "fingerpaint" prototype: three datasets, each turned into a Low / Medium / High index, combined by a rule you choose
-on screen into one Environmental Hazard class. Not rigorous and not for decisions. Data-structure caveats are listed in
-[DATA_ISSUES.md](DATA_ISSUES.md).
+A "fingerpaint" prototype: three indices (Wildfire, Erosion, Permafrost), each turned into Low / Medium / High,
+combined by a rule you choose on screen into one Environmental Hazard class. Not rigorous and not for decisions.
+Data-structure caveats are listed in [DATA_ISSUES.md](DATA_ISSUES.md).
+
+Each index, and the rule that combines them, is its own workstream with several **variants** (candidate versions)
+to compare. The app shows every variant, so new ones appear as soon as they are built.
+
+| Workstream | Question, variants, open questions | Decisions |
+|---|---|---|
+| Wildfire | [wildfire/README.md](wildfire/README.md) | [DECISIONS](wildfire/DECISIONS.md) |
+| Erosion | [erosion/README.md](erosion/README.md) | [DECISIONS](erosion/DECISIONS.md) |
+| Permafrost | [permafrost/README.md](permafrost/README.md) | [DECISIONS](permafrost/DECISIONS.md) |
+| Combining | [composite/README.md](composite/README.md) | [DECISIONS](composite/DECISIONS.md) |
 
 ## Using the app
-Shared copy (private claude.ai page, share it from its Share menu): https://claude.ai/artifact/BUwzxzSDTSzFa6exz8zwAN.
-On that page the wildfire point value comes from the SNAP API only for the preset places (fetched when the page was
-built); a clicked or typed point uses the map pixel instead, because hosted pages can't call outside websites.
+**Shared link** (claude.ai; shared with "anyone with the link"): https://claude.ai/artifact/BUwzxzSDTSzFa6exz8zwAN.
+It holds every variant and loads each one when someone picks it. Watershed (HUC-12) wildfire values come from the SNAP
+API only for the places in the list (fetched at build time); a clicked or typed point uses the map pixel, because
+claude.ai pages can't reach other websites.
 
-Open `build/toy_index_app.html` in a browser (Chrome, Firefox, Edge or Safari). It is a single 12 MB file with the data
-built in: download it and double-click it. You need internet only for the wildfire point value (SNAP API).
-On GitHub, open the file and use **Download raw file** (GitHub shows HTML as source code, not as a page). It is the only
-tracked file in `build/` (force-added; the folder is otherwise ignored), so commit it again after each rebuild.
+**Download** (offline, or for people without claude.ai): `app/build/toy_index_app.html`, one file with the data built
+in; on GitHub use **Download raw file** and double-click it. It holds only the variants marked `in_single_file` (about
+six fit) and asks the SNAP API for watershed values at any point.
 
-- **Classes built on** (top right): **Future values** (mid-century amounts) or **Change over time** (how much each
-  index changes from a baseline; see below). Each mode keeps its own class boundaries. Add `#mode=delta` to the address
-  to open in change mode.
+- **Preset** (top right): a named set of variants, plus class boundaries and rule if the preset sets them. Open one
+  directly with a link ending in `#preset-<id>`, e.g. `#preset-change`. Picking variants by hand shows "Custom mix".
 - **Point** (top left): pick a place, type a latitude/longitude, or click any map. The badge shows the point's
-  Environmental Hazard; the table below shows each index's value and class.
+  Environmental Hazard; the table shows each index's value and class.
 - **Maps**: Alaska, a region around the point and a local area (sizes adjustable). The tabs switch between the hazard
-  and the three indexes. Hover for values.
-- **Index cards** (bottom): drag the sliders or type numbers to move the Low/Medium and Medium/High boundaries. The
-  histogram shows how Alaska's land area is spread across values; the bar shows the share in each class.
-- **Combining rule** (bottom right): pick a rule and adjust its numbers. The grid shows all 27 combinations
-  (Wildfire × Erosion × Permafrost) and the hazard each one gets; click a cell to set it by hand.
-- **Copy settings** gives a plain-text record of the current boundaries and rule (paste it into notes). Settings are
-  remembered in your browser; **Reset all** restores the defaults.
+  and the three indices. Hover for values.
+- **Index cards** (bottom): the dropdown picks the variant; sliders or typed numbers move the Low/Medium and
+  Medium/High boundaries (kept per variant). The histogram shows how Alaska's land is spread across values.
+- **Combining rule** (bottom right): pick a rule and adjust its numbers. The grid shows all 27 combinations and the
+  hazard each one gets; click a cell to set it by hand.
+- **Copy settings** gives a plain-text record, ending with the setup as a preset file (see
+  [composite/README.md](composite/README.md)). Settings are remembered in your browser; **Reset all** (two clicks)
+  restores the defaults.
 
-Point values: erosion and permafrost come from the 1 km map cell. Wildfire comes from the SNAP API's watershed
-(HUC-12) average, because SNAP advises against reading single ALFRESCO pixels; the map itself shows raw pixels.
-
-### Change over time
-| Index | From → to | Measured as |
-|---|---|---|
-| Wildfire | 1980–2008 historical run → 2040–2069 | change in chance of burning per year (absolute; a third of land is unchanged) |
-| Erosion | NOAA Atlas 14 → 2050–2079 | % change in the 24-hour, 100-year storm. SNAP's DOT amounts are Atlas 14 × the climate model's change since 1979–2005 (Bieniek et al. 2022), so this is the model's projected change |
-| Permafrost | 2004–2015 → 2040–2069 | "progress to thaw": warming at 1 m as a % of the distance to 0 °C. 100 % = crosses 0 °C. Ground not frozen at the start is Low (no permafrost to lose) |
-
-Defaults: permafrost Low ≤ 50 % < Medium ≤ 100 % < High; wildfire Low = no increase, increases split at their
-median; erosion statewide thirds.
-
-## Rebuilding (Chinook)
+## Building
 ```
-micromamba run -n arcticdem-pisr python -I toy_index/fetch_statewide.py   # cached: no new requests once fetched
-micromamba run -n arcticdem-pisr python -I toy_index/build_grids.py       # -> <data>/toy_index/grids_1km.npz
-micromamba run -n arcticdem-pisr python -I toy_index/build_delta.py       # -> <data>/toy_index/grids_delta_1km.npz
-micromamba run -n arcticdem-pisr python -I toy_index/build_app.py         # -> toy_index/build/toy_index_app.html
+micromamba run -n arcticdem-pisr python -I toy_index/build_variants.py   # new/missing variants -> <data>/toy_index/variants/
+micromamba run -n arcticdem-pisr python -I toy_index/app/build_app.py    # -> app/build/toy_index_app.html + app/build/hosted/
 ```
-`app_template.html` holds the page; `build_app.py` injects the data. Open the built page with `#selftest` at the end
-of the address to print checks (projection, decoded values, every rule, API access) at the top of the page.
+`build_variants.py wildfire` builds one index; `--force` rebuilds. Then publish `app/build/hosted/` to the shared link
+(Claude does this with the Artifact tool) and commit `app/build/toy_index_app.html`.
 
-| File | Does |
+Open a built page with `#selftest` at the end of the address to print checks (projection, values at every place for
+every preset, every rule, variant switching, API access) at the top of the page.
+
+## Layout
+| Path | Holds |
 |---|---|
-| `fetch_pilot.py` | 100 km test window at Fairbanks (Rasdaman), plus the server label codes |
-| `fetch_statewide.py` | Statewide flammability (2040–2069 and the 1980–2008 baseline) + 24 h / 100-yr precipitation (10 cached requests) |
-| `build_grids.py` | Puts all three on the GIPL 1 km grid (fixes the transposed precipitation GeoTIFFs) |
-| `build_delta.py` | Change-over-time grids: wildfire baseline (1 cached Rasdaman request), NOAA Atlas 14 (download: hdsc.nws.noaa.gov/pub/hdsc/data/ak/ak100yr24ha_ams.zip), GIPL 2004–2015 |
-| `build_app.py`, `app_template.html` | Build the single-file app |
+| `common/grid.py` | The common grid (GIPL 1 km, EPSG:3338) and land mask |
+| `common/sources.py` | Cached Rasdaman requests and their label codes (no new requests unless `fetch=True`) |
+| `common/data.py` | Readers that put each source on the common grid |
+| `common/variant.py` | The variant contract (`variant.json` fields), registry and file I/O |
+| `<index>/variants/<id>/` | One variant: `variant.json` (description, display, default boundaries, status) + `build.py` |
+| `composite/presets/*.json` | Presets |
+| `build_variants.py` | Builds variant grids |
+| `app/` | `app_template.html` (the page), `build_app.py` (packs variants and presets into it) |
 | `DATA_ISSUES.md` | Running list of data-structure issues |
+
+Data used: Rasdaman coverages (10 cached statewide requests), local GIPL GeoTIFFs, NOAA Atlas 14 Vol. 7
+(hdsc.nws.noaa.gov/pub/hdsc/data/ak/ak100yr24ha_ams.zip, in `<data>/noaa_atlas14/`), SNAP DOT netCDFs (local archive).

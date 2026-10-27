@@ -1,0 +1,21 @@
+{
+  "label": "24-hour, 100-year storm, mid-century",
+  "description": "DOT precipitation: rain in the 24-hour, 100-year storm",
+  "details": "2050–2079 · mean of GFDL-CM3 and NCAR-CCSM4 · RCP 8.5",
+  "unit": "in",
+  "digits": 2,
+  "offset": 0,
+  "scale": 100,
+  "range_q": [
+    0.005,
+    0.99
+  ],
+  "breaks": "thirds",
+  "sources": [
+    "Rasdaman dot_precip pf, duration 3 (24 h), era 1, interval 100, models 0 and 1"
+  ],
+  "status": "candidate",
+  "in_single_file": true,
+  "author": "Joshdpaul",
+  "created": "2026-10-27"
+}

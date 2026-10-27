@@ -1,0 +1,24 @@
+{
+  "label": "24-hour, 100-year storm, change",
+  "description": "Change in rain in the 24-hour, 100-year storm",
+  "details": "NOAA Atlas 14 (model’s 1979–2005) → 2050–2079 · mean of GFDL-CM3 and NCAR-CCSM4 · RCP 8.5",
+  "unit": "%",
+  "digits": 0,
+  "offset": 100,
+  "scale": 100,
+  "range_q": [
+    0.005,
+    0.995
+  ],
+  "breaks": "thirds",
+  "signed": true,
+  "sources": [
+    "Rasdaman dot_precip (as storm-24h-100yr-future)",
+    "NOAA Atlas 14 Vol. 7 ak100yr24ha_ams",
+    "Bieniek et al. 2022, JAMC 61(2), doi:10.1175/JAMC-D-21-0106.1"
+  ],
+  "status": "candidate",
+  "in_single_file": true,
+  "author": "Joshdpaul",
+  "created": "2026-10-27"
+}
