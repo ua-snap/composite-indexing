@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toy Hazard Index</title>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #898781;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.10);
+  --low: #2a78d6;
+  --med: #eda100;
+  --high: #c2410c;
+  --nodata: #d6d5ce;
+  --focus: #0b0b0b;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink);
+  font: 15px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; padding: 14px 20px 10px; }
+h1 { font-size: 20px; margin: 0; }
+h2 { font-size: 16px; margin: 0; }
+.sub { color: var(--ink-2); font-size: 13px; }
+main { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 14px; padding: 0 20px 20px; align-items: start; }
+.bottom { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.7fr);
+  gap: 14px; align-items: start; }
+#indexCards { display: contents; }
+@media (max-width: 1500px) { .bottom { grid-template-columns: repeat(3, minmax(0, 1fr)); } #ruleCard { grid-column: 1 / -1; } }
+@media (max-width: 1100px) { main, .bottom { grid-template-columns: minmax(0, 1fr); } #ruleCard { grid-column: auto; } }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+.row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.spread { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.small { font-size: 13px; color: var(--ink-2); }
+.muted { color: var(--muted); }
+.num { font-variant-numeric: tabular-nums; }
+select, input, button { font: inherit; color: var(--ink); }
+select, input[type=number], input[type=text] { border: 1px solid var(--axis); border-radius: 6px; padding: 3px 6px;
+  background: #fff; }
+input[type=number] { width: 92px; }
+input[type=text] { width: 96px; }
+button { border: 1px solid var(--axis); border-radius: 6px; background: #fff; padding: 3px 10px; cursor: pointer; }
+button:hover { background: #f0efec; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+input[type=range] { width: 100%; margin: 0; }
+
+.chip { display: inline-block; min-width: 64px; text-align: center; border-radius: 5px; padding: 1px 8px;
+  font-weight: 600; font-size: 13px; }
+.c0 { background: var(--low); color: #fff; }
+.c1 { background: var(--med); color: #0b0b0b; }
+.c2 { background: var(--high); color: #fff; }
+.c3 { background: var(--nodata); color: #0b0b0b; font-weight: 500; }
+
+/* point card */
+.badge { display: flex; align-items: center; justify-content: space-between; border-radius: 8px; padding: 10px 14px;
+  margin: 10px 0 8px; font-size: 22px; font-weight: 700; }
+.badge .lbl { font-size: 13px; font-weight: 500; }
+.ptab { width: 100%; border-collapse: collapse; }
+.ptab td { padding: 4px 0; border-top: 1px solid var(--grid); vertical-align: top; }
+.ptab td:nth-child(2) { text-align: right; padding-right: 10px; white-space: nowrap; }
+.ptab td:last-child { text-align: right; width: 76px; }
+
+/* index cards */
+.hist { width: 100%; height: 70px; display: block; margin-top: 8px; }
+.axisrow { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+.brk { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 10px; align-items: center; margin-top: 6px; }
+.brk label { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+.shares { display: flex; height: 10px; border-radius: 3px; overflow: hidden; gap: 2px; margin-top: 8px; background: var(--surface); }
+.shares div { height: 100%; }
+
+/* maps */
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.tabs button { border-radius: 6px; padding: 4px 12px; }
+.tabs button[aria-pressed=true] { background: var(--ink); color: #fff; border-color: var(--ink); }
+.maps { display: grid; grid-template-columns: 1.273fr 1fr 1fr; gap: 10px; margin-top: 10px; }
+@media (max-width: 800px) { .maps { grid-template-columns: minmax(0, 1fr); } }
+.panel { min-width: 0; }
+.panel canvas { width: 100%; display: block; border: 1px solid var(--grid); border-radius: 6px; cursor: crosshair;
+  background: var(--surface); }
+.panel .spread { margin-bottom: 4px; font-size: 13px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 13px; align-items: center; }
+.sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 5px; }
+#tip { position: fixed; pointer-events: none; background: #fff; border: 1px solid var(--axis); border-radius: 6px;
+  padding: 6px 9px; font-size: 13px; box-shadow: 0 2px 8px rgba(0,0,0,.12); display: none; z-index: 10; }
+#tip table td { padding: 0 4px; }
+
+/* composite */
+.rulebox { display: flex; flex-wrap: wrap; gap: 12px 20px; margin-top: 8px; }
+.rulebox > :first-child { flex: 1 1 280px; min-width: 0; }
+.rulebox > :last-child { flex: 0 0 auto; }
+.rulesel { font-size: 16px; padding: 5px 8px; }
+.sentence { background: #f0efec; border-radius: 6px; padding: 8px 10px; margin: 10px 0; }
+.ctl { display: grid; grid-template-columns: auto 1fr auto; gap: 6px 10px; align-items: center; font-size: 14px; }
+.matrices { display: flex; gap: 14px; flex-wrap: wrap; }
+.mx caption { font-size: 13px; font-weight: 600; padding-bottom: 4px; text-align: left; }
+.mx { border-collapse: separate; border-spacing: 2px; }
+.mx th { font-size: 11px; font-weight: 500; color: var(--ink-2); padding: 0 3px; }
+.mx td button { width: 34px; height: 28px; border: none; border-radius: 4px; font-weight: 700; padding: 0; }
+.mx td button.here { outline: 3px solid var(--ink); outline-offset: 1px; }
+.mxnote { font-size: 12px; color: var(--ink-2); margin-top: 6px; max-width: 520px; }
+#selftest { white-space: pre; font: 12px monospace; background: #fff; border: 1px solid var(--axis); padding: 8px;
+  margin: 0 20px 14px; display: none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Toy Environmental Hazard Index</h1>
+  <span class="sub">Mid-century · middle-of-the-road emissions · multi-model average where available ·
+    fingerpaint prototype, not for decisions</span>
+</header>
+
+<div id="selftest"></div>
+<main>
+    <section class="card" id="pointCard">
+      <div class="spread"><h2>Point</h2><span class="small">or click any map</span></div>
+      <div class="row" style="margin-top:8px">
+        <select id="preset" aria-label="Choose a place"></select>
+        <input type="text" id="lat" aria-label="Latitude" placeholder="lat">
+        <input type="text" id="lon" aria-label="Longitude" placeholder="lon">
+        <button id="go">Go</button>
+      </div>
+      <div class="badge c3" id="badge"><span><span class="lbl">Environmental Hazard</span><br><span id="badgeTxt">–</span></span>
+        <span class="lbl num" id="badgeWhere"></span></div>
+      <table class="ptab" id="ptab"></table>
+      <div class="small" id="pnote" style="margin-top:6px"></div>
+    </section>
+
+    <section class="card" id="mapsCard">
+      <div class="spread">
+        <div class="tabs" role="group" aria-label="Map layer" id="tabs"></div>
+        <span class="small">Hover a map for values · click to move the point</span>
+      </div>
+      <div class="maps">
+        <div class="panel"><div class="spread"><b>Alaska</b><span class="muted">1 km grid</span></div>
+          <canvas id="mapState" aria-label="Statewide map"></canvas></div>
+        <div class="panel"><div class="spread"><b>Region</b>
+          <select id="regionKm" aria-label="Region size"><option>150</option><option>300</option><option>500</option></select></div>
+          <canvas id="mapRegion" aria-label="Regional map"></canvas></div>
+        <div class="panel"><div class="spread"><b>Local</b>
+          <select id="localKm" aria-label="Local size"><option>20</option><option>40</option><option>80</option></select></div>
+          <canvas id="mapLocal" aria-label="Local map"></canvas></div>
+      </div>
+      <div class="legend" id="legend"></div>
+    </section>
+
+  <div class="bottom">
+    <div id="indexCards"></div>
+    <section class="card" id="ruleCard">
+      <div class="spread"><h2>Combining rule → Environmental Hazard</h2>
+        <span class="row"><button id="copy">Copy settings</button><button id="reset">Reset all</button></span></div>
+      <div class="rulebox">
+        <div>
+          <select id="rule" class="rulesel" aria-label="Combining rule">
+            <option value="worst">Worst of the three</option>
+            <option value="avg">Average of points (weighted)</option>
+            <option value="product">Multiply points (Wildfire × Erosion × Permafrost)</option>
+            <option value="count">Count the Highs</option>
+            <option value="custom">Custom table (set each combination)</option>
+          </select>
+          <div class="sentence" id="sentence"></div>
+          <div class="ctl" id="ruleCtl"></div>
+          <div class="row" style="margin-top:10px; font-size:14px">
+            <label for="missing">If an index has no value:</label>
+            <select id="missing"><option value="low">count it as Low</option><option value="blank">leave the hazard blank</option></select>
+          </div>
+        </div>
+        <div>
+          <div class="matrices" id="matrices"></div>
+          <div class="mxnote">Every possible combination and the hazard it gets. Rows: Wildfire, columns: Erosion.
+            The outlined cell is the point. Click any cell to change it (switches to Custom table).</div>
+        </div>
+      </div>
+      <textarea id="copyBox" rows="8" style="width:100%; margin-top:10px; display:none" aria-label="Settings text"></textarea>
+    </section>
+  </div>
+</main>
+<div id="tip"></div>
+<!--__IMAGES__-->
+
+<script>
+const META = /*__META__*/null;
+const KEYS = ["wildfire", "erosion", "permafrost"];
+const CLS = ["Low", "Medium", "High"];
+const MISSING = 3, SEA = 255;
+const COLOR = { 0: "#2a78d6", 1: "#eda100", 2: "#c2410c", 3: "#d6d5ce", 255: "#fcfcfb" };
+const N = META.nx * META.ny;
+const STORE = "toyIndex.v1";
+
+// ---------- defaults & state ----------
+function defaults() {
+  const custom = [];
+  for (let w = 0; w < 3; w++) for (let e = 0; e < 3; e++) for (let p = 0; p < 3; p++) custom.push(Math.max(w, e, p));
+  return {
+    breaks: Object.fromEntries(KEYS.map(k => [k, META.indices[k].breaks.slice()])),
+    rule: "worst", weights: { wildfire: 1, erosion: 1, permafrost: 1 }, avgCuts: [1.5, 2.5], prodCuts: [4, 12],
+    countHigh: 2, countMed: 1, custom, missing: "low", layer: "hazard", regionKm: 300, localKm: 40,
+    point: { ...META.points[0] },
+  };
+}
+let S = defaults();
+try { const saved = JSON.parse(localStorage.getItem(STORE) || "null"); if (saved) S = { ...S, ...saved }; } catch (e) {}
+function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }
+
+// ---------- projection: EPSG:3338 (Albers, GRS80) ----------
+const ALB = (() => {
+  const a = 6378137, f = 1 / 298.257222101, e2 = 2 * f - f * f, e = Math.sqrt(e2), rad = Math.PI / 180;
+  const lat1 = 55 * rad, lat2 = 65 * rad, lat0 = 50 * rad, lon0 = -154 * rad;
+  const m = p => Math.cos(p) / Math.sqrt(1 - e2 * Math.sin(p) ** 2);
+  const q = p => { const s = Math.sin(p); return (1 - e2) * (s / (1 - e2 * s * s) - Math.log((1 - e * s) / (1 + e * s)) / (2 * e)); };
+  const m1 = m(lat1), m2 = m(lat2), q1 = q(lat1), q2 = q(lat2);
+  const n = (m1 * m1 - m2 * m2) / (q2 - q1), C = m1 * m1 + n * q1, rho0 = a * Math.sqrt(C - n * q(lat0)) / n;
+  return {
+    fwd(lat, lon) { const rho = a * Math.sqrt(C - n * q(lat * rad)) / n, th = n * (lon * rad - lon0);
+      return [rho * Math.sin(th), rho0 - rho * Math.cos(th)]; },
+    inv(x, y) { const rho = Math.hypot(x, rho0 - y), th = Math.atan2(x, rho0 - y), qq = (C - rho * rho * n * n / (a * a)) / n;
+      let p = Math.asin(qq / 2);
+      for (let i = 0; i < 20; i++) { const s = Math.sin(p), c = Math.cos(p);
+        const d = (1 - e2 * s * s) ** 2 / (2 * c) * (qq / (1 - e2) - s / (1 - e2 * s * s) + Math.log((1 - e * s) / (1 + e * s)) / (2 * e));
+        p += d; if (Math.abs(d) < 1e-12) break; }
+      return [p / rad, (lon0 + th / n) / rad]; },
+  };
+})();
+const cellOf = (x, y) => [Math.floor((x - META.x0) / META.res), Math.floor((META.ytop - y) / META.res)];
+const cellXY = (c, r) => [META.x0 + (c + 0.5) * META.res, META.ytop - (r + 0.5) * META.res];
+const inGrid = (c, r) => c >= 0 && r >= 0 && c < META.nx && r < META.ny;
+
+// ---------- data ----------
+const codes = {}, cls = {}, hist = {};
+let land, hazard;
+function readPNG(id) {
+  const img = document.getElementById(id), c = document.createElement("canvas");
+  c.width = img.naturalWidth; c.height = img.naturalHeight;
+  const ctx = c.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(img, 0, 0);
+  return ctx.getImageData(0, 0, c.width, c.height).data;
+}
+function loadData() {
+  const L = readPNG("png-land"); land = new Uint8Array(N);
+  for (let i = 0; i < N; i++) land[i] = L[4 * i] > 127 ? 1 : 0;
+  for (const k of KEYS) {
+    const d = readPNG("png-" + k), a = new Uint16Array(N), h = new Uint32Array(META.indices[k].maxcode + 1);
+    for (let i = 0; i < N; i++) { const v = (d[4 * i] << 8) | d[4 * i + 1]; a[i] = land[i] ? v : 0; if (land[i] && v) h[v]++; }
+    codes[k] = a; hist[k] = h; cls[k] = new Uint8Array(N);
+  }
+  hazard = new Uint8Array(N);
+}
+const decode = (k, c) => (c - 1) / META.indices[k].scale - META.indices[k].offset;
+const classify = (k, v) => v == null || Number.isNaN(v) ? MISSING : v <= S.breaks[k][0] + 1e-9 ? 0 : v <= S.breaks[k][1] + 1e-9 ? 1 : 2;
+const fmt = (k, v) => v == null ? "–" : v.toFixed(META.indices[k].digits) + " " + META.indices[k].unit;
+
+function lut(k) {
+  const m = META.indices[k], t = new Uint8Array(m.maxcode + 1); t[0] = MISSING;
+  for (let c = 1; c <= m.maxcode; c++) t[c] = classify(k, decode(k, c));
+  return t;
+}
+function computeClasses(k) {
+  const t = lut(k), a = codes[k], o = cls[k];
+  for (let i = 0; i < N; i++) o[i] = land[i] ? t[a[i]] : SEA;
+}
+
+// ---------- combining rule ----------
+function ruleClass(w, e, p) {
+  let c = [w, e, p];
+  if (c.every(x => x === MISSING)) return MISSING;
+  if (c.includes(MISSING)) { if (S.missing === "blank") return MISSING; c = c.map(x => x === MISSING ? 0 : x); }
+  const pts = c.map(x => x + 1);
+  switch (S.rule) {
+    case "worst": return Math.max(...c);
+    case "avg": {
+      const wt = KEYS.map(k => +S.weights[k]), sw = wt.reduce((s, x) => s + x, 0);
+      const score = sw > 0 ? pts.reduce((s, x, i) => s + x * wt[i], 0) / sw : 1;
+      return score < S.avgCuts[0] - 1e-9 ? 0 : score < S.avgCuts[1] - 1e-9 ? 1 : 2;
+    }
+    case "product": { const pr = pts[0] * pts[1] * pts[2]; return pr <= S.prodCuts[0] ? 0 : pr <= S.prodCuts[1] ? 1 : 2; }
+    case "count": {
+      const nh = c.filter(x => x === 2).length, nm = c.filter(x => x >= 1).length;
+      return nh >= S.countHigh ? 2 : nm >= S.countMed ? 1 : 0;
+    }
+    case "custom": return S.custom[c[0] * 9 + c[1] * 3 + c[2]];
+  }
+}
+let TABLE = new Uint8Array(64);
+function buildTable() { for (let w = 0; w < 4; w++) for (let e = 0; e < 4; e++) for (let p = 0; p < 4; p++) TABLE[(w << 4) | (e << 2) | p] = ruleClass(w, e, p); }
+function computeHazard() {
+  const W = cls.wildfire, E = cls.erosion, P = cls.permafrost;
+  for (let i = 0; i < N; i++) hazard[i] = land[i] ? TABLE[(W[i] << 4) | (E[i] << 2) | P[i]] : SEA;
+}
+
+// ---------- rendering ----------
+const off = document.createElement("canvas"); off.width = META.nx; off.height = META.ny;
+const offCtx = off.getContext("2d");
+const img = offCtx.createImageData(META.nx, META.ny), px = new Uint32Array(img.data.buffer);
+const C32 = {};
+for (const [k, hex] of Object.entries(COLOR)) {
+  const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+  C32[k] = ((255 << 24) | (b << 16) | (g << 8) | r) >>> 0;
+}
+const C32A = new Uint32Array(256); for (const k in C32) C32A[k] = C32[k];
+const layerArr = () => S.layer === "hazard" ? hazard : cls[S.layer];
+function paintOff() { const a = layerArr(); for (let i = 0; i < N; i++) px[i] = C32A[a[i]]; offCtx.putImageData(img, 0, 0); }
+
+const maps = {
+  state: { el: document.getElementById("mapState"), aspect: META.ny / META.nx },
+  region: { el: document.getElementById("mapRegion"), aspect: 1 },
+  local: { el: document.getElementById("mapLocal"), aspect: 1 },
+};
+function view(name) {  // grid window shown by a map: [c0, r0, cols, rows]
+  if (name === "state") return [0, 0, META.nx, META.ny];
+  const km = name === "region" ? S.regionKm : S.localKm, [pc, pr] = cellOf(S.point.x, S.point.y);
+  return [pc + 0.5 - km / 2, pr + 0.5 - km / 2, km, km];
+}
+function sizeCanvas(m) {
+  const dpr = window.devicePixelRatio || 1, w = m.el.clientWidth, h = Math.round(w * m.aspect);
+  m.el.style.height = h + "px";
+  if (m.el.width !== Math.round(w * dpr)) { m.el.width = Math.round(w * dpr); m.el.height = Math.round(h * dpr); }
+}
+function drawMap(name) {
+  const m = maps[name], ctx = m.el.getContext("2d"), W = m.el.width, H = m.el.height;
+  const [c0, r0, nc, nr] = view(name), sx = W / nc, sy = H / nr;
+  ctx.imageSmoothingEnabled = false;
+  ctx.fillStyle = COLOR[255]; ctx.fillRect(0, 0, W, H);
+  const a0 = Math.max(0, Math.floor(c0)), b0 = Math.max(0, Math.floor(r0));
+  const a1 = Math.min(META.nx, Math.ceil(c0 + nc)), b1 = Math.min(META.ny, Math.ceil(r0 + nr));
+  if (a1 > a0 && b1 > b0) ctx.drawImage(off, a0, b0, a1 - a0, b1 - b0, (a0 - c0) * sx, (b0 - r0) * sy, (a1 - a0) * sx, (b1 - b0) * sy);
+  const dpr = window.devicePixelRatio || 1;
+  const box = (km) => { const [pc, pr] = cellOf(S.point.x, S.point.y);
+    const x = (pc + 0.5 - km / 2 - c0) * sx, y = (pr + 0.5 - km / 2 - r0) * sy;
+    ctx.lineWidth = 2 * dpr; ctx.strokeStyle = "#0b0b0b"; ctx.strokeRect(x, y, km * sx, km * sy);
+    ctx.lineWidth = 1 * dpr; ctx.strokeStyle = "#fff"; ctx.strokeRect(x - 2 * dpr, y - 2 * dpr, km * sx + 4 * dpr, km * sy + 4 * dpr); };
+  if (name === "state") box(S.regionKm);
+  if (name === "region") box(S.localKm);
+  const [pc, pr] = cellOf(S.point.x, S.point.y);
+  if (name === "local") {  // outline the point's 1 km cell
+    ctx.lineWidth = 2 * dpr; ctx.strokeStyle = "#0b0b0b"; ctx.strokeRect((pc - c0) * sx, (pr - r0) * sy, sx, sy);
+  }
+  const x = (pc + 0.5 - c0) * sx, y = (pr + 0.5 - r0) * sy, R = 6 * dpr;
+  ctx.beginPath(); ctx.arc(x, y, R, 0, 2 * Math.PI); ctx.lineWidth = 4 * dpr; ctx.strokeStyle = "#fff"; ctx.stroke();
+  ctx.lineWidth = 2 * dpr; ctx.strokeStyle = "#0b0b0b"; ctx.stroke();
+}
+function drawMaps() { for (const n in maps) { sizeCanvas(maps[n]); drawMap(n); } }
+function eventCell(name, ev) {
+  const m = maps[name], r = m.el.getBoundingClientRect(), [c0, r0, nc, nr] = view(name);
+  return [Math.floor(c0 + (ev.clientX - r.left) / r.width * nc), Math.floor(r0 + (ev.clientY - r.top) / r.height * nr)];
+}
+
+// ---------- UI: index cards ----------
+const ui = {};
+function buildIndexCards() {
+  const host = document.getElementById("indexCards");
+  for (const k of KEYS) {
+    const m = META.indices[k], step = Math.pow(10, -m.digits);
+    const card = document.createElement("section"); card.className = "card";
+    card.innerHTML = `
+      <div class="spread"><h2>${m.name} index</h2><span class="small num" data-r="pt"></span></div>
+      <div class="small">${m.source}<br><span class="muted">${m.details}</span></div>
+      <canvas class="hist" aria-label="${m.name} distribution across Alaska"></canvas>
+      <div class="axisrow num"><span>${m.lo.toFixed(m.digits)}</span><span>land area by value</span><span>${m.hi.toFixed(m.digits)} ${m.unit}</span></div>
+      <div class="brk">
+        <label>Low up to</label>
+        <input type="range" data-b="0" min="${m.lo}" max="${m.hi}" step="${(m.hi - m.lo) / 1000}" aria-label="${m.name} Low to Medium boundary">
+        <input type="number" data-n="0" step="${step}" aria-label="${m.name} Low to Medium boundary value">
+        <label>High above</label>
+        <input type="range" data-b="1" min="${m.lo}" max="${m.hi}" step="${(m.hi - m.lo) / 1000}" aria-label="${m.name} Medium to High boundary">
+        <input type="number" data-n="1" step="${step}" aria-label="${m.name} Medium to High boundary value">
+      </div>
+      <div class="shares" data-r="bar"></div>
+      <div class="small num" data-r="shares" style="margin-top:3px"></div>`;
+    host.appendChild(card);
+    const q = s => card.querySelector(s);
+    ui[k] = { card, hist: q("canvas"), pt: q('[data-r="pt"]'), bar: q('[data-r="bar"]'), shares: q('[data-r="shares"]'),
+      ranges: [q('[data-b="0"]'), q('[data-b="1"]')], nums: [q('[data-n="0"]'), q('[data-n="1"]')] };
+    for (const j of [0, 1]) {
+      const set = (v) => { if (!Number.isFinite(v)) return; const b = S.breaks[k]; b[j] = v;
+        if (j === 0 && b[1] < v) b[1] = v; if (j === 1 && b[0] > v) b[0] = v; changed(k); };
+      ui[k].ranges[j].addEventListener("input", e => set(+(+e.target.value).toFixed(m.digits)));
+      ui[k].nums[j].addEventListener("input", e => set(parseFloat(e.target.value)));
+    }
+  }
+}
+function syncBreakInputs(k) {
+  const m = META.indices[k];
+  for (const j of [0, 1]) {
+    ui[k].ranges[j].value = S.breaks[k][j];
+    if (document.activeElement !== ui[k].nums[j]) ui[k].nums[j].value = (+S.breaks[k][j]).toFixed(m.digits);
+  }
+}
+function drawHist(k) {
+  const m = META.indices[k], cv = ui[k].hist, dpr = window.devicePixelRatio || 1;
+  cv.width = Math.round(cv.clientWidth * dpr); cv.height = Math.round(70 * dpr);
+  const ctx = cv.getContext("2d"), W = cv.width, H = cv.height, NB = 60, bins = new Float64Array(NB), h = hist[k];
+  const byCls = Array.from({ length: NB }, () => [0, 0, 0]), t = lut(k);
+  let total = 0;
+  for (let c = 1; c < h.length; c++) { if (!h[c]) continue; const v = decode(k, c);
+    const b = Math.min(NB - 1, Math.max(0, Math.floor((v - m.lo) / (m.hi - m.lo) * NB))); bins[b] += h[c]; byCls[b][t[c]] += h[c]; total += h[c]; }
+  const sorted = Array.from(bins).sort((a, b) => b - a);
+  const clipped = sorted[0] > 3 * sorted[1], ymax = clipped ? sorted[1] * 1.25 : sorted[0];
+  const bw = W / NB, gap = Math.max(1, dpr);
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = COLOR[255]; ctx.fillRect(0, 0, W, H);
+  for (let b = 0; b < NB; b++) {
+    if (!bins[b]) continue;
+    const hh = Math.min(1, bins[b] / ymax) * (H - 14 * dpr);  // stacked by class: Low at the bottom
+    let y = H;
+    for (const c of [0, 1, 2]) { if (!byCls[b][c]) continue; const sh = hh * byCls[b][c] / bins[b];
+      ctx.fillStyle = COLOR[c]; ctx.fillRect(b * bw + gap / 2, y - sh, bw - gap, sh); y -= sh; }
+    if (clipped && bins[b] === sorted[0]) {
+      ctx.fillStyle = "#0b0b0b"; ctx.font = `${11 * dpr}px system-ui`; ctx.textAlign = b < NB / 2 ? "left" : "right";
+      ctx.fillText(`${Math.round(100 * bins[b] / total)}% ↑`, b < NB / 2 ? b * bw + bw + 3 * dpr : b * bw - 3 * dpr, 11 * dpr);
+    }
+  }
+  ctx.strokeStyle = "#0b0b0b"; ctx.lineWidth = 2 * dpr;
+  for (const v of S.breaks[k]) { const x = (v - m.lo) / (m.hi - m.lo) * W; if (x < 0 || x > W) continue;
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  const pv = pointValue(k);
+  if (pv != null) { const x = Math.min(W, Math.max(0, (pv - m.lo) / (m.hi - m.lo) * W));
+    ctx.fillStyle = "#0b0b0b"; ctx.beginPath(); ctx.moveTo(x - 6 * dpr, 0); ctx.lineTo(x + 6 * dpr, 0); ctx.lineTo(x, 9 * dpr); ctx.fill(); }
+}
+function classShares(a) {
+  const n = [0, 0, 0, 0]; for (let i = 0; i < N; i++) { const v = a[i]; if (v !== SEA) n[v]++; }
+  return n;
+}
+function sharesFromHist(k) {
+  const t = lut(k), n = [0, 0, 0, 0], h = hist[k]; let landN = 0;
+  for (let c = 1; c < h.length; c++) n[t[c]] += h[c];
+  for (let i = 0; i < N; i++) landN += land[i];
+  n[3] = landN - n[0] - n[1] - n[2];
+  return n;
+}
+function showShares(k) {
+  const n = sharesFromHist(k), tot = n[0] + n[1] + n[2];
+  ui[k].bar.innerHTML = [0, 1, 2].map(c => `<div style="width:${100 * n[c] / tot}%;background:${COLOR[c]}"></div>`).join("");
+  ui[k].shares.textContent = [0, 1, 2].map(c => `${CLS[c]} ${Math.round(100 * n[c] / tot)}%`).join(" · ") + " of mapped land";
+}
+
+// ---------- point ----------
+const huc = {};  // "lat,lon" -> value | null
+let hucState = "idle";
+function pointCell() { return cellOf(S.point.x, S.point.y); }
+function pixelValue(k) {
+  const [c, r] = pointCell(); if (!inGrid(c, r)) return null;
+  const v = codes[k][r * META.nx + c]; return v ? decode(k, v) : null;
+}
+function hucKey() { return `${S.point.lat.toFixed(4)},${S.point.lon.toFixed(4)}`; }
+function pointValue(k) {
+  if (k === "wildfire") { const h = huc[hucKey()]; if (h != null) return h; }
+  return pixelValue(k);
+}
+async function fetchHuc() {
+  const key = hucKey();
+  if (key in huc) return;
+  hucState = "loading"; renderPoint();
+  try {
+    const r = await fetch(`https://earthmaps.io/alfresco/flammability/local/${S.point.lat.toFixed(4)}/${S.point.lon.toFixed(4)}`);
+    const j = r.ok ? await r.json() : null;
+    const v = j && j["2040-2069"] && j["2040-2069"]["5modelAvg"] ? j["2040-2069"]["5modelAvg"]["rcp45"] : null;
+    huc[key] = typeof v === "number" ? v : null; hucState = huc[key] == null ? "none" : "ok";
+  } catch (e) { huc[key] = null; hucState = "error"; }
+  if (key === hucKey()) { renderPoint(); drawHist("wildfire"); }
+}
+function pointClasses() { return KEYS.map(k => classify(k, pointValue(k))); }
+function renderPoint() {
+  const pcls = pointClasses(), hz = TABLE[(pcls[0] << 4) | (pcls[1] << 2) | pcls[2]];
+  const b = document.getElementById("badge");
+  b.className = "badge c" + hz;
+  document.getElementById("badgeTxt").textContent = hz === MISSING ? "No value" : CLS[hz];
+  document.getElementById("badgeWhere").innerHTML =
+    `${S.point.name}<br>${Math.abs(S.point.lat).toFixed(3)}° N, ${Math.abs(S.point.lon).toFixed(3)}° W`;
+  const rows = KEYS.map((k, i) => {
+    const m = META.indices[k]; let src = "";
+    if (k === "wildfire") {
+      const pix = pixelValue(k), hv = huc[hucKey()];
+      src = hucState === "loading" ? "asking SNAP API for the watershed average…"
+        : hv != null ? `watershed (HUC-12) average, SNAP API · pixel: ${pix == null ? "not burnable" : pix.toFixed(4)}`
+        : `API gave no watershed value: using pixel${pix == null ? " (not burnable)" : ""}`;
+    } else src = "1 km pixel";
+    ui[k].pt.innerHTML = `point: ${fmt(k, pointValue(k))} <span class="chip c${pcls[i]}">${pcls[i] === MISSING ? "No value" : CLS[pcls[i]]}</span>`;
+    return `<tr><td><b>${m.name}</b><br><span class="small">${src}</span></td><td class="num">${fmt(k, pointValue(k))}</td>
+      <td><span class="chip c${pcls[i]}">${pcls[i] === MISSING ? "No value" : CLS[pcls[i]]}</span></td></tr>`;
+  });
+  document.getElementById("ptab").innerHTML = rows.join("");
+  const miss = KEYS.filter((k, i) => pcls[i] === MISSING).map(k => META.indices[k].name);
+  document.getElementById("pnote").textContent = miss.length
+    ? `No ${miss.join(" / ")} value here: ${S.missing === "low" ? "counted as Low" : "hazard left blank"} (see rule settings).` : "";
+  renderMatrices(pcls);
+}
+function setPoint(p) {
+  S.point = p; save();
+  document.getElementById("lat").value = p.lat.toFixed(4); document.getElementById("lon").value = p.lon.toFixed(4);
+  const sel = document.getElementById("preset"); sel.value = META.points.some(q => q.name === p.name) ? p.name : "";
+  renderPoint(); drawMaps(); for (const k of KEYS) drawHist(k); fetchHuc();
+}
+function pointFromLatLon(name, lat, lon) { const [x, y] = ALB.fwd(lat, lon); return { name, lat, lon, x, y }; }
+
+// ---------- UI: composite ----------
+function ruleSentence() {
+  const w = S.weights;
+  switch (S.rule) {
+    case "worst": return "The hazard takes the highest of the three classes.";
+    case "avg": return `Score each index Low 1, Medium 2, High 3. Take the weighted average (weights ${w.wildfire} / ${w.erosion} / ${w.permafrost}). Below ${S.avgCuts[0]} is Low, ${S.avgCuts[1]} or more is High, otherwise Medium.`;
+    case "product": return `Score each index Low 1, Medium 2, High 3 and multiply (1 to 27). Up to ${S.prodCuts[0]} is Low, up to ${S.prodCuts[1]} is Medium, above is High.`;
+    case "count": return `High if at least ${S.countHigh} index${S.countHigh > 1 ? "es are" : " is"} High. Otherwise Medium if at least ${S.countMed} ${S.countMed > 1 ? "are" : "is"} Medium or High. Otherwise Low.`;
+    case "custom": return "Each of the 27 combinations is set by hand: click a cell to cycle Low → Medium → High.";
+  }
+}
+function numCtl(label, get, set, min, max, step) {
+  const id = "c" + Math.random().toString(36).slice(2, 8);
+  return { html: `<label for="${id}">${label}</label><input type="range" id="${id}r" min="${min}" max="${max}" step="${step}" value="${get()}" aria-label="${label}"><input type="number" id="${id}" min="${min}" max="${max}" step="${step}" value="${get()}">`,
+    bind() { for (const s of [id, id + "r"]) document.getElementById(s).addEventListener("input", e => {
+      const v = parseFloat(e.target.value); if (!Number.isFinite(v)) return; set(v);
+      document.getElementById(s === id ? id + "r" : id).value = v; ruleChanged(false); }); } };
+}
+function renderRuleCtl() {
+  const box = document.getElementById("ruleCtl"); let ctls = [];
+  if (S.rule === "avg") ctls = [
+    ...KEYS.map(k => numCtl(`${META.indices[k].name} weight`, () => S.weights[k], v => S.weights[k] = v, 0, 3, 0.5)),
+    numCtl("Low below", () => S.avgCuts[0], v => S.avgCuts[0] = v, 1, 3, 0.01),
+    numCtl("High from", () => S.avgCuts[1], v => S.avgCuts[1] = v, 1, 3, 0.01)];
+  if (S.rule === "product") ctls = [numCtl("Low up to", () => S.prodCuts[0], v => S.prodCuts[0] = v, 1, 27, 1),
+    numCtl("Medium up to", () => S.prodCuts[1], v => S.prodCuts[1] = v, 1, 27, 1)];
+  if (S.rule === "count") ctls = [numCtl("Highs needed for High", () => S.countHigh, v => S.countHigh = v, 1, 3, 1),
+    numCtl("Medium-or-High needed for Medium", () => S.countMed, v => S.countMed = v, 1, 3, 1)];
+  if (S.rule === "custom") { box.innerHTML = `<span></span><span class="row"><button id="fillWorst">Start from “worst of three”</button></span><span></span>`;
+    document.getElementById("fillWorst").onclick = () => { S.custom = defaults().custom; ruleChanged(false); };
+    return; }
+  box.innerHTML = ctls.map(c => c.html).join(""); ctls.forEach(c => c.bind());
+}
+function renderMatrices(pcls) {
+  pcls = pcls || pointClasses();
+  const host = document.getElementById("matrices"); let html = "";
+  const here = pcls.map(c => c === MISSING && S.missing === "low" ? 0 : c);
+  for (let p = 0; p < 3; p++) {
+    html += `<table class="mx"><caption>Permafrost ${CLS[p]}</caption><tr><th></th>${CLS.map(c => `<th>E ${c[0]}</th>`).join("")}</tr>`;
+    for (let w = 0; w < 3; w++) {
+      html += `<tr><th>W ${CLS[w][0]}</th>`;
+      for (let e = 0; e < 3; e++) {
+        const v = TABLE[(w << 4) | (e << 2) | p], isHere = here[0] === w && here[1] === e && here[2] === p;
+        html += `<td><button class="c${v}${isHere ? " here" : ""}" data-w="${w}" data-e="${e}" data-p="${p}"
+          aria-label="Wildfire ${CLS[w]}, Erosion ${CLS[e]}, Permafrost ${CLS[p]}: ${CLS[v]}">${CLS[v][0]}</button></td>`;
+      }
+      html += "</tr>";
+    }
+    html += "</table>";
+  }
+  host.innerHTML = html;
+}
+document.getElementById("matrices").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const w = +b.dataset.w, ee = +b.dataset.e, p = +b.dataset.p;
+  if (S.rule !== "custom") {
+    for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) for (let k = 0; k < 3; k++) S.custom[i * 9 + j * 3 + k] = TABLE[(i << 4) | (j << 2) | k];
+    S.rule = "custom"; document.getElementById("rule").value = "custom";
+  }
+  const i = w * 9 + ee * 3 + p; S.custom[i] = (S.custom[i] + 1) % 3;
+  ruleChanged(true);
+});
+
+// ---------- legend, tabs, tooltip ----------
+function renderLegend() {
+  const n = S.layer === "hazard" ? classShares(hazard) : sharesFromHist(S.layer), tot = n[0] + n[1] + n[2] + n[3];
+  const name = S.layer === "hazard" ? "Environmental Hazard" : META.indices[S.layer].name;
+  document.getElementById("legend").innerHTML = `<b>${name}</b>` + [0, 1, 2, 3].map(c =>
+    `<span><span class="sw" style="background:${COLOR[c]}"></span>${c === 3 ? "No value" : CLS[c]} <span class="muted num">${(100 * n[c] / tot).toFixed(0)}%</span></span>`).join("")
+    + `<span class="muted">of Alaska land</span>`;
+}
+function buildTabs() {
+  const t = document.getElementById("tabs");
+  t.innerHTML = [["hazard", "Environmental Hazard"], ...KEYS.map(k => [k, META.indices[k].name])]
+    .map(([k, l]) => `<button data-layer="${k}" aria-pressed="${S.layer === k}">${l}</button>`).join("");
+  t.onclick = e => { const b = e.target.closest("button"); if (!b) return; S.layer = b.dataset.layer; save();
+    t.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x.dataset.layer === S.layer));
+    paintOff(); drawMaps(); renderLegend(); };
+}
+const tip = document.getElementById("tip");
+for (const name in maps) {
+  const el = maps[name].el;
+  el.addEventListener("mousemove", ev => {
+    const [c, r] = eventCell(name, ev);
+    if (!inGrid(c, r) || !land[r * META.nx + c]) { tip.style.display = "none"; return; }
+    const i = r * META.nx + c, [lat, lon] = ALB.inv(...cellXY(c, r));
+    const lab = v => v === MISSING ? "No value" : CLS[v];
+    tip.innerHTML = `<div class="num">${lat.toFixed(3)}° N, ${Math.abs(lon).toFixed(3)}° W</div><table>` + KEYS.map(k => {
+      const v = codes[k][i]; return `<tr><td>${META.indices[k].name}</td><td class="num">${v ? fmt(k, decode(k, v)) : "–"}</td><td><span class="chip c${cls[k][i]}">${lab(cls[k][i])}</span></td></tr>`; }).join("")
+      + `<tr><td><b>Hazard</b></td><td></td><td><span class="chip c${hazard[i]}">${lab(hazard[i])}</span></td></tr></table>`;
+    tip.style.display = "block";
+    const x = ev.clientX + 14, y = ev.clientY + 14, w = tip.offsetWidth, h = tip.offsetHeight;
+    tip.style.left = Math.min(x, innerWidth - w - 8) + "px"; tip.style.top = Math.min(y, innerHeight - h - 8) + "px";
+  });
+  el.addEventListener("mouseleave", () => tip.style.display = "none");
+  el.addEventListener("click", ev => {
+    const [c, r] = eventCell(name, ev); if (!inGrid(c, r)) return;
+    const [x, y] = cellXY(c, r), [lat, lon] = ALB.inv(x, y);
+    setPoint({ name: "Map click", lat, lon, x, y });
+  });
+}
+
+// ---------- update cycle ----------
+let pending = { idx: new Set(), hazard: false }, raf = 0;
+function schedule() { if (!raf) raf = requestAnimationFrame(flush); }
+function flush() {
+  raf = 0; const p = pending; pending = { idx: new Set(), hazard: false };
+  for (const k of p.idx) { computeClasses(k); syncBreakInputs(k); drawHist(k); showShares(k); }
+  if (p.idx.size || p.hazard) { buildTable(); computeHazard(); }
+  paintOff(); drawMaps(); renderLegend(); renderPoint();
+  document.getElementById("sentence").textContent = ruleSentence();
+  save();
+}
+function changed(k) { pending.idx.add(k); schedule(); }
+function ruleChanged(rebuildCtl) { if (rebuildCtl) renderRuleCtl(); pending.hazard = true; schedule(); }
+
+function settingsText() {
+  const L = ["Toy Environmental Hazard Index settings", `Saved ${new Date().toISOString().slice(0, 16).replace("T", " ")}`, ""];
+  for (const k of KEYS) { const m = META.indices[k], b = S.breaks[k];
+    L.push(`${m.name}: Low ≤ ${b[0]} ${m.unit} < Medium ≤ ${b[1]} ${m.unit} < High   (${m.source}; ${m.details})`); }
+  L.push("", "Rule: " + document.getElementById("rule").selectedOptions[0].text, ruleSentence(),
+    "Missing index: " + document.getElementById("missing").selectedOptions[0].text);
+  if (S.rule === "custom") for (let i = 0; i < 27; i++)
+    L.push(`  W ${CLS[Math.floor(i / 9)]}, E ${CLS[Math.floor(i / 3) % 3]}, P ${CLS[i % 3]} -> ${CLS[S.custom[i]]}`);
+  const pc = pointClasses(); L.push("", `Point: ${S.point.name} (${S.point.lat.toFixed(4)}, ${S.point.lon.toFixed(4)})`);
+  KEYS.forEach((k, i) => L.push(`  ${META.indices[k].name}: ${fmt(k, pointValue(k))} -> ${pc[i] === MISSING ? "No value" : CLS[pc[i]]}`));
+  const hz = TABLE[(pc[0] << 4) | (pc[1] << 2) | pc[2]]; L.push(`  Environmental Hazard: ${hz === MISSING ? "No value" : CLS[hz]}`);
+  return L.join("\n");
+}
+
+// ---------- init ----------
+function init() {
+  loadData();
+  buildIndexCards(); buildTabs();
+  const sel = document.getElementById("preset");
+  sel.innerHTML = `<option value="">(custom point)</option>` + META.points.map(p => `<option>${p.name}</option>`).join("");
+  sel.onchange = () => { const p = META.points.find(q => q.name === sel.value); if (p) setPoint({ ...p }); };
+  const go = () => { const lat = parseFloat(document.getElementById("lat").value), lon = parseFloat(document.getElementById("lon").value);
+    if (Number.isFinite(lat) && Number.isFinite(lon)) setPoint(pointFromLatLon("Typed point", lat, -Math.abs(lon))); };
+  document.getElementById("go").onclick = go;
+  for (const id of ["lat", "lon"]) document.getElementById(id).addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+  for (const [id, key] of [["regionKm", "regionKm"], ["localKm", "localKm"]]) {
+    const el = document.getElementById(id); el.value = String(S[key]);
+    el.onchange = () => { S[key] = +el.value; save(); drawMaps(); };
+  }
+  const rule = document.getElementById("rule"); rule.value = S.rule;
+  rule.onchange = () => { S.rule = rule.value; ruleChanged(true); };
+  const miss = document.getElementById("missing"); miss.value = S.missing;
+  miss.onchange = () => { S.missing = miss.value; ruleChanged(false); };
+  document.getElementById("reset").onclick = () => { if (!confirm("Reset all class boundaries and the rule to the defaults?")) return;
+    S = defaults(); save(); location.reload(); };
+  document.getElementById("copy").onclick = async () => {
+    const t = settingsText(), box = document.getElementById("copyBox");
+    box.value = t; box.style.display = "block"; box.select();
+    try { await navigator.clipboard.writeText(t); document.getElementById("copy").textContent = "Copied ✓";
+      setTimeout(() => document.getElementById("copy").textContent = "Copy settings", 1500); } catch (e) {}
+  };
+  renderRuleCtl();
+  KEYS.forEach(k => pending.idx.add(k)); pending.hazard = true;
+  flush();
+  setPoint(S.point);
+  window.addEventListener("resize", () => { drawMaps(); KEYS.forEach(drawHist); });
+  if (location.hash === "#selftest") selfTest();
+}
+function selfTest() {
+  const L = ["SELF-TEST: projection vs pyproj (m), inverse (deg), values at the cell"];
+  for (const p of META.points) {
+    const [x, y] = ALB.fwd(p.lat, p.lon), [la, lo] = ALB.inv(p.x, p.y), [c, r] = cellOf(p.x, p.y);
+    const vals = KEYS.map(k => { const v = inGrid(c, r) ? codes[k][r * META.nx + c] : 0; return v ? decode(k, v).toFixed(4) : "nan"; });
+    L.push(`${p.name.padEnd(22)} dx=${(x - p.x).toFixed(3)} dy=${(y - p.y).toFixed(3)} dlat=${(la - p.lat).toExponential(1)} dlon=${(lo - p.lon).toExponential(1)} cell=${c},${r} W/E/P=${vals.join(" / ")}`);
+  }
+  const keep = JSON.stringify(S), tab = () => Array.from({ length: 27 }, (_, i) =>
+    CLS[TABLE[(Math.floor(i / 9) << 4) | ((Math.floor(i / 3) % 3) << 2) | (i % 3)]][0]).join("");
+  for (const r of ["worst", "avg", "product", "count", "custom"]) {
+    S.rule = r; renderRuleCtl(); buildTable(); computeHazard();
+    L.push(`rule ${r.padEnd(8)} WEP LLL..HHH = ${tab()}  land L/M/H/none = ${classShares(hazard).join(" / ")}`);
+  }
+  S.rule = "worst"; renderRuleCtl();
+  const num = ui.erosion.nums[1]; num.value = "6.5"; num.dispatchEvent(new Event("input")); flush();
+  L.push(`typed erosion "High above" 6.5 -> breaks ${S.breaks.erosion}, ${ui.erosion.shares.textContent}`);
+  document.querySelector('#matrices button[data-w="0"][data-e="0"][data-p="0"]').click(); flush();
+  L.push(`clicked cell W L / E L / P L -> rule ${S.rule}, that cell now ${CLS[S.custom[0]]}, sentence: ${document.getElementById("sentence").textContent}`);
+  S = JSON.parse(keep); save();
+  try {
+    const x = new XMLHttpRequest(), p = META.points[0];
+    x.open("GET", `https://earthmaps.io/alfresco/flammability/local/${p.lat.toFixed(4)}/${p.lon.toFixed(4)}`, false); x.send();
+    L.push(`API from this page: HTTP ${x.status}, 2040-2069 5modelAvg rcp45 = ${JSON.parse(x.responseText)["2040-2069"]["5modelAvg"]["rcp45"]}`);
+  } catch (e) { L.push("API from this page FAILED: " + e); }
+  const t = document.getElementById("selftest"); t.textContent = L.join("\n"); t.style.display = "block";
+}
+window.addEventListener("load", init);
+</script>
+</body>
+</html>
