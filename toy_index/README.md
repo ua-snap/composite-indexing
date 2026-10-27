@@ -7,12 +7,18 @@ Data-structure caveats are listed in [DATA_ISSUES.md](DATA_ISSUES.md).
 Each index, and the rule that combines them, is its own workstream with several **variants** (candidate versions)
 to compare. The app shows every variant, so new ones appear as soon as they are built.
 
-| Workstream | Question, variants, open questions | Decisions |
-|---|---|---|
-| Wildfire | [wildfire/README.md](wildfire/README.md) | [DECISIONS](wildfire/DECISIONS.md) |
-| Erosion | [erosion/README.md](erosion/README.md) | [DECISIONS](erosion/DECISIONS.md) |
-| Permafrost | [permafrost/README.md](permafrost/README.md) | [DECISIONS](permafrost/DECISIONS.md) |
-| Combining | [composite/README.md](composite/README.md) | [DECISIONS](composite/DECISIONS.md) |
+| Workstream | Question, variants, open questions | Plan of work | Decisions |
+|---|---|---|---|
+| Wildfire | [wildfire/README.md](wildfire/README.md) | [PLAYBOOK](wildfire/PLAYBOOK.md) | [DECISIONS](wildfire/DECISIONS.md) |
+| Erosion | [erosion/README.md](erosion/README.md) | [PLAYBOOK](erosion/PLAYBOOK.md) | [DECISIONS](erosion/DECISIONS.md) |
+| Permafrost | [permafrost/README.md](permafrost/README.md) | [PLAYBOOK](permafrost/PLAYBOOK.md) | [DECISIONS](permafrost/DECISIONS.md) |
+| Combining | [composite/README.md](composite/README.md) | [PLAYBOOK](composite/PLAYBOOK.md) | [DECISIONS](composite/DECISIONS.md) |
+
+Each playbook: what "High" should mean (decide first), a ranked variant backlog with data source and cost (catalog
+IDs refer to the Arctic-EDS Candidate Data Catalog, copy saved 2026-10-27 as
+[arctic_eds_candidate_data_catalog.csv](arctic_eds_candidate_data_catalog.csv)), how variants get compared, decisions for the team, and the first
+session's work. The loop for every workstream: build variants → compare (`compare.py`, to come) → publish to the
+shared link → team reacts → record the decision.
 
 ## Using the app
 **Shared link** (claude.ai; shared with "anyone with the link"): https://claude.ai/artifact/BUwzxzSDTSzFa6exz8zwAN.
