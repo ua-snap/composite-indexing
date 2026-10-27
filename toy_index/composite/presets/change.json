@@ -1,0 +1,10 @@
+{
+  "name": "Change over time",
+  "description": "Change from each index's baseline",
+  "order": 2,
+  "variants": {
+    "wildfire": "flam-change",
+    "erosion": "storm-24h-100yr-change",
+    "permafrost": "thaw-progress"
+  }
+}

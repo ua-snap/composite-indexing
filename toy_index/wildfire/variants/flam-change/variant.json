@@ -1,0 +1,38 @@
+{
+  "label": "Flammability, change",
+  "description": "Change in ALFRESCO relative flammability (chance of burning per year)",
+  "details": "1980–2008 historical run → 2040–2069 · 5-model average · RCP 4.5",
+  "unit": "/yr",
+  "digits": 4,
+  "offset": 0.05,
+  "scale": 100000.0,
+  "range_q": [
+    0.005,
+    0.995
+  ],
+  "breaks": "zero-median-increase",
+  "signed": true,
+  "point_api": {
+    "route": "/alfresco/flammability/local/{lat}/{lon}",
+    "cache_label": "toy_flam_local",
+    "label": "watershed (HUC-12) average",
+    "value": [
+      "2040-2069",
+      "5modelAvg",
+      "rcp45"
+    ],
+    "minus": [
+      "1980-2008",
+      "MODEL-SPINUP",
+      "historical"
+    ]
+  },
+  "sources": [
+    "Rasdaman alfresco_relative_flammability_30yr era 3/1, model 1/0, scenario 1/0",
+    "point: earthmaps.io HUC-12 averages"
+  ],
+  "status": "candidate",
+  "in_single_file": true,
+  "author": "Joshdpaul",
+  "created": "2026-10-27"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Future values",
+  "description": "Mid-century amounts for every index",
+  "order": 1,
+  "variants": {
+    "wildfire": "flam-future",
+    "erosion": "storm-24h-100yr-future",
+    "permafrost": "temp-1m-future"
+  }
+}
