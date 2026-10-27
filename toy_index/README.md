@@ -5,8 +5,14 @@ on screen into one Environmental Hazard class. Not rigorous and not for decision
 [DATA_ISSUES.md](DATA_ISSUES.md).
 
 ## Using the app
+Shared copy (private claude.ai page, share it from its Share menu): https://claude.ai/artifact/BUwzxzSDTSzFa6exz8zwAN.
+On that page the wildfire point value comes from the SNAP API only for the preset places (fetched when the page was
+built); a clicked or typed point uses the map pixel instead, because hosted pages can't call outside websites.
+
 Open `build/toy_index_app.html` in a browser (Chrome, Firefox, Edge or Safari). It is a single 5 MB file with the data
 built in: download it and double-click it. You need internet only for the wildfire point value (SNAP API).
+On GitHub, open the file and use **Download raw file** (GitHub shows HTML as source code, not as a page). It is the only
+tracked file in `build/` (force-added; the folder is otherwise ignored), so commit it again after each rebuild.
 
 - **Point** (top left): pick a place, type a latitude/longitude, or click any map. The badge shows the point's
   Environmental Hazard; the table below shows each index's value and class.

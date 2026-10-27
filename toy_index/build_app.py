@@ -16,10 +16,12 @@ import numpy as np
 import pyproj
 from PIL import Image
 
+from composite_indexing import api
 from composite_indexing import config as C
 
 HERE = Path(__file__).resolve().parent
 OUT = HERE / "build" / "toy_index_app.html"
+OUT_ARTIFACT = HERE / "build" / "toy_hazard_index.html"
 GRIDS = C.DATA / "toy_index" / "grids_1km.npz"
 
 INDICES = {
@@ -50,6 +52,17 @@ POINTS = [  # (name, lat, lon); first = default
     ("Utqiaġvik", 71.2906, -156.7887),
     ("Juneau", 58.3019, -134.4197),
 ]
+
+
+def huc_value(lat, lon):
+    """Wildfire point value for a preset: SNAP API HUC-12 flammability (2040-2069, 5modelAvg, rcp45), cached.
+    Hosted pages can't call the API themselves, so presets carry it."""
+    try:
+        j = api.get_json(f"/alfresco/flammability/local/{lat:.4f}/{lon:.4f}", "toy_flam_local")
+        return j["2040-2069"]["5modelAvg"]["rcp45"]
+    except Exception as e:  # no watershed value (e.g. coast) or HTTP error
+        print(f"  no HUC value at {lat}, {lon}: {e}")
+        return None
 
 
 def sig2(v):
@@ -101,7 +114,8 @@ def main():
             x, y = meta["x0"] + (c + 0.5) * C.GIPL_RES, meta["ytop"] - (r + 0.5) * C.GIPL_RES
             lon, lat = inv.transform(x, y)
             name = f"{name} (nearest data, {np.hypot(rr[k] - SNAP_KM, cc[k] - SNAP_KM):.0f} km)"
-        meta["points"].append(dict(name=name, lat=round(lat, 4), lon=round(lon, 4), x=round(x, 2), y=round(y, 2)))
+        meta["points"].append(dict(name=name, lat=round(lat, 4), lon=round(lon, 4), x=round(x, 2), y=round(y, 2),
+                                   huc=huc_value(round(lat, 4), round(lon, 4))))
 
     html = (HERE / "app_template.html").read_text()
     imgs = "\n".join(f'<img id="png-{k}" alt="" hidden src="data:image/png;base64,{b}">' for k, b in images.items())
@@ -109,6 +123,12 @@ def main():
     OUT.parent.mkdir(exist_ok=True)
     OUT.write_text(html)
     print(f"wrote {OUT} ({OUT.stat().st_size / 1e6:.1f} MB)")
+    # claude.ai Artifact copy: the host adds the doctype/html/head/body skeleton, so the file starts at <title>
+    head, rest = html.split("<title>", 1)
+    body = rest.split("</head>", 1)
+    art = "<title>" + body[0] + body[1].replace("<body>", "", 1).replace("</body>\n</html>", "")
+    OUT_ARTIFACT.write_text(art)
+    print(f"wrote {OUT_ARTIFACT}")
 
 
 if __name__ == "__main__":

@@ -1,1 +1,2 @@
 build/
+# except build/toy_index_app.html, which is tracked (force-added) so it can be downloaded from GitHub

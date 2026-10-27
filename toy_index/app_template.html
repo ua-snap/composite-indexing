@@ -15,9 +15,9 @@
   --grid: #e1e0d9;
   --axis: #c3c2b7;
   --border: rgba(11, 11, 11, 0.10);
-  --low: #2a78d6;
-  --med: #eda100;
-  --high: #c2410c;
+  --low: #0072b2;
+  --med: #f0e442;
+  --high: #d55e00;
   --nodata: #d6d5ce;
   --focus: #0b0b0b;
 }
@@ -188,7 +188,7 @@ const META = /*__META__*/null;
 const KEYS = ["wildfire", "erosion", "permafrost"];
 const CLS = ["Low", "Medium", "High"];
 const MISSING = 3, SEA = 255;
-const COLOR = { 0: "#2a78d6", 1: "#eda100", 2: "#c2410c", 3: "#d6d5ce", 255: "#fcfcfb" };
+const COLOR = { 0: "#0072b2", 1: "#f0e442", 2: "#d55e00", 3: "#d6d5ce", 255: "#fcfcfb" };
 const N = META.nx * META.ny;
 const STORE = "toyIndex.v1";
 
@@ -439,7 +439,8 @@ function showShares(k) {
 }
 
 // ---------- point ----------
-const huc = {};  // "lat,lon" -> value | null
+const huc = {};  // "lat,lon" -> value | null; presets carry a value fetched at build time
+for (const p of META.points) if (p.huc != null) huc[`${p.lat.toFixed(4)},${p.lon.toFixed(4)}`] = p.huc;
 let hucState = "idle";
 function pointCell() { return cellOf(S.point.x, S.point.y); }
 function pixelValue(k) {
@@ -453,7 +454,7 @@ function pointValue(k) {
 }
 async function fetchHuc() {
   const key = hucKey();
-  if (key in huc) return;
+  if (key in huc) { hucState = huc[key] == null ? "none" : "ok"; renderPoint(); return; }
   hucState = "loading"; renderPoint();
   try {
     const r = await fetch(`https://earthmaps.io/alfresco/flammability/local/${S.point.lat.toFixed(4)}/${S.point.lon.toFixed(4)}`);
@@ -477,6 +478,7 @@ function renderPoint() {
       const pix = pixelValue(k), hv = huc[hucKey()];
       src = hucState === "loading" ? "asking SNAP API for the watershed average…"
         : hv != null ? `watershed (HUC-12) average, SNAP API · pixel: ${pix == null ? "not burnable" : pix.toFixed(4)}`
+        : hucState === "error" ? `SNAP API not reachable from this page: using pixel${pix == null ? " (not burnable)" : ""}`
         : `API gave no watershed value: using pixel${pix == null ? " (not burnable)" : ""}`;
     } else src = "1 km pixel";
     ui[k].pt.innerHTML = `point: ${fmt(k, pointValue(k))} <span class="chip c${pcls[i]}">${pcls[i] === MISSING ? "No value" : CLS[pcls[i]]}</span>`;
@@ -646,8 +648,17 @@ function init() {
   rule.onchange = () => { S.rule = rule.value; ruleChanged(true); };
   const miss = document.getElementById("missing"); miss.value = S.missing;
   miss.onchange = () => { S.missing = miss.value; ruleChanged(false); };
-  document.getElementById("reset").onclick = () => { if (!confirm("Reset all class boundaries and the rule to the defaults?")) return;
-    S = defaults(); save(); location.reload(); };
+  let armed = 0;  // two-click reset (hosted pages can't show confirm dialogs)
+  const resetBtn = document.getElementById("reset");
+  resetBtn.onclick = () => {
+    if (!armed) { resetBtn.textContent = "Click again to reset"; armed = setTimeout(() => { armed = 0; resetBtn.textContent = "Reset all"; }, 4000); return; }
+    clearTimeout(armed); armed = 0; resetBtn.textContent = "Reset all";
+    S = defaults(); save();
+    rule.value = S.rule; miss.value = S.missing;
+    document.getElementById("regionKm").value = String(S.regionKm); document.getElementById("localKm").value = String(S.localKm);
+    document.querySelectorAll("#tabs button").forEach(x => x.setAttribute("aria-pressed", x.dataset.layer === S.layer));
+    renderRuleCtl(); KEYS.forEach(k => pending.idx.add(k)); pending.hazard = true; flush(); setPoint(S.point);
+  };
   document.getElementById("copy").onclick = async () => {
     const t = settingsText(), box = document.getElementById("copyBox");
     box.value = t; box.style.display = "block"; box.select();
