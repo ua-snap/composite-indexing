@@ -1,8 +1,8 @@
-# Toy index: data structure issues (running list)
+# Team workbench: data structure issues (running list)
 
-**Short answer:** the three datasets behind the toy index (wildfire, erosion, permafrost) were built by different
+**Short answer:** the three datasets behind the team workbench (wildfire, erosion, permafrost) were built by different
 projects for different purposes. They don't share one model set, emissions scenario, time window, grid, unit or kind
-of number. Even a "fingerpaint" index has to paper over these gaps, so this list records each gap and how the toy
+of number. Even a working index has to paper over these gaps, so this list records each gap and how the workbench
 handles it. Anything we'd need to fix properly in a real index is marked **real fix needed**.
 
 Started 2026-10-27; add to it as we go.
@@ -24,27 +24,27 @@ Started 2026-10-27; add to it as we go.
 
 ## Issues so far
 
-| # | Issue | Where it shows up | What the toy does | |
+| # | Issue | Where it shows up | What the workbench does | |
 |---|---|---|---|---|
 | 1 | **Model mismatch** | Erosion has only 2 models; the others use a 5-model average. Wildfire and GIPL "5-model averages" may be built differently (averaged inputs vs averaged outputs; not yet confirmed). | Average the 2 erosion models; label it. | real fix needed |
 | 2 | **Scenario mismatch** | Erosion exists only for RCP 8.5 (WRF downscaling); the others use RCP 4.5. | Use RCP 8.5 for erosion; label it. | real fix needed |
 | 3 | **Era mismatch** | Wildfire is fixed at 2040–2069 and erosion at 2050–2079; GIPL is annual. | Use the nearest era for each; GIPL averaged to 2040–2069 to match wildfire. | real fix needed |
-| 4 | **Grid mismatch** | Three grids: wildfire 1 km, GIPL 1 km (offset ~430 m from wildfire), erosion ~480 m. All EPSG:3338 but cell edges don't line up. | Everything moved onto the GIPL 1 km grid (wildfire: nearest cell; erosion: averaged). | ok for toy |
-| 5 | **Extent mismatch** | Wildfire stops ~10 km short of the GIPL box's south edge and includes Yukon; erosion covers ocean and Canada; GIPL is Alaska land only. | Cut everything to the GIPL land mask. | ok for toy |
+| 4 | **Grid mismatch** | Three grids: wildfire 1 km, GIPL 1 km (offset ~430 m from wildfire), erosion ~480 m. All EPSG:3338 but cell edges don't line up. | Everything moved onto the GIPL 1 km grid (wildfire: nearest cell; erosion: averaged). | ok for now |
+| 5 | **Extent mismatch** | Wildfire stops ~10 km short of the GIPL box's south edge and includes Yukon; erosion covers ocean and Canada; GIPL is Alaska land only. | Cut everything to the GIPL land mask. | ok for now |
 | 6 | **Different kinds of number** | A yearly probability (wildfire), a rare extreme event (erosion) and an average condition (permafrost). "High" means something different in each. | Each index gets its own Low/Med/High breaks. | discuss |
 | 7 | **Pixel vs area values** | SNAP says single ALFRESCO pixels aren't statistically meaningful; their API only gives HUC-12 averages. | Maps show raw pixels; the point rating uses the API's HUC-12 average. So the point rating can differ from the pixel under it, and HUC averages are smoother (fewer "High" points). | discuss |
 | 8 | **Holes in the data** | Wildfire: ~20 % of land has no value (not burnable: water, ice, rock, towns). GIPL: "stuck" model cells and a 2 km border around them are masked (D17); ~6 % of land, including downtown Fairbanks. | Holes shown in grey. Default point moved to Fort Wainwright (clean GIPL cell). | discuss |
 | 9 | **"No value" vs "zero"** | Wildfire has both blank cells (not burnable) and true zeros (burnable, but never burned in the simulations); 26 % of land is exactly 0. Because of that pile of zeros, a "thirds of the land" default puts the Low/Medium boundary at 0.0001, so Low means "essentially never burns". | Zeros are Low; blanks are grey. Team to set the boundary. | discuss |
 | 10 | **What "high" means for permafrost** | Ground above 0 °C at 1 m usually means no permafrost there, so nothing is left to thaw. That's 58 % of mapped land by 2040–2069. A warm cell may be "already thawed / not applicable" rather than "high hazard". | Treated as High for now. | discuss |
-| 11 | **Units** | Flammability is a fraction; erosion is stored in thousandths of an inch on Rasdaman but returned in **mm** by the API; GIPL is °C. | Converted to inches; API-vs-server unit difference noted in code. | ok for toy |
+| 11 | **Units** | Flammability is a fraction; erosion is stored in thousandths of an inch on Rasdaman but returned in **mm** by the API; GIPL is °C. | Converted to inches; API-vs-server unit difference noted in code. | ok for now |
 | 12 | **Uncertainty only for erosion** | Erosion has 90 % confidence bounds (`pf_lower`, `pf_upper`); the others don't. | Ignored. | later |
 | 13 | **Hidden choices inside datasets** | Wildfire: SNAP files come in 3 fire-management versions, but Rasdaman serves one (which one isn't stated). Erosion: we picked one storm length (24 h) and one return interval (100 yr) out of 15 × 9. | Use what Rasdaman serves; 24 h / 100 yr fixed. | real fix needed |
-| 14 | **Labels and encodings** | GIPL year labels are 20 years late (GIPL_ISSUE_3). Rasdaman axes are coded by number, sometimes in odd orders (erosion: 24 h = index 3, 60 min = 12). | Labels decoded from server metadata; all checked against the API at Fairbanks. | ok for toy |
-| 15 | **Server output quirk** | Rasdaman returns erosion GeoTIFFs **transposed** (rows and columns swapped). A square test window hides it. | Transposed when read; checked against the land mask and the API. | ok for toy |
+| 14 | **Labels and encodings** | GIPL year labels are 20 years late (GIPL_ISSUE_3). Rasdaman axes are coded by number, sometimes in odd orders (erosion: 24 h = index 3, 60 min = 12). | Labels decoded from server metadata; all checked against the API at Fairbanks. | ok for now |
+| 15 | **Server output quirk** | Rasdaman returns erosion GeoTIFFs **transposed** (rows and columns swapped). A square test window hides it. | Transposed when read; checked against the land mask and the API. | ok for now |
 | 16 | **Baseline periods don't match** (delta) | Wildfire's "before" is 1980–2008; erosion's is the climate model's 1979–2005, shown as NOAA Atlas 14 amounts (see 17); permafrost's is 2004–2015 (the only GIPL years run on observed weather). | Use each dataset's best "before"; label it. | discuss |
-| 17 | **Erosion "before" is Atlas 14, but the change is the model's** (delta) | SNAP's DOT amounts are NOAA Atlas 14 (rain gauges) multiplied by the climate model's change since 1979–2005, which removes the model's bias (Bieniek et al. 2022). So DOT ÷ Atlas 14 is the projected change since 1979–2005 (median +27 % by 2020–2049, +42 % by 2050–2079). It assumes Atlas 14 (gauge record 1867–2011) stands for 1979–2005. We confirmed the pattern in the grids, not the code. | Change = DOT 2050–2079 ÷ Atlas 14. | ok for toy |
+| 17 | **Erosion "before" is Atlas 14, but the change is the model's** (delta) | SNAP's DOT amounts are NOAA Atlas 14 (rain gauges) multiplied by the climate model's change since 1979–2005, which removes the model's bias (Bieniek et al. 2022). So DOT ÷ Atlas 14 is the projected change since 1979–2005 (median +27 % by 2020–2049, +42 % by 2050–2079). It assumes Atlas 14 (gauge record 1867–2011) stands for 1979–2005. We confirmed the pattern in the grids, not the code. | Change = DOT 2050–2079 ÷ Atlas 14. | ok for now |
 | 18 | **Same name, different product** (delta) | SNAP's local "ALFRESCO Flammability" yearly GeoTIFFs are not the Rasdaman "relative flammability": the historical files are 0/1 (burned or not), and none of the three fire-management versions reproduces Rasdaman's 2040–2069 grid (means differ ~25 %). | Baseline taken from the same Rasdaman coverage (1980–2008). | discuss |
-| 19 | **Percent change blows up near zero** (delta) | Wildfire has 26 % zeros (percent undefined); permafrost "progress to thaw" divides by the starting temperature, and 13.5 % of land starts between −0.5 and 0 °C. | Wildfire uses absolute change; permafrost values clipped for display (the class is still right: crossing 0 °C = over 100 %). | ok for toy |
+| 19 | **Percent change blows up near zero** (delta) | Wildfire has 26 % zeros (percent undefined); permafrost "progress to thaw" divides by the starting temperature, and 13.5 % of land starts between −0.5 and 0 °C. | Wildfire uses absolute change; permafrost values clipped for display (the class is still right: crossing 0 °C = over 100 %). | ok for now |
 
 ## Caveats
 - The list covers structure (how the datasets fit together), not whether each dataset is right.

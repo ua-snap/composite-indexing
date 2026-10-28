@@ -1,4 +1,4 @@
-"""Cached Rasdaman requests for the toy index (merged from fetch_pilot.py and fetch_statewide.py; same requests, so
+"""Cached Rasdaman requests for the team workbench (merged from fetch_pilot.py and fetch_statewide.py; same requests, so
 the cache still hits). Rules (CLAUDE.md): sequential, cached, never re-requested; new requests need the user's OK.
 
 Approved and made 2026-10-27:

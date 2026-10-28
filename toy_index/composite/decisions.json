@@ -1,0 +1,39 @@
+{
+  "note": "Repo copy of the team decisions. The app starts from these until the team saves its own; Claude copies the app's saved decisions back here. breaks: per variant, only where they differ from variant.json.",
+  "wildfire": {
+    "variant": "flam-future",
+    "breaks": {},
+    "note": ""
+  },
+  "erosion": {
+    "variant": "storm-24h-100yr-future",
+    "breaks": {},
+    "note": ""
+  },
+  "permafrost": {
+    "variant": "temp-1m-future",
+    "breaks": {},
+    "note": ""
+  },
+  "hazard": {
+    "rule": "worst",
+    "weights": {
+      "wildfire": 1,
+      "erosion": 1,
+      "permafrost": 1
+    },
+    "avgCuts": [
+      1.5,
+      2.5
+    ],
+    "prodCuts": [
+      4,
+      12
+    ],
+    "countHigh": 2,
+    "countMed": 1,
+    "custom": null,
+    "missing": "low",
+    "note": ""
+  }
+}

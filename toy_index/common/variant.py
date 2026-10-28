@@ -5,9 +5,11 @@ Repo:  toy_index/<index>/variants/<id>/variant.json   description (fields below)
 Data:  <data>/toy_index/variants/<index>/<id>.tif     band 1 values (NaN = no value); band 2 (if any) na mask
 
 variant.json fields
-  label          short name shown in the app's dropdown, e.g. "Flammability, change"
+  letter         the variant's name in the app: "A", "B", ... (unique within the index; never reused)
+  label          short name shown under the letter, e.g. "Flammability, change"
   description    one line: what a value means
   details        periods · models · scenario
+  method         how it's computed, in words, enough to rebuild it (shown in the app and the PDF export)
   unit, digits   display (digits also sets the slider/number step)
   offset, scale  app encoding: code = round((value + offset) * scale) + 1 must fit in 1..65534
   range_q        [lo, hi] quantiles of land values for the histogram/slider range
@@ -18,7 +20,6 @@ variant.json fields
   na_label, na_class   cells flagged in band 2: no value, fixed class (0 Low, 1 Medium, 2 High), shown as na_label
   point_api      watershed point value from the SNAP API instead of the pixel: {route, value: [keys], minus: [keys]}
   status         draft | candidate | recommended | retired (retired variants are left out of the app)
-  in_single_file include in the single-file (download) app, which holds about six variants at most
   sources, author, created
 """
 import importlib.util
@@ -50,10 +51,15 @@ def registry():
     return out
 
 
-def presets():
-    """Composite presets: list of dict(id, ...), ordered by their "order" field."""
-    ps = [dict(json.loads(f.read_text()), id=f.stem) for f in (ROOT / "composite" / "presets").glob("*.json")]
-    return sorted(ps, key=lambda p: (p.get("order", 99), p["id"]))
+def index_info(index):
+    """toy_index/<index>/index.json: name, question (index "composite" = the Environmental Hazard)."""
+    return json.loads((ROOT / index / "index.json").read_text())
+
+
+def decisions():
+    """The repo copy of the team decisions (composite/decisions.json): per index {variant, breaks, note}, and
+    "hazard" (the combining rule). The app starts from these until the team saves its own."""
+    return json.loads((ROOT / "composite" / "decisions.json").read_text())
 
 
 def run_build(v):
@@ -72,6 +78,21 @@ def save(index, vid, values, na=None):
         for i, b in enumerate(bands, 1):
             ds.write(b, i)
     return p
+
+
+def sig2(v):
+    return float(f"{v:.2g}")
+
+
+def default_breaks(rule, v):
+    """[b1, b2] from variant.json "breaks" over the mapped land values v (see the field list above)."""
+    if isinstance(rule, list):
+        return rule
+    if rule == "thirds":
+        return [sig2(q) for q in np.quantile(v, [1 / 3, 2 / 3])]
+    if rule == "zero-median-increase":
+        return [0.0, sig2(np.median(v[v > 0]))]
+    raise ValueError(f"unknown breaks rule {rule!r}")
 
 
 def load(index, vid):

@@ -1,4 +1,4 @@
-"""The common grid of every toy index variant: the GIPL 1 km grid (EPSG:3338, 1941 x 2471)."""
+"""The common grid of every workbench variant: the GIPL 1 km grid (EPSG:3338, 1941 x 2471)."""
 import numpy as np
 import rasterio
 from affine import Affine
