@@ -1,7 +1,9 @@
 {
+  "letter": "B",
   "label": "24-hour, 100-year storm, change",
   "description": "Change in rain in the 24-hour, 100-year storm",
   "details": "NOAA Atlas 14 (model’s 1979–2005) → 2050–2079 · mean of GFDL-CM3 and NCAR-CCSM4 · RCP 8.5",
+  "method": "Percent change in the 24-hour, 100-year storm: 100 × (2050–2079 depth ÷ NOAA Atlas 14 depth − 1). The 2050–2079 depth is Variant A. Atlas 14 is Volume 7 (Alaska), 24-hour, 100-year, annual maximum series (hdsc.nws.noaa.gov/pub/hdsc/data/ak/ak100yr24ha_ams.zip, 1/1000 inch, NAD83 lon/lat), averaged over 3 × 3 points per 1 km cell. SNAP's DOT depths are Atlas 14 × each model's change since 1979–2005 (Bieniek et al. 2022, JAMC 61(2)), so this is the models' projected change since 1979–2005.",
   "unit": "%",
   "digits": 0,
   "offset": 100,
@@ -18,7 +20,6 @@
     "Bieniek et al. 2022, JAMC 61(2), doi:10.1175/JAMC-D-21-0106.1"
   ],
   "status": "candidate",
-  "in_single_file": true,
   "author": "Joshdpaul",
   "created": "2026-10-27"
 }

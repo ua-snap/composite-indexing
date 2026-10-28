@@ -8,7 +8,7 @@ how much the answer depends on the model. Everything in the first session is loc
 
 **Key terms**
 - **GIPL:** the permafrost model behind SNAP's ground-temperature maps (1 km, 2021–2120 files = climate 2001–2100).
-- **MAGT:** mean annual ground temperature at a depth (1 m in the toy). Above 0 °C means no permafrost at that depth.
+- **MAGT:** mean annual ground temperature at a depth (1 m in the workbench). Above 0 °C means no permafrost at that depth.
 - **Active layer / permafrost top:** the ground that thaws each summer; the depth where permafrost starts.
 - **Talik:** unfrozen ground within permafrost; forms as permafrost degrades.
 
@@ -49,7 +49,7 @@ Priority 1 = local data or existing results · 2 = more work · 3 = new data.
 | `ground-ice` | weight by ground-ice content | permafrost ground-ice map (NSIDC) | new download | 3 |
 
 ## 4. How we'll compare variants
-- **Standard comparison** (`compare.py`): maps, distributions, class shares by region, class agreement, preset places.
+- **Standard comparison** (the app's **Compare variants** section): maps, distributions, class shares by region, class agreement, preset places.
 - **Reality check:** GIPL against measured borehole temperatures (`<data>/boreholes/`, TSP network), ESA CCI [P2]
   and the Obu et al. 2019 permafrost zones [P8]. Coarse model products [P5, P6] (~50 km) can show whether GIPL's
   statewide trend is typical.
@@ -59,7 +59,7 @@ Priority 1 = local data or existing results · 2 = more work · 3 = new data.
 ## 5. Decisions for the team
 1. Meaning of "High" (section 1), and how "no permafrost at the start" is classed.
 2. Use PTI as the permafrost index outright (it's the most developed), or keep a simpler GIPL measure?
-3. PTI eras (2026–2050, 2051–2080) vs the toy's 2040–2069: re-run PTI for 2040–2069, or accept the nearest era?
+3. PTI eras (2026–2050, 2051–2080) vs the workbench's 2040–2069: re-run PTI for 2040–2069, or accept the nearest era?
 4. Our PTI's name, given Guo et al.'s published Permafrost Thaw Index [P3].
 
 ## 6. First session

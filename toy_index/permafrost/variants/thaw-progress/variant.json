@@ -1,7 +1,9 @@
 {
+  "letter": "B",
   "label": "Progress to thaw at 1 m",
   "description": "Progress to thaw at 1 m: warming as a share of the distance to 0 °C (100 % = crosses 0 °C)",
   "details": "2004–2015 → 2040–2069 · GIPL 2.0 · 5-model average · RCP 4.5 · ground not frozen at the start counts as Low",
+  "method": "Warming at 1 m as a share of the distance to 0 °C: 100 × (T_future − T_base) ÷ (0 − T_base). T_base = GIPL 2.0 1 m temperature averaged over climate years 2004–2015 (the years run on observed weather); T_future = 2040–2069 (as Variant A; 5-model average, RCP 4.5). 100 % means the ground crosses 0 °C. Ground not frozen at the start (T_base ≥ 0 °C) has no permafrost to lose: it gets no value and counts as Low. Stuck cells removed as in Variant A.",
   "unit": "%",
   "digits": 0,
   "offset": 200,
@@ -25,7 +27,6 @@
     "stuck-cell mask D17"
   ],
   "status": "candidate",
-  "in_single_file": true,
   "author": "Joshdpaul",
   "created": "2026-10-27"
 }

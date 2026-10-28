@@ -2,240 +2,765 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Toy Hazard Index</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hazard Index Team Workbench</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
 <style>
+/* Layout: a sticky tab bar over full-width pages. Index pages = variant cards in a row, then the comparison;
+   Hazard = read-only inputs, rule, maps; Summary = one hazard map with the decisions laid out as a flow. */
 :root {
-  color-scheme: light;
-  --page: #f9f9f7;
-  --surface: #fcfcfb;
-  --ink: #0b0b0b;
-  --ink-2: #52514e;
-  --muted: #898781;
-  --grid: #e1e0d9;
-  --axis: #c3c2b7;
-  --border: rgba(11, 11, 11, 0.10);
+  --page: #f4f5f2;
+  --surface: #ffffff;
+  --sunk: #eaece7;
+  --ink: #141816;
+  --ink-2: #4a524d;
+  --muted: #7d8680;
+  --line: #d8dcd5;
+  --axis: #b5bcb6;
+  --accent: #1d5c4f;
+  --accent-ink: #ffffff;
+  --accent-soft: #dcebe6;
+  --warn: #9a5b00;
+  --warn-soft: #fbecd2;
   --low: #0072b2;
   --med: #f0e442;
   --high: #d55e00;
-  --nodata: #d6d5ce;
-  --focus: #0b0b0b;
+  --nodata: #cfd3cc;
+  --sea: #ffffff;
+  --same: #d4e4f7;
+  --apart1: #5598e7;
+  --apart2: #0d366b;
+  --same-ink: #141816;
+  --apart1-ink: #141816;
+  --apart2-ink: #ffffff;
+  --seq: #2a78d6;
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #101312; --surface: #181c1a; --sunk: #222724; --ink: #edf0ed; --ink-2: #b8c1bb; --muted: #858f89;
+    --line: #2d3430; --axis: #46504a; --accent: #74c3ad; --accent-ink: #0c1311; --accent-soft: #1f3530;
+    --warn: #f1b558; --warn-soft: #3a2c14; --nodata: #3a413d; --sea: #181c1a;
+    --same: #22364a; --apart1: #4f8fdc; --apart2: #b9d7f7;
+    --same-ink: #edf0ed; --apart1-ink: #0c1311; --apart2-ink: #0c1311; --seq: #3987e5; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #101312; --surface: #181c1a; --sunk: #222724; --ink: #edf0ed; --ink-2: #b8c1bb; --muted: #858f89;
+  --line: #2d3430; --axis: #46504a; --accent: #74c3ad; --accent-ink: #0c1311; --accent-soft: #1f3530;
+  --warn: #f1b558; --warn-soft: #3a2c14; --nodata: #3a413d; --sea: #181c1a;
+  --same: #22364a; --apart1: #4f8fdc; --apart2: #b9d7f7;
+    --same-ink: #edf0ed; --apart1-ink: #0c1311; --apart2-ink: #0c1311; --seq: #3987e5; color-scheme: dark;
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--page); color: var(--ink);
-  font: 15px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
-header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; padding: 14px 20px 10px; }
-h1 { font-size: 20px; margin: 0; }
-h2 { font-size: 16px; margin: 0; }
-.sub { color: var(--ink-2); font-size: 13px; }
-main { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 14px; padding: 0 20px 20px; align-items: start; }
-.bottom { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.7fr);
-  gap: 14px; align-items: start; }
-#indexCards { display: contents; }
-@media (max-width: 1500px) { .bottom { grid-template-columns: repeat(3, minmax(0, 1fr)); } #ruleCard { grid-column: 1 / -1; } }
-@media (max-width: 1100px) { main, .bottom { grid-template-columns: minmax(0, 1fr); } #ruleCard { grid-column: auto; } }
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
-.row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.spread { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.45 var(--font-body); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10;
+  background: var(--surface); }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 20px; font-weight: 600; }
+h3 { font-size: 15px; font-weight: 600; }
+p { margin: 0; }
+.wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  max-width: 1680px; margin: 0 auto; }
 .small { font-size: 13px; color: var(--ink-2); }
 .muted { color: var(--muted); }
-.num { font-variant-numeric: tabular-nums; }
-select, input, button { font: inherit; color: var(--ink); }
-select, input[type=number], input[type=text] { border: 1px solid var(--axis); border-radius: 6px; padding: 3px 6px;
-  background: #fff; }
-input[type=number] { width: 92px; }
+.num { font-family: var(--font-data); font-variant-numeric: tabular-nums; font-size: 0.92em; }
+.eyebrow { font-family: var(--font-display); font-size: 12px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--accent); }
+.row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+select, input, button, textarea { font: inherit; color: var(--ink); }
+select, input[type=number], input[type=text], textarea { border: 1px solid var(--axis); border-radius: 6px;
+  padding: 4px 7px; background: var(--surface); }
+textarea { width: 100%; resize: vertical; font-size: 14px; }
+input[type=number] { width: 104px; font-family: var(--font-data); font-size: 13px; }
 input[type=text] { width: 96px; }
-button { border: 1px solid var(--axis); border-radius: 6px; background: #fff; padding: 3px 10px; cursor: pointer; }
-button:hover { background: #f0efec; }
-:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-input[type=range] { width: 100%; margin: 0; }
+input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); }
+input[type=checkbox] { accent-color: var(--accent); width: 18px; height: 18px; margin: 0; }
+button { border: 1px solid var(--axis); border-radius: 6px; background: var(--surface); padding: 5px 12px;
+  cursor: pointer; font-size: 14px; }
+button:hover:not(:disabled) { background: var(--sunk); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+button.primary:hover:not(:disabled) { background: var(--accent); filter: brightness(1.08); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+a { color: var(--accent); }
+[hidden] { display: none !important; }
 
-.chip { display: inline-block; min-width: 64px; text-align: center; border-radius: 5px; padding: 1px 8px;
-  font-weight: 600; font-size: 13px; }
-.c0 { background: var(--low); color: #fff; }
-.c1 { background: var(--med); color: #0b0b0b; }
-.c2 { background: var(--high); color: #fff; }
-.c3 { background: var(--nodata); color: #0b0b0b; font-weight: 500; }
-
-/* point card */
-.badge { display: flex; align-items: center; justify-content: space-between; border-radius: 8px; padding: 10px 14px;
-  margin: 10px 0 8px; font-size: 22px; font-weight: 700; }
-.badge .lbl { font-size: 13px; font-weight: 500; }
-.ptab { width: 100%; border-collapse: collapse; }
-.ptab td { padding: 4px 0; border-top: 1px solid var(--grid); vertical-align: top; }
-.ptab td:nth-child(2) { text-align: right; padding-right: 10px; white-space: nowrap; }
-.ptab td:last-child { text-align: right; width: 76px; }
-
-/* index cards */
-.hist { width: 100%; height: 70px; display: block; margin-top: 8px; }
-.axisrow { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
-.brk { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 10px; align-items: center; margin-top: 6px; }
-.brk label { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
-.shares { display: flex; height: 10px; border-radius: 3px; overflow: hidden; gap: 2px; margin-top: 8px; background: var(--surface); }
-.shares div { height: 100%; }
-
-/* maps */
-.tabs { display: flex; gap: 4px; flex-wrap: wrap; }
-.tabs button { border-radius: 6px; padding: 4px 12px; }
-.tabs button[aria-pressed=true] { background: var(--ink); color: #fff; border-color: var(--ink); }
-.modesw { display: flex; align-items: center; gap: 8px; margin-left: auto; font-size: 14px; }
-.modesw select { font-size: 15px; font-weight: 600; padding: 4px 8px; }
-.vsel { width: 100%; margin: 6px 0 4px; font-weight: 600; }
-.loading main { opacity: .6; cursor: progress; }
-#loadErr { color: #b23c00; font-weight: 600; padding: 0 20px; }
+/* top bar */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface);
+  border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; align-items: center; gap: 6px 22px; flex-wrap: wrap; padding-block: 10px 0; }
+.brand { font-family: var(--font-display); font-weight: 700; font-size: 17px; padding-bottom: 10px; }
+.brand span { color: var(--muted); font-weight: 500; }
+nav { display: flex; gap: 2px; overflow-x: auto; max-width: 100%; }
+nav button { border: none; border-radius: 0; background: none; padding: 8px 14px 10px; font-family: var(--font-display);
+  font-size: 15px; font-weight: 600; color: var(--ink-2); border-bottom: 3px solid transparent; white-space: nowrap; }
+nav button:hover:not(:disabled) { background: var(--sunk); }
+nav button[aria-selected=true] { color: var(--ink); border-bottom-color: var(--accent); }
+nav .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--warn);
+  margin-left: 6px; vertical-align: 2px; }
+.conn { margin-left: auto; font-size: 12px; color: var(--muted); padding-bottom: 10px; }
+#loadErr { color: var(--warn); font-weight: 600; padding-block: 8px 0; }
 #loadErr:empty { display: none; }
-.maps { display: grid; grid-template-columns: 1.273fr 1fr 1fr; gap: 10px; margin-top: 10px; }
-@media (max-width: 800px) { .maps { grid-template-columns: minmax(0, 1fr); } }
-.panel { min-width: 0; }
-.panel canvas { width: 100%; display: block; border: 1px solid var(--grid); border-radius: 6px; cursor: crosshair;
-  background: var(--surface); }
-.panel .spread { margin-bottom: 4px; font-size: 13px; }
-.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 13px; align-items: center; }
-.sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 5px; }
-#tip { position: fixed; pointer-events: none; background: #fff; border: 1px solid var(--axis); border-radius: 6px;
-  padding: 6px 9px; font-size: 13px; box-shadow: 0 2px 8px rgba(0,0,0,.12); display: none; z-index: 10; }
-#tip table td { padding: 0 4px; }
+main { padding-block: 22px 40px; }
+.tab { display: grid; gap: 22px; }
+.loading .tab { opacity: .55; cursor: progress; }
 
-/* composite */
-.rulebox { display: flex; flex-wrap: wrap; gap: 12px 20px; margin-top: 8px; }
-.rulebox > :first-child { flex: 1 1 280px; min-width: 0; }
-.rulebox > :last-child { flex: 0 0 auto; }
-.rulesel { font-size: 16px; padding: 5px 8px; }
-.sentence { background: #f0efec; border-radius: 6px; padding: 8px 10px; margin: 10px 0; }
-.ctl { display: grid; grid-template-columns: auto 1fr auto; gap: 6px 10px; align-items: center; font-size: 14px; }
+/* page head + decision box */
+.pagehead { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 520px); gap: 16px 28px; align-items: start; }
+.question { color: var(--ink-2); max-width: 62ch; margin-top: 6px; }
+.decision { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+  display: grid; gap: 6px; font-size: 14px; }
+.pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.pill { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 1px 10px; font-size: 12px;
+  font-weight: 600; font-family: var(--font-display); letter-spacing: 0.02em; border: 1px solid var(--line); }
+.pill.team { background: var(--accent-soft); color: var(--ink); border-color: transparent; }
+.pill.team::before { content: "✓"; color: var(--accent); }
+.pill.start { background: var(--sunk); color: var(--ink-2); border-color: transparent; }
+.pill.draft { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+.why { border-left: 3px solid var(--accent); padding-left: 10px; font-style: italic; color: var(--ink-2); }
+@media (max-width: 900px) { .pagehead { grid-template-columns: minmax(0, 1fr); } }
+
+/* variant cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 16px; }
+.vcard { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid;
+  gap: 8px; align-content: start; min-width: 0; }
+.vcard.chosen { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
+.vhead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pick { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.letter { font-family: var(--font-display); font-size: 24px; font-weight: 700; line-height: 1; }
+.vlabel { font-weight: 600; flex: 1 1 160px; min-width: 0; }
+.tag { font-size: 11px; font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; }
+.chosenTag { color: var(--accent); border-color: var(--accent); }
+.mapbox { position: relative; }
+canvas.map { width: 100%; display: block; border-radius: 8px; background: var(--sea); cursor: crosshair; }
+canvas.hist { width: 100%; height: 72px; display: block; }
+.axisrow { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+.brk { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px 10px; align-items: center; }
+.brk label { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+.bar { display: flex; height: 12px; border-radius: 3px; overflow: hidden; gap: 2px; background: var(--surface); }
+.bar div { height: 100%; }
+
+/* main sections of the index and hazard pages: generous space between them, tight inside */
+.tab.idx, .tab.hz { gap: 56px; }
+.block { display: grid; gap: 14px; }
+.reasoning { background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 14px; padding: 20px 22px;
+  display: grid; gap: 12px; }
+.reasoning h2 { font-size: 26px; }
+.reasoning h2 label { cursor: text; }
+.reasoning p { color: var(--ink-2); max-width: 75ch; }
+.reasoning textarea { font-size: 16px; line-height: 1.5; padding: 12px 14px; min-height: 120px; border-color: var(--accent); }
+
+/* panels + tables */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px;
+  display: grid; gap: 10px; align-content: start; min-width: 0; }
+.sechead { display: flex; align-items: baseline; gap: 6px 14px; flex-wrap: wrap; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); gap: 16px; }
+.compare { display: grid; gap: 18px; }
+.scroll { overflow-x: auto; }
+table.t { border-collapse: collapse; width: 100%; font-size: 13px; }
+table.t th { font-family: var(--font-display); font-weight: 600; font-size: 12.5px; text-align: left; color: var(--ink-2);
+  padding: 4px 8px; border-bottom: 1px solid var(--axis); white-space: nowrap; }
+table.t td { padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+table.t td.c, table.t th.c { text-align: center; }
+table.t tr.hl td { background: var(--accent-soft); }
+table.t th.hl { color: var(--accent); }
+.cellbar { display: flex; height: 10px; border-radius: 2px; overflow: hidden; gap: 1px; min-width: 90px; }
+.cellbar div { height: 100%; }
+.cellnum { font-family: var(--font-data); font-size: 11.5px; color: var(--ink-2); margin-top: 2px; white-space: nowrap; }
+.chip { display: inline-block; min-width: 58px; text-align: center; border-radius: 5px; padding: 0 7px;
+  font-weight: 600; font-size: 12.5px; }
+.c0 { background: var(--low); color: #ffffff; }
+.c1 { background: var(--med); color: #141816; }
+.c2 { background: var(--high); color: #ffffff; }
+.c3 { background: var(--nodata); color: var(--ink); font-weight: 500; }
+.sw { display: inline-block; width: 13px; height: 13px; border-radius: 3px; vertical-align: -2px; margin-right: 5px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; align-items: center; }
+.pairgrid { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 720px); gap: 24px; align-items: start; }
+@media (max-width: 800px) { .pairgrid { grid-template-columns: minmax(0, 1fr); } }
+table.conf { border-collapse: separate; border-spacing: 3px; font-size: 13px; }
+table.conf th { font-family: var(--font-display); font-weight: 600; font-size: 12px; color: var(--ink-2); padding: 2px 4px; }
+table.conf td { width: 72px; height: 44px; text-align: center; border-radius: 4px; font-family: var(--font-data); }
+table.conf td.ag0 { background: var(--same); color: var(--same-ink); font-weight: 600; }
+table.conf td.ag1 { background: var(--apart1); color: var(--apart1-ink); }
+table.conf td.ag2 { background: var(--apart2); color: var(--apart2-ink); }
+table.conf th.rowh { text-align: right; padding-right: 8px; }
+table.conf .cellnum { font-weight: 400; }
+
+/* hazard tab */
+.inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+.itile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid;
+  gap: 6px; align-content: start; }
+.itile .head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.lock { font-size: 12px; color: var(--muted); }
+.hzgrid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 1100px) { .hzgrid { grid-template-columns: minmax(0, 1fr); } }
+.rulesel { font-size: 16px; padding: 6px 8px; font-weight: 600; }
+.sentence { background: var(--sunk); border-radius: 6px; padding: 8px 10px; }
+.ctl { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px 10px; align-items: center; font-size: 14px; }
 .matrices { display: flex; gap: 14px; flex-wrap: wrap; }
-.mx caption { font-size: 13px; font-weight: 600; padding-bottom: 4px; text-align: left; }
+.mx caption { font-size: 13px; font-weight: 600; padding-bottom: 4px; text-align: left; font-family: var(--font-display); }
 .mx { border-collapse: separate; border-spacing: 2px; }
 .mx th { font-size: 11px; font-weight: 500; color: var(--ink-2); padding: 0 3px; }
 .mx td button { width: 34px; height: 28px; border: none; border-radius: 4px; font-weight: 700; padding: 0; }
 .mx td button.here { outline: 3px solid var(--ink); outline-offset: 1px; }
-.mxnote { font-size: 12px; color: var(--ink-2); margin-top: 6px; max-width: 520px; }
-#selftest { white-space: pre; font: 12px monospace; background: #fff; border: 1px solid var(--axis); padding: 8px;
-  margin: 0 20px 14px; display: none; }
+.mapsrow { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 1000px) { .mapsrow { grid-template-columns: minmax(0, 1fr); } }
+.maps3 { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 10px; }
+@media (max-width: 800px) { .maps3 { grid-template-columns: minmax(0, 1fr); } }
+.maps3 .spread { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; margin-bottom: 4px; }
+.layers { display: flex; gap: 4px; flex-wrap: wrap; }
+.layers button[aria-pressed=true] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.badge { display: flex; align-items: center; justify-content: space-between; border-radius: 8px; padding: 10px 14px;
+  font-size: 22px; font-weight: 700; font-family: var(--font-display); }
+.badge .lbl { font-size: 13px; font-weight: 500; font-family: var(--font-body); }
+.ptab { width: 100%; border-collapse: collapse; font-size: 14px; }
+.ptab td { padding: 5px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.ptab td:nth-child(2) { text-align: right; padding-right: 10px; white-space: nowrap; }
+.ptab td:last-child { text-align: right; width: 76px; }
+
+/* summary */
+.hero { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+@media (max-width: 1000px) { .hero { grid-template-columns: minmax(0, 1fr); } }
+.hero h1 { font-size: 40px; }
+.statusline { color: var(--ink-2); margin-top: 6px; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.stat { border-radius: 10px; padding: 10px 12px; }
+.stat .big { font-family: var(--font-display); font-size: 38px; font-weight: 700; line-height: 1.05; }
+.stat .lbl { font-size: 13px; font-weight: 600; }
+.flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) 44px minmax(0, 1.05fr); gap: 14px; align-items: stretch; }
+@media (max-width: 1200px) { .flow { grid-template-columns: repeat(3, minmax(0, 1fr)); } .flow .arrow { display: none; }
+  .flow .ruletile { grid-column: 1 / -1; } }
+@media (max-width: 760px) { .flow { grid-template-columns: minmax(0, 1fr); } }
+.ftile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid;
+  gap: 8px; align-content: start; min-width: 0; }
+.ftile .means { font-size: 14px; }
+.arrow { display: grid; place-items: center; color: var(--accent); }
+.ruletile { border-color: var(--accent); }
+.regionbars { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px 10px; align-items: center; font-size: 13px; }
+.regionbars .bar { height: 16px; }
+.foot { font-size: 12.5px; color: var(--muted); max-width: 100ch; }
+.method summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+.method p { margin-top: 6px; }
+.sumhead { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.sumhead > div:first-child { flex: 1 1 300px; min-width: 0; }
+.export { display: grid; gap: 4px; justify-items: end; text-align: right; max-width: 260px; }
+
+#tip { position: fixed; pointer-events: none; background: var(--surface); border: 1px solid var(--axis); border-radius: 6px;
+  padding: 6px 9px; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,.18); z-index: 20; max-width: 360px; }
+#tip table td { padding: 1px 4px; }
+#selftest { white-space: pre; font: 12px var(--font-data); background: var(--surface); border: 1px solid var(--axis);
+  padding: 8px; overflow-x: auto; }
+@media (prefers-reduced-motion: no-preference) { .vcard, .panel { transition: border-color .15s; } }
 </style>
 </head>
 <body>
-<header>
-  <h1>Toy Environmental Hazard Index</h1>
-  <span class="sub">Mid-century · middle-of-the-road emissions · multi-model average where available ·
-    fingerpaint prototype, not for decisions</span>
-  <div class="modesw"><label for="setup" class="small">Preset</label><select id="setup"></select></div>
-</header>
-
-<div id="loadErr" role="alert"></div>
-<div id="selftest"></div>
-<main>
-    <section class="card" id="pointCard">
-      <div class="spread"><h2>Point</h2><span class="small">or click any map</span></div>
-      <div class="row" style="margin-top:8px">
-        <select id="place" aria-label="Choose a place"></select>
-        <input type="text" id="lat" aria-label="Latitude" placeholder="lat">
-        <input type="text" id="lon" aria-label="Longitude" placeholder="lon">
-        <button id="go">Go</button>
-      </div>
-      <div class="badge c3" id="badge"><span><span class="lbl">Environmental Hazard</span><br><span id="badgeTxt">–</span></span>
-        <span class="lbl num" id="badgeWhere"></span></div>
-      <table class="ptab" id="ptab"></table>
-      <div class="small" id="pnote" style="margin-top:6px"></div>
-    </section>
-
-    <section class="card" id="mapsCard">
-      <div class="spread">
-        <div class="tabs" role="group" aria-label="Map layer" id="tabs"></div>
-        <span class="small">Hover a map for values · click to move the point</span>
-      </div>
-      <div class="maps">
-        <div class="panel"><div class="spread"><b>Alaska</b><span class="muted">1 km grid</span></div>
-          <canvas id="mapState" aria-label="Statewide map"></canvas></div>
-        <div class="panel"><div class="spread"><b>Region</b>
-          <select id="regionKm" aria-label="Region size"><option>150</option><option>300</option><option>500</option></select></div>
-          <canvas id="mapRegion" aria-label="Regional map"></canvas></div>
-        <div class="panel"><div class="spread"><b>Local</b>
-          <select id="localKm" aria-label="Local size"><option>20</option><option>40</option><option>80</option></select></div>
-          <canvas id="mapLocal" aria-label="Local map"></canvas></div>
-      </div>
-      <div class="legend" id="legend"></div>
-    </section>
-
-  <div class="bottom">
-    <div id="indexCards"></div>
-    <section class="card" id="ruleCard">
-      <div class="spread"><h2>Combining rule → Environmental Hazard</h2>
-        <span class="row"><button id="copy">Copy settings</button><button id="reset">Reset all</button></span></div>
-      <div class="rulebox">
-        <div>
-          <select id="rule" class="rulesel" aria-label="Combining rule">
-            <option value="worst">Worst of the three</option>
-            <option value="avg">Average of points (weighted)</option>
-            <option value="product">Multiply points (Wildfire × Erosion × Permafrost)</option>
-            <option value="count">Count the Highs</option>
-            <option value="custom">Custom table (set each combination)</option>
-          </select>
-          <div class="sentence" id="sentence"></div>
-          <div class="ctl" id="ruleCtl"></div>
-          <div class="row" style="margin-top:10px; font-size:14px">
-            <label for="missing">If an index has no value:</label>
-            <select id="missing"><option value="low">count it as Low</option><option value="blank">leave the hazard blank</option></select>
-          </div>
-        </div>
-        <div>
-          <div class="matrices" id="matrices"></div>
-          <div class="mxnote">Every possible combination and the hazard it gets. Rows: Wildfire, columns: Erosion.
-            The outlined cell is the point. Click any cell to change it (switches to Custom table).</div>
-        </div>
-      </div>
-      <textarea id="copyBox" rows="8" style="width:100%; margin-top:10px; display:none" aria-label="Settings text"></textarea>
-    </section>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">Environmental Hazard Index <span>· team workbench</span></div>
+    <nav role="tablist" aria-label="Pages" id="nav"></nav>
+    <span class="conn" id="conn"></span>
   </div>
+</header>
+<div class="wrap"><div id="loadErr" role="alert"></div></div>
+<main class="wrap">
+  <section class="tab" id="tab-summary" role="tabpanel" hidden>
+    <div class="hero">
+      <div class="panel">
+        <div class="sumhead">
+          <div>
+            <p class="eyebrow">Summary of team decisions</p>
+            <h1>Environmental Hazard</h1>
+            <p class="statusline" id="sumStatus"></p>
+          </div>
+          <div class="export"><button class="primary" id="pdfBtn">Download PDF</button>
+            <span class="small" id="pdfMsg" role="status">Summary plus everything needed to rebuild the index.</span></div>
+        </div>
+        <div class="mapbox"><canvas class="map" id="sumMap" aria-label="Environmental Hazard class map of Alaska"></canvas></div>
+        <div class="legend" id="sumLegend"></div>
+      </div>
+      <div style="display:grid; gap:16px; min-width:0">
+        <div class="panel">
+          <h3>Share of Alaska's land</h3>
+          <div class="stats" id="sumStats"></div>
+        </div>
+        <div class="panel">
+          <h3>By region</h3>
+          <div class="regionbars" id="sumRegions"></div>
+        </div>
+        <div class="panel">
+          <h3>At named places</h3>
+          <div class="scroll" id="sumPlaces"></div>
+        </div>
+      </div>
+    </div>
+    <div class="sechead"><h2>How the index is built</h2>
+      <span class="small">Each index puts every 1 km cell in Low, Medium or High. The rule turns the three classes into one.</span></div>
+    <div class="flow" id="sumFlow"></div>
+    <p class="foot" id="sumFoot"></p>
+    <section class="panel" id="resetPanel" hidden>
+      <h3>Start over</h3>
+      <p class="small">Clears every saved team decision: variants, boundaries, the rule and all reasoning. Every page goes back to
+        the repo's starting point; the decision history is kept. Download the PDF first if you want a copy.</p>
+      <div class="row"><button id="resetBtn">Reset all team decisions</button><span class="small" id="resetMsg" role="status"></span></div>
+    </section>
+  </section>
+
+  <section class="tab idx" id="tab-wildfire" role="tabpanel" hidden></section>
+  <section class="tab idx" id="tab-erosion" role="tabpanel" hidden></section>
+  <section class="tab idx" id="tab-permafrost" role="tabpanel" hidden></section>
+
+  <section class="tab hz" id="tab-hazard" role="tabpanel" hidden>
+    <div class="pagehead">
+      <div><p class="eyebrow">Combining rule</p><h1>Environmental Hazard</h1><p class="question" id="hzQuestion"></p></div>
+      <div class="decision" id="hzDecision"></div>
+    </div>
+    <div>
+      <div class="sechead" style="margin-bottom:10px"><h2>Inputs</h2>
+        <span class="small">Set on the index pages. Change them there; this page only combines them.</span></div>
+      <div class="inputs" id="hzInputs"></div>
+      <label class="row small" id="hzPreviewWrap" style="margin-top:10px" hidden>
+        <input type="checkbox" id="hzPreview"> Preview with my unsaved index changes (otherwise the saved team decisions)</label>
+    </div>
+    <div class="hzgrid">
+      <section class="panel" aria-labelledby="ruleH">
+        <h2 id="ruleH">Combining rule</h2>
+        <select id="rule" class="rulesel" aria-label="Combining rule">
+          <option value="worst">Worst of the three</option>
+          <option value="avg">Average of points (weighted)</option>
+          <option value="product">Multiply points (Wildfire × Erosion × Permafrost)</option>
+          <option value="count">Count the Highs</option>
+          <option value="custom">Custom table (set each combination)</option>
+        </select>
+        <div class="sentence" id="sentence"></div>
+        <div class="ctl" id="ruleCtl"></div>
+        <div class="row" style="font-size:14px">
+          <label for="missing">If an index has no value:</label>
+          <select id="missing"><option value="low">count it as Low</option><option value="blank">leave the hazard blank</option></select>
+        </div>
+        <div class="matrices" id="matrices"></div>
+        <p class="small">Every combination and the hazard it gets. Rows: Wildfire, columns: Erosion. The outlined cell is
+          the point on the map. Click a cell to change it (switches to Custom table).</p>
+      </section>
+      <section class="panel" aria-labelledby="hzSharesH">
+        <h2 id="hzSharesH">Result</h2>
+        <div class="scroll" id="hzShares"></div>
+        <h3>What makes a cell High</h3>
+        <div id="hzDrivers" class="small"></div>
+      </section>
+    </div>
+    <section class="reasoning" aria-labelledby="whyH">
+      <div><h2 id="whyH"><label for="note-hazard">Reasoning</label></h2>
+        <p>Why the team chose this rule. Saved with the team decision and shown on the Summary.</p></div>
+      <textarea id="note-hazard" rows="4" placeholder="For example: worst of three, because one serious hazard is enough for a community to plan around."></textarea>
+      <div class="row"><button class="primary" id="hzSave">Save rule as team decision</button>
+        <button id="hzDiscard">Discard my changes</button><span class="small" id="hzMsg" role="status"></span></div>
+    </section>
+    <div class="mapsrow">
+      <section class="panel" id="pointCard">
+        <div class="row" style="justify-content:space-between"><h2>Point</h2><span class="small">or click any map</span></div>
+        <div class="row">
+          <select id="place" aria-label="Choose a place"></select>
+          <input type="text" id="lat" aria-label="Latitude" placeholder="lat">
+          <input type="text" id="lon" aria-label="Longitude" placeholder="lon">
+          <button id="go">Go</button>
+        </div>
+        <div class="badge c3" id="badge"><span><span class="lbl">Environmental Hazard</span><br><span id="badgeTxt">–</span></span>
+          <span class="lbl num" id="badgeWhere" style="text-align:right"></span></div>
+        <table class="ptab" id="ptab"></table>
+        <div class="small" id="pnote"></div>
+      </section>
+      <section class="panel">
+        <div class="row" style="justify-content:space-between">
+          <div class="layers" role="group" aria-label="Map layer" id="layers"></div>
+          <span class="small">Hover for values · click to move the point</span>
+        </div>
+        <div class="maps3">
+          <div><div class="spread"><b>Alaska</b><span class="muted">1 km grid</span></div>
+            <canvas class="map" id="mapState" aria-label="Statewide map"></canvas></div>
+          <div><div class="spread"><b>Region</b>
+            <select id="regionKm" aria-label="Region size"><option>150</option><option>300</option><option>500</option></select></div>
+            <canvas class="map" id="mapRegion" aria-label="Regional map"></canvas></div>
+          <div><div class="spread"><b>Local</b>
+            <select id="localKm" aria-label="Local size"><option>20</option><option>40</option><option>80</option></select></div>
+            <canvas class="map" id="mapLocal" aria-label="Local map"></canvas></div>
+        </div>
+        <div class="legend" id="hzLegend"></div>
+      </section>
+    </div>
+  </section>
+  <pre id="selftest" hidden></pre>
 </main>
-<div id="tip"></div>
-<!--__IMAGES__-->
+<div id="tip" hidden></div>
+<!--__BASE__-->
 
 <script>
 const META = /*__META__*/null;
 const KEYS = ["wildfire", "erosion", "permafrost"];
+const TABS = ["summary", ...KEYS, "hazard"];
+const TAB_NAMES = { summary: "Summary", wildfire: "Wildfire", erosion: "Erosion", permafrost: "Permafrost", hazard: "Environmental Hazard" };
 const CLS = ["Low", "Medium", "High"];
-const MISSING = 3, SEA = 255, NA = "na";  // NA: fixed-class cell without a value
-const COLOR = { 0: "#0072b2", 1: "#f0e442", 2: "#d55e00", 3: "#d6d5ce", 255: "#fcfcfb" };
-const N = META.nx * META.ny;
-const STORE = "toyIndex.v3";  // v3: per-variant breaks, presets
+const MISSING = 3, SEA = 255, NA = "na";
+const NX = META.nx, NY = META.ny, N = NX * NY;
+const AREAS = ["Statewide", ...META.regions];
+const STORE = "toyIndex.v4";
 const RULE_KEYS = ["rule", "weights", "avgCuts", "prodCuts", "countHigh", "countMed", "custom", "missing"];
-const NAME = k => META.indices[k].name;
-const VARS = k => META.indices[k].variants;
-const V = k => VARS(k)[S.variants[k]];  // the variant chosen for index k
-const vkey = k => `${k}/${S.variants[k]}`;
-const usable = (k, id) => VARS(k)[id] && VARS(k)[id].src;
+const IDX = k => META.indices[k];
+const VARS = k => IDX(k).variants;
+const VM = (k, id) => VARS(k)[id];
+const VIDS = k => Object.keys(VARS(k));
+const clone = o => JSON.parse(JSON.stringify(o));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const $ = id => document.getElementById(id);
+const pct = (x, d = 0) => !Number.isFinite(x) ? "–" : x > 0 && x < 0.005 && d === 0 ? "<1 %" : (100 * x).toFixed(d) + " %";
+const clsName = c => c === MISSING ? "No value" : CLS[c];
+const chip = c => `<span class="chip c${c}">${clsName(c)}</span>`;
 
-// ---------- defaults & state ----------
-function defaults() {
-  const custom = [];
-  for (let w = 0; w < 3; w++) for (let e = 0; e < 3; e++) for (let p = 0; p < 3; p++) custom.push(Math.max(w, e, p));
-  const breaks = {};
-  for (const k of KEYS) for (const [id, v] of Object.entries(VARS(k))) breaks[`${k}/${id}`] = v.breaks.slice();
-  const S0 = {
-    breaks, variants: {}, preset: "",
-    rule: "worst", weights: { wildfire: 1, erosion: 1, permafrost: 1 }, avgCuts: [1.5, 2.5], prodCuts: [4, 12],
-    countHigh: 2, countMed: 1, custom, missing: "low", layer: "hazard", regionKm: 300, localKm: 40,
-    point: { ...META.points[0] },
-  };
-  presetInto(S0, META.presets[0]);
-  return S0;
+// ---------- palette (from the CSS tokens, so maps follow the theme) ----------
+let PAL;
+function readPalette() {
+  const cs = getComputedStyle(document.documentElement), g = n => cs.getPropertyValue(n).trim();
+  const u32 = hex => { const h = hex.replace("#", ""); const r = parseInt(h.slice(0, 2), 16), gg = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
+    return ((255 << 24) | (b << 16) | (gg << 8) | r) >>> 0; };
+  const cls = new Uint32Array(256), dif = new Uint32Array(256);
+  ["--low", "--med", "--high", "--nodata"].forEach((n, i) => cls[i] = u32(g(n)));
+  cls[SEA] = u32(g("--sea"));
+  ["--same", "--apart1", "--apart2", "--nodata"].forEach((n, i) => dif[i] = u32(g(n)));
+  dif[SEA] = cls[SEA];
+  PAL = { cls, dif, g, classHex: [g("--low"), g("--med"), g("--high"), g("--nodata")] };
 }
-function presetInto(s, p) {  // a preset sets variants and, optionally, breaks and the rule
-  for (const k of KEYS) { const id = p.variants[k]; s.variants[k] = usable(k, id) ? id : firstUsable(k, s.variants[k]); }
-  for (const [key, b] of Object.entries(p.breaks || {})) s.breaks[key] = b.slice();
-  for (const key of RULE_KEYS) if (p[key] != null) s[key] = JSON.parse(JSON.stringify(p[key]));
-  s.preset = p.id;
+
+// ---------- base grid: land + regions ----------
+let land, region, landN = 0, BBOX;
+function pixels(im) {
+  const c = document.createElement("canvas"); c.width = im.naturalWidth || im.width; c.height = im.naturalHeight || im.height;
+  const ctx = c.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(im, 0, 0);
+  return ctx.getImageData(0, 0, c.width, c.height).data;
 }
-function firstUsable(k, prefer) { return usable(k, prefer) ? prefer : Object.keys(VARS(k)).find(id => usable(k, id)); }
-let S = defaults();
+async function loadBase() {
+  const im = $("png-base"); await im.decode();
+  const d = pixels(im); land = new Uint8Array(N); region = new Uint8Array(N);
+  let r0 = NY, r1 = 0, c0 = NX, c1 = 0;
+  for (let i = 0; i < N; i++) if (d[4 * i] > 127) {
+    land[i] = 1; region[i] = d[4 * i + 1]; landN++;
+    const r = (i / NX) | 0, c = i - r * NX;
+    if (r < r0) r0 = r; if (r > r1) r1 = r; if (c < c0) c0 = c; if (c > c1) c1 = c;
+  }
+  BBOX = [c0 - 4, r0 - 4, c1 - c0 + 9, r1 - r0 + 9];
+}
+
+// ---------- variants: load on demand ----------
+const DATA = {}, loading = {};
+async function image(src) { const im = Object.assign(new Image(), { src }); await im.decode(); return im; }
+function loadVariant(k, id) {
+  const key = `${k}/${id}`;
+  return loading[key] ||= (async () => {
+    const m = VM(k, id), d = pixels(await image(m.src)), a = new Uint16Array(N), h = new Uint32Array(m.maxcode + 1);
+    for (let i = 0; i < N; i++) { const v = (d[4 * i] << 8) | d[4 * i + 1]; a[i] = land[i] ? v : 0; if (land[i] && v) h[v]++; }
+    return DATA[key] = { codes: a, hist: h };
+  })().catch(e => { delete loading[key]; throw e; });
+}
+const decode = (m, c) => (c - 1) / m.scale - m.offset;
+const clsOf = (v, b) => v <= b[0] + 1e-9 ? 0 : v <= b[1] + 1e-9 ? 1 : 2;
+function lut(m, b) {
+  const t = new Uint8Array(m.maxcode + 1); t[0] = MISSING;
+  for (let c = 1; c <= m.maxcode; c++) t[c] = c === m.na_code ? m.na_class : clsOf(decode(m, c), b);
+  return t;
+}
+const CC = new Map();  // "k/id|b1,b2" -> class grid (0-2, 3 no value, 255 sea); a small LRU
+function classes(k, id, b) {
+  const key = `${k}/${id}|${b[0]},${b[1]}`;
+  let a = CC.get(key);
+  if (a) { CC.delete(key); CC.set(key, a); return a; }
+  const t = lut(VM(k, id), b), codes = DATA[`${k}/${id}`].codes;
+  a = new Uint8Array(N);
+  for (let i = 0; i < N; i++) a[i] = land[i] ? t[codes[i]] : SEA;
+  CC.set(key, a);
+  if (CC.size > 16) CC.delete(CC.keys().next().value);
+  return a;
+}
+function valueAt(k, id, i) { const m = VM(k, id), c = DATA[`${k}/${id}`].codes[i]; return !c ? null : c === m.na_code ? NA : decode(m, c); }
+function fmt(m, v) { if (v == null) return "–"; if (v === NA) return m.na_label;
+  const s = (+v).toFixed(m.digits); return (m.signed && +s > 0 ? "+" : "") + s + " " + m.unit; }
+function classOfValue(m, v, b) { return v == null ? MISSING : v === NA ? m.na_class : clsOf(v, b); }
+function boundsText(m, b) { return `Low ≤ ${fmt(m, b[0])} · Medium ≤ ${fmt(m, b[1])} · High > ${fmt(m, b[1])}`; }
+
+// ---------- state: team record (db), personal drafts (this browser), repo defaults ----------
+let TEAM = {}, DRAFT = { idx: {}, hazard: null };
+const UI = { tab: "summary", point: null, regionKm: 300, localKm: 40, pair: {}, layer: "hazard", preview: false };
 try {
-  const saved = JSON.parse(localStorage.getItem(STORE) || "null");
-  if (saved) { const d = S; S = { ...d, ...saved, breaks: { ...d.breaks, ...saved.breaks } };
-    for (const k of KEYS) S.variants[k] = firstUsable(k, S.variants[k]); }
+  const s = JSON.parse(localStorage.getItem(STORE) || "null");
+  if (s) { if (s.draft) DRAFT = { idx: s.draft.idx || {}, hazard: s.draft.hazard || null }; Object.assign(UI, s.ui || {}); }
 } catch (e) {}
-function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }
-function matchingPreset() { return META.presets.find(p => KEYS.every(k => p.variants[k] === S.variants[k])); }
+for (const k of Object.keys(DRAFT.idx)) if (!KEYS.includes(k)) delete DRAFT.idx[k];
+let saveTimer = 0;
+function saveLocal() { clearTimeout(saveTimer); saveTimer = setTimeout(() => {
+  try { localStorage.setItem(STORE, JSON.stringify({ draft: DRAFT, ui: UI })); } catch (e) {} }, 300); }
+
+function worstTable() { const t = []; for (let w = 0; w < 3; w++) for (let e = 0; e < 3; e++) for (let p = 0; p < 3; p++) t.push(Math.max(w, e, p)); return t; }
+function teamIdx(k) {
+  const t = TEAM[k], src = t || META.decisions[k], breaks = {};
+  for (const id of VIDS(k)) { const b = (src.breaks || {})[id]; breaks[id] = Array.isArray(b) && b.length === 2 ? b.map(Number) : VM(k, id).breaks.slice(); }
+  return { variant: src.variant && VARS(k)[src.variant] ? src.variant : null, breaks, note: src.note || "",
+    by: t ? t.by : null, at: t ? t.at : null, from: t ? "team" : "repo" };
+}
+function workIdx(k) {
+  const t = teamIdx(k), d = DRAFT.idx[k];
+  if (!d) return t;
+  const breaks = { ...t.breaks };
+  for (const id of VIDS(k)) if (Array.isArray((d.breaks || {})[id])) breaks[id] = d.breaks[id];
+  return { ...t, variant: d.variant !== undefined && (d.variant === null || VARS(k)[d.variant]) ? d.variant : t.variant,
+    breaks, note: d.note ?? t.note, from: "draft" };
+}
+const coreIdx = (k, s) => JSON.stringify([s.variant, VIDS(k).map(id => s.breaks[id]), (s.note || "").trim()]);
+const dirtyIdx = k => !!DRAFT.idx[k] && coreIdx(k, workIdx(k)) !== coreIdx(k, teamIdx(k));
+function editIdx(k, fn) {
+  const w = clone(workIdx(k)); fn(w);
+  DRAFT.idx[k] = { variant: w.variant, breaks: w.breaks, note: w.note };
+  if (!dirtyIdx(k)) delete DRAFT.idx[k];
+  saveLocal(); updateNav();
+}
+function ruleDefaults() { return { rule: "worst", weights: { wildfire: 1, erosion: 1, permafrost: 1 }, avgCuts: [1.5, 2.5],
+  prodCuts: [4, 12], countHigh: 2, countMed: 1, custom: worstTable(), missing: "low", note: "" }; }
+function teamRule() {
+  const t = TEAM.hazard, src = t || META.decisions.hazard, R = ruleDefaults();
+  for (const key of [...RULE_KEYS, "note"]) if (src[key] != null) R[key] = clone(src[key]);
+  if (!Array.isArray(R.custom) || R.custom.length !== 27) R.custom = worstTable();
+  return { ...R, by: t ? t.by : null, at: t ? t.at : null, from: t ? "team" : "repo" };
+}
+function workRule() { const t = teamRule(); return DRAFT.hazard ? { ...t, ...clone(DRAFT.hazard), from: "draft" } : t; }
+const coreRule = R => JSON.stringify([...RULE_KEYS.map(k => k === "custom" && R.rule !== "custom" ? null : R[k]), (R.note || "").trim()]);
+const dirtyRule = () => !!DRAFT.hazard && coreRule(workRule()) !== coreRule(teamRule());
+function editRule(fn) {
+  const w = workRule(); fn(w);
+  DRAFT.hazard = Object.fromEntries([...RULE_KEYS, "note"].map(k => [k, w[k]]));
+  if (!dirtyRule()) DRAFT.hazard = null;
+  saveLocal(); updateNav();
+}
+// the variant + boundaries each index feeds into the hazard
+function hazardInputs(useDrafts) {
+  return KEYS.map(k => {
+    const s = useDrafts && dirtyIdx(k) ? workIdx(k) : teamIdx(k), id = s.variant || META.decisions[k].variant;
+    return { k, id, b: s.breaks[id], decided: !!s.variant, from: s.from };
+  });
+}
+
+// ---------- team record: db + user capabilities ----------
+let db = null, user = null, uid = null, writeOK = null, mode = "connecting";
+const NAMES = {};
+async function connect() {
+  const c = window.claude;
+  if (!c || !c.use) { setMode("local"); return; }
+  try { [db, user] = await Promise.all([c.use("db"), c.use("user")]); } catch (e) { db = null; }
+  if (!db) { setMode("local"); return; }
+  if (user) { uid = await user.id(); writeOK = await user.can("data.write"); $("resetPanel").hidden = !(await user.canEdit()); }
+  setMode(writeOK === false ? "readonly" : "team");
+  db.collection("decisions").onSnapshot(snap => {
+    const t = {}; for (const d of snap.docs) t[d.id] = d.data();
+    TEAM = t; teamChanged();
+  }, e => { setMode("local"); $("loadErr").textContent = "Lost the connection to the team decisions. Reload the page to reconnect."; });
+}
+function setMode(m) {
+  mode = m;
+  $("conn").textContent = m === "team" ? "Team decisions: live" : m === "readonly" ? "Team decisions: view only"
+    : m === "local" ? "Team decisions unavailable here: showing the repo's starting point" : "Connecting…";
+  refreshSaveButtons();
+}
+function whoWhen(by, at) {
+  const name = by ? (NAMES[by] || "a teammate") : "someone";
+  const when = at ? new Date(at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
+  return `${esc(name)}${when ? ", " + esc(when) : ""}`;
+}
+async function resolveNames() {
+  if (!user) return;
+  const ids = [...new Set(Object.values(TEAM).map(d => d && d.by).filter(Boolean))].filter(id => !(id in NAMES));
+  if (!ids.length) return;
+  const ps = await user.profiles(ids);
+  let changed = false;
+  for (const id of ids) { NAMES[id] = (ps[id] && ps[id].name) || "a teammate"; changed = true; }
+  if (changed) renderStatuses();
+}
+async function saveTeam(key, body) {
+  const doc = { ...body, by: uid, at: new Date().toISOString() };
+  await db.doc("decisions/" + key).set(doc);
+  try { await db.collection("history").add({ key, value: doc, by: uid, at: doc.at }); } catch (e) {}
+  TEAM[key] = doc;
+  return doc;
+}
+function saveError(e) {
+  if (e && (e.code === "invalid_argument" || e.code === "not_granted")) { writeOK = false; setMode("readonly");
+    return "Your access to this page is view only, so you can't save team decisions. Ask the owner for Contributor access."; }
+  if (e && e.code === "quota_exceeded") return "The team record is full. Ask the owner to clear the decision history.";
+  return "Couldn't save. Check your connection and try again.";
+}
+function teamChanged() {
+  resolveNames(); updateNav(); renderStatuses();
+  renderTab(UI.tab);
+}
+
+// ---------- drawing ----------
+const DPR = () => Math.min(2, window.devicePixelRatio || 1);
+function paintGrid(cv, arr, view, pal) {  // nearest-cell sampling of a class grid into the canvas's pixels
+  const [c0, r0, nc, nr] = view, W = cv.width, H = cv.height;
+  const ctx = cv.getContext("2d"), img = ctx.createImageData(W, H), px = new Uint32Array(img.data.buffer), sea = pal[SEA];
+  const cols = new Int32Array(W);
+  for (let x = 0; x < W; x++) { const c = Math.floor(c0 + (x + 0.5) * nc / W); cols[x] = c >= 0 && c < NX ? c : -1; }
+  for (let y = 0; y < H; y++) {
+    const r = Math.floor(r0 + (y + 0.5) * nr / H), o = y * W;
+    if (r < 0 || r >= NY) { px.fill(sea, o, o + W); continue; }
+    const base = r * NX;
+    for (let x = 0; x < W; x++) { const c = cols[x]; px[o + x] = c < 0 ? sea : pal[arr[base + c]]; }
+  }
+  ctx.putImageData(img, 0, 0);
+  return ctx;
+}
+function drawGrid(cv, arr, view, pal) {  // returns ctx + scale for overlays, or null while the canvas is hidden
+  const w = cv.clientWidth; if (!w) return null;
+  const [, , nc, nr] = view, dpr = DPR(), h = Math.round(w * nr / nc);
+  cv.style.height = h + "px";
+  const W = Math.max(1, Math.round(w * dpr)), H = Math.max(1, Math.round(h * dpr));
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+  return { ctx: paintGrid(cv, arr, view, pal), sx: W / nc, sy: H / nr, dpr };
+}
+function gridPNG(arr, view, W, pal) {  // a class grid as a PNG data URL, W px wide (PDF export)
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = Math.round(W * view[3] / view[2]);
+  paintGrid(cv, arr, view, pal);
+  return cv.toDataURL("image/png");
+}
+function cellAt(cv, view, ev) {
+  const r = cv.getBoundingClientRect(), [c0, r0, nc, nr] = view;
+  return [Math.floor(c0 + (ev.clientX - r.left) / r.width * nc), Math.floor(r0 + (ev.clientY - r.top) / r.height * nr)];
+}
+const inGrid = (c, r) => c >= 0 && r >= 0 && c < NX && r < NY;
+const tip = $("tip");
+function showTip(ev, html) {
+  tip.innerHTML = html; tip.hidden = false;
+  const x = ev.clientX + 14, y = ev.clientY + 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.min(x, innerWidth - w - 8) + "px"; tip.style.top = Math.min(y, innerHeight - h - 8) + "px";
+}
+function hideTip() { tip.hidden = true; }
+function regionName(i) { return region[i] ? META.regions[region[i] - 1] : ""; }
+function latlonText(c, r) { const [lat, lon] = ALB.inv(...cellXY(c, r)); return `${lat.toFixed(3)}° N, ${Math.abs(lon).toFixed(3)}° W`; }
+function drawHist(cv, k, id, b, marker) {
+  const m = VM(k, id), dpr = DPR(), h = DATA[`${k}/${id}`].hist;
+  cv.width = Math.round(cv.clientWidth * dpr); cv.height = Math.round(72 * dpr);
+  const ctx = cv.getContext("2d"), W = cv.width, H = cv.height, NB = 60, bins = new Float64Array(NB);
+  const byCls = Array.from({ length: NB }, () => [0, 0, 0]), t = lut(m, b);
+  let total = 0;
+  for (let c = 1; c < h.length; c++) { if (!h[c] || c === m.na_code) continue; const v = decode(m, c);
+    const j = Math.min(NB - 1, Math.max(0, Math.floor((v - m.lo) / (m.hi - m.lo) * NB))); bins[j] += h[c]; byCls[j][t[c]] += h[c]; total += h[c]; }
+  const sorted = Array.from(bins).sort((x, y) => y - x);
+  const clipped = sorted[0] > 3 * sorted[1], ymax = clipped ? sorted[1] * 1.25 : sorted[0];
+  const bw = W / NB, gap = Math.max(1, dpr);
+  ctx.clearRect(0, 0, W, H);
+  for (let j = 0; j < NB; j++) {
+    if (!bins[j]) continue;
+    const hh = Math.min(1, bins[j] / ymax) * (H - 14 * dpr);
+    let y = H;
+    for (const c of [0, 1, 2]) { if (!byCls[j][c]) continue; const sh = hh * byCls[j][c] / bins[j];
+      ctx.fillStyle = PAL.classHex[c]; ctx.fillRect(j * bw + gap / 2, y - sh, bw - gap, sh); y -= sh; }
+    if (clipped && bins[j] === sorted[0]) {
+      ctx.fillStyle = PAL.g("--ink"); ctx.font = `${11 * dpr}px ${PAL.g("--font-data")}`; ctx.textAlign = j < NB / 2 ? "left" : "right";
+      ctx.fillText(`${Math.round(100 * bins[j] / total)}% ↑`, j < NB / 2 ? j * bw + bw + 3 * dpr : j * bw - 3 * dpr, 11 * dpr);
+    }
+  }
+  ctx.strokeStyle = PAL.g("--ink"); ctx.lineWidth = 2 * dpr;
+  for (const v of b) { const x = (v - m.lo) / (m.hi - m.lo) * W; if (x < 0 || x > W) continue;
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  if (marker != null && marker !== NA) { const x = Math.min(W, Math.max(0, (marker - m.lo) / (m.hi - m.lo) * W));
+    ctx.fillStyle = PAL.g("--ink"); ctx.beginPath(); ctx.moveTo(x - 6 * dpr, 0); ctx.lineTo(x + 6 * dpr, 0); ctx.lineTo(x, 9 * dpr); ctx.fill(); }
+}
+function barHTML(n, cls = "bar") {  // n = [Low, Medium, High, none] counts
+  const tot = n[0] + n[1] + n[2] + n[3] || 1;
+  return `<div class="${cls}">` + [0, 1, 2, 3].filter(c => n[c]).map(c =>
+    `<div style="width:${100 * n[c] / tot}%;background:${PAL.classHex[c]}" title="${clsName(c)} ${pct(n[c] / tot)}"></div>`).join("") + "</div>";
+}
+
+// ---------- statistics ----------
+function areaCounts(arr) {  // [area][class 0-3]; area 0 = statewide, 1-4 = regions
+  const n = Array.from({ length: 5 }, () => [0, 0, 0, 0]);
+  for (let i = 0; i < N; i++) { const v = arr[i]; if (v === SEA) continue; n[0][v]++; const r = region[i]; if (r) n[r][v]++; }
+  return n;
+}
+function agreement(a, b) {  // per area: same class, Low vs High, 3x3 shares (cells with a class in both)
+  const m = Array.from({ length: 5 }, () => new Float64Array(9));
+  for (let i = 0; i < N; i++) { const x = a[i], y = b[i]; if (x > 2 || y > 2) continue; const j = x * 3 + y; m[0][j]++; const r = region[i]; if (r) m[r][j]++; }
+  return m.map(c => { const t = c.reduce((s, v) => s + v, 0) || 1;
+    return { same: (c[0] + c[4] + c[8]) / t, lh: (c[2] + c[6]) / t, conf: Array.from(c, v => v / t) }; });
+}
+const RHO = {};
+function rankCorr(k, ia, ib) {  // Spearman over cells with a value in both: average ranks from the code histograms
+  const key = `${k}/${ia}|${ib}`; if (key in RHO) return RHO[key];
+  const A = DATA[`${k}/${ia}`].codes, B = DATA[`${k}/${ib}`].codes, ma = VM(k, ia), mb = VM(k, ib);
+  const ha = new Float64Array(ma.maxcode + 1), hb = new Float64Array(mb.maxcode + 1);
+  let n = 0;
+  for (let i = 0; i < N; i++) { const x = A[i], y = B[i]; if (!x || !y || x === ma.na_code || y === mb.na_code) continue; ha[x]++; hb[y]++; n++; }
+  if (n < 3) return RHO[key] = NaN;
+  for (const h of [ha, hb]) { let cum = 0; for (let c = 0; c < h.length; c++) if (h[c]) { const cnt = h[c]; h[c] = cum + (cnt + 1) / 2; cum += cnt; } }
+  const mean = (n + 1) / 2; let sxy = 0, sxx = 0, syy = 0;
+  for (let i = 0; i < N; i++) { const x = A[i], y = B[i]; if (!x || !y || x === ma.na_code || y === mb.na_code) continue;
+    const dx = ha[x] - mean, dy = hb[y] - mean; sxy += dx * dy; sxx += dx * dx; syy += dy * dy; }
+  return RHO[key] = sxy / Math.sqrt(sxx * syy);
+}
+
+// ---------- places ----------
+function placeValue(k, id, p) {  // the app's value at a named place: watershed value from the API where the variant has one
+  const api = (p.api || {})[`${k}/${id}`];
+  if (api != null) return { v: api, api: true };
+  return { v: valueAt(k, id, p.row * NX + p.col), api: false };
+}
+
+// ---------- combining rule ----------
+function ruleClass(R, w, e, p) {
+  let c = [w, e, p];
+  if (c.every(x => x === MISSING)) return MISSING;
+  if (c.includes(MISSING)) { if (R.missing === "blank") return MISSING; c = c.map(x => x === MISSING ? 0 : x); }
+  const pts = c.map(x => x + 1);
+  switch (R.rule) {
+    case "worst": return Math.max(...c);
+    case "avg": {
+      const wt = KEYS.map(k => +R.weights[k]), sw = wt.reduce((s, x) => s + x, 0);
+      const score = sw > 0 ? pts.reduce((s, x, i) => s + x * wt[i], 0) / sw : 1;
+      return score < R.avgCuts[0] - 1e-9 ? 0 : score < R.avgCuts[1] - 1e-9 ? 1 : 2;
+    }
+    case "product": { const pr = pts[0] * pts[1] * pts[2]; return pr <= R.prodCuts[0] ? 0 : pr <= R.prodCuts[1] ? 1 : 2; }
+    case "count": { const nh = c.filter(x => x === 2).length, nm = c.filter(x => x >= 1).length;
+      return nh >= R.countHigh ? 2 : nm >= R.countMed ? 1 : 0; }
+    case "custom": return R.custom[c[0] * 9 + c[1] * 3 + c[2]];
+  }
+}
+function ruleTable(R) { const T = new Uint8Array(64);
+  for (let w = 0; w < 4; w++) for (let e = 0; e < 4; e++) for (let p = 0; p < 4; p++) T[(w << 4) | (e << 2) | p] = ruleClass(R, w, e, p);
+  return T; }
+function ruleSentence(R) {
+  const w = R.weights;
+  switch (R.rule) {
+    case "worst": return "The hazard takes the highest of the three classes.";
+    case "avg": return `Score each index Low 1, Medium 2, High 3 and take the weighted average (weights: Wildfire ${w.wildfire}, Erosion ${w.erosion}, Permafrost ${w.permafrost}). Below ${R.avgCuts[0]} is Low, ${R.avgCuts[1]} or more is High, otherwise Medium.`;
+    case "product": return `Score each index Low 1, Medium 2, High 3 and multiply (1 to 27). Up to ${R.prodCuts[0]} is Low, up to ${R.prodCuts[1]} is Medium, above is High.`;
+    case "count": return `High if at least ${R.countHigh} index${R.countHigh > 1 ? "es are" : " is"} High. Otherwise Medium if at least ${R.countMed} ${R.countMed > 1 ? "are" : "is"} Medium or High. Otherwise Low.`;
+    case "custom": return "Each of the 27 combinations is set by hand.";
+  }
+}
+const missingText = R => R.missing === "low" ? "An index with no value counts as Low." : "Where an index has no value, the hazard is left blank.";
+const HZ = new Map();
+function hazardGrid(inputs, R) {
+  const key = JSON.stringify([inputs.map(x => [x.id, x.b]), RULE_KEYS.map(k => R[k])]);
+  if (HZ.has(key)) return HZ.get(key);
+  const T = ruleTable(R), [W, E, P] = inputs.map(x => classes(x.k, x.id, x.b)), h = new Uint8Array(N);
+  for (let i = 0; i < N; i++) h[i] = land[i] ? T[(W[i] << 4) | (E[i] << 2) | P[i]] : SEA;
+  if (HZ.size > 3) HZ.delete(HZ.keys().next().value);
+  HZ.set(key, h);
+  return h;
+}
 
 // ---------- projection: EPSG:3338 (Albers, GRS80) ----------
 const ALB = (() => {
@@ -258,572 +783,745 @@ const ALB = (() => {
 })();
 const cellOf = (x, y) => [Math.floor((x - META.x0) / META.res), Math.floor((META.ytop - y) / META.res)];
 const cellXY = (c, r) => [META.x0 + (c + 0.5) * META.res, META.ytop - (r + 0.5) * META.res];
-const inGrid = (c, r) => c >= 0 && r >= 0 && c < META.nx && r < META.ny;
 
-// ---------- data: variants load on demand ----------
-const DATA = {}, cls = {}, codes = {}, hist = {};  // DATA: "index/id" -> {codes, hist}; codes/hist: chosen variants
-let land, hazard;
-function pixels(im) {
-  const c = document.createElement("canvas"); c.width = im.naturalWidth || im.width; c.height = im.naturalHeight || im.height;
-  const ctx = c.getContext("2d", { willReadFrequently: true });
-  ctx.drawImage(im, 0, 0);
-  return ctx.getImageData(0, 0, c.width, c.height).data;
+// ---------- navigation ----------
+function buildNav() {
+  $("nav").innerHTML = TABS.map(t => `<button role="tab" id="nav-${t}" aria-controls="tab-${t}" data-tab="${t}">${TAB_NAMES[t]}</button>`).join("");
+  $("nav").onclick = e => { const b = e.target.closest("button"); if (b) location.hash = b.dataset.tab; };
+  updateNav();
 }
-async function image(src) {  // "#id" = embedded <img>; otherwise a file published beside the page
-  const im = src.startsWith("#") ? document.getElementById(src.slice(1)) : Object.assign(new Image(), { src });
-  await im.decode();
-  return im;
-}
-function loadLand() {
-  const L = pixels(document.getElementById("png-land")); land = new Uint8Array(N);
-  for (let i = 0; i < N; i++) land[i] = L[4 * i] > 127 ? 1 : 0;
-  for (const k of KEYS) cls[k] = new Uint8Array(N);
-  hazard = new Uint8Array(N);
-}
-const loading = {};
-function loadVariant(k, id) {
-  const key = `${k}/${id}`;
-  return loading[key] ||= (async () => {
-    const m = VARS(k)[id], d = pixels(await image(m.src)), a = new Uint16Array(N), h = new Uint32Array(m.maxcode + 1);
-    for (let i = 0; i < N; i++) { const v = (d[4 * i] << 8) | d[4 * i + 1]; a[i] = land[i] ? v : 0; if (land[i] && v) h[v]++; }
-    return DATA[key] = { codes: a, hist: h };
-  })();
-}
-async function loadChosen() {
-  await Promise.all(KEYS.map(k => loadVariant(k, S.variants[k])));
-  for (const k of KEYS) ({ codes: codes[k], hist: hist[k] } = DATA[vkey(k)]);
-}
-const decode = (k, c) => (c - 1) / V(k).scale - V(k).offset;
-const valueOf = (k, c) => !c ? null : c === V(k).na_code ? NA : decode(k, c);
-const classify = (k, v) => v == null || Number.isNaN(v) ? MISSING : v === NA ? V(k).na_class
-  : v <= S.breaks[vkey(k)][0] + 1e-9 ? 0 : v <= S.breaks[vkey(k)][1] + 1e-9 ? 1 : 2;
-const fmt = (k, v) => { const m = V(k); if (v == null) return "–"; if (v === NA) return m.na_label;
-  const s = v.toFixed(m.digits); return (m.signed && +s > 0 ? "+" : "") + s + " " + m.unit; };
-
-function lut(k) {
-  const m = V(k), t = new Uint8Array(m.maxcode + 1); t[0] = MISSING;
-  for (let c = 1; c <= m.maxcode; c++) t[c] = classify(k, valueOf(k, c));
-  return t;
-}
-function computeClasses(k) {
-  const t = lut(k), a = codes[k], o = cls[k];
-  for (let i = 0; i < N; i++) o[i] = land[i] ? t[a[i]] : SEA;
-}
-
-// ---------- combining rule ----------
-function ruleClass(w, e, p) {
-  let c = [w, e, p];
-  if (c.every(x => x === MISSING)) return MISSING;
-  if (c.includes(MISSING)) { if (S.missing === "blank") return MISSING; c = c.map(x => x === MISSING ? 0 : x); }
-  const pts = c.map(x => x + 1);
-  switch (S.rule) {
-    case "worst": return Math.max(...c);
-    case "avg": {
-      const wt = KEYS.map(k => +S.weights[k]), sw = wt.reduce((s, x) => s + x, 0);
-      const score = sw > 0 ? pts.reduce((s, x, i) => s + x * wt[i], 0) / sw : 1;
-      return score < S.avgCuts[0] - 1e-9 ? 0 : score < S.avgCuts[1] - 1e-9 ? 1 : 2;
-    }
-    case "product": { const pr = pts[0] * pts[1] * pts[2]; return pr <= S.prodCuts[0] ? 0 : pr <= S.prodCuts[1] ? 1 : 2; }
-    case "count": {
-      const nh = c.filter(x => x === 2).length, nm = c.filter(x => x >= 1).length;
-      return nh >= S.countHigh ? 2 : nm >= S.countMed ? 1 : 0;
-    }
-    case "custom": return S.custom[c[0] * 9 + c[1] * 3 + c[2]];
+function updateNav() {
+  for (const t of TABS) {
+    const b = $("nav-" + t), dirty = KEYS.includes(t) ? dirtyIdx(t) : t === "hazard" ? dirtyRule() : false;
+    b.innerHTML = TAB_NAMES[t] + (dirty ? `<span class="dot" title="Unsaved changes"></span>` : "");
+    b.setAttribute("aria-selected", String(t === UI.tab));
   }
 }
-let TABLE = new Uint8Array(64);
-function buildTable() { for (let w = 0; w < 4; w++) for (let e = 0; e < 4; e++) for (let p = 0; p < 4; p++) TABLE[(w << 4) | (e << 2) | p] = ruleClass(w, e, p); }
-function computeHazard() {
-  const W = cls.wildfire, E = cls.erosion, P = cls.permafrost;
-  for (let i = 0; i < N; i++) hazard[i] = land[i] ? TABLE[(W[i] << 4) | (E[i] << 2) | P[i]] : SEA;
+let renderSeq = 0;
+async function showTab(t) {
+  UI.tab = t; saveLocal(); updateNav(); hideTip();
+  for (const x of TABS) $("tab-" + x).hidden = x !== t;
+  await renderTab(t);
+}
+async function renderTab(t) {
+  const seq = ++renderSeq;
+  const need = KEYS.includes(t) ? VIDS(t).map(id => [t, id])
+    : hazardInputs(t === "hazard" && UI.preview).map(x => [x.k, x.id]).concat(t === "summary" ? [] : hazardInputs(false).map(x => [x.k, x.id]));
+  const missing = need.filter(([k, id]) => !DATA[`${k}/${id}`]);
+  if (missing.length) {
+    document.body.classList.add("loading");
+    try { await Promise.all(missing.map(([k, id]) => loadVariant(k, id))); }
+    catch (e) { $("loadErr").textContent = `Could not load map data (${e.message || e}). Reload the page to try again.`; return; }
+    finally { document.body.classList.remove("loading"); }
+  }
+  if (seq !== renderSeq) return;
+  if (t === "summary") renderSummary();
+  else if (t === "hazard") renderHazard();
+  else renderIndex(t);
+}
+function route() {
+  const h = location.hash.slice(1);
+  showTab(TABS.includes(h) ? h : TABS.includes(UI.tab) ? UI.tab : "summary");
 }
 
-// ---------- rendering ----------
-const off = document.createElement("canvas"); off.width = META.nx; off.height = META.ny;
-const offCtx = off.getContext("2d");
-const img = offCtx.createImageData(META.nx, META.ny), px = new Uint32Array(img.data.buffer);
-const C32 = {};
-for (const [k, hex] of Object.entries(COLOR)) {
-  const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
-  C32[k] = ((255 << 24) | (b << 16) | (g << 8) | r) >>> 0;
+// ---------- decision boxes ----------
+function decisionHTML(kind, s, dirty) {  // kind: index key or "hazard"; s: team state
+  const pills = [s.from === "team" ? `<span class="pill team">Team decision</span>` : `<span class="pill start">Not decided yet</span>`];
+  if (dirty) pills.push(`<span class="pill draft">Your unsaved changes</span>`);
+  let what;
+  if (kind === "hazard") what = `<b>${esc(document.querySelector(`#rule option[value="${s.rule}"]`).textContent)}</b>. ${esc(ruleSentence(s))}`;
+  else if (s.variant) { const m = VM(kind, s.variant); what = `<b>Variant ${esc(m.letter)}</b>: ${esc(m.label)}<br><span class="num">${esc(boundsText(m, s.breaks[s.variant]))}</span>`; }
+  else what = `No variant chosen. The hazard uses the repo's starting point, Variant ${esc(VM(kind, META.decisions[kind].variant).letter)}.`;
+  const who = s.from === "team" ? `<span class="small">Saved by ${whoWhen(s.by, s.at)}</span>`
+    : `<span class="small">${mode === "local" ? "Starting point from the repo." : "Starting point from the repo. Nobody has saved a team decision yet."}</span>`;
+  const note = s.note ? `<p class="why">${esc(s.note)}</p>` : "";
+  return `<div class="pills">${pills.join("")}</div><div>${what}</div>${note}${who}`;
 }
-const C32A = new Uint32Array(256); for (const k in C32) C32A[k] = C32[k];
-const layerArr = () => S.layer === "hazard" ? hazard : cls[S.layer];
-function paintOff() { const a = layerArr(); for (let i = 0; i < N; i++) px[i] = C32A[a[i]]; offCtx.putImageData(img, 0, 0); }
+function renderStatuses() {
+  for (const k of KEYS) { const el = document.querySelector(`#tab-${k} [data-r="decision"]`); if (el) el.innerHTML = decisionHTML(k, teamIdx(k), dirtyIdx(k)); }
+  $("hzDecision").innerHTML = decisionHTML("hazard", teamRule(), dirtyRule());
+  refreshSaveButtons();
+}
+function refreshSaveButtons() {
+  const why = mode === "local" ? "Team decisions aren't available in this view (opened outside claude.ai, or signed out)."
+    : mode === "readonly" ? "You have view-only access, so you can't save team decisions." : mode === "connecting" ? "Connecting to the team record…" : "";
+  for (const k of KEYS) {
+    const b = document.querySelector(`#tab-${k} [data-r="save"]`); if (!b) continue;
+    b.disabled = !!why || !dirtyIdx(k); b.title = why;
+    document.querySelector(`#tab-${k} [data-r="discard"]`).disabled = !DRAFT.idx[k];
+  }
+  $("hzSave").disabled = !!why || !dirtyRule(); $("hzSave").title = why;
+  $("hzDiscard").disabled = !DRAFT.hazard;
+}
 
+// ---------- index pages ----------
+const IT = {};  // per index: DOM refs
+function buildIndexTab(k) {
+  const sec = $("tab-" + k), I = IDX(k), ids = VIDS(k);
+  sec.innerHTML = `
+    <div class="pagehead">
+      <div><p class="eyebrow">Index</p><h1>${esc(I.name)}</h1><p class="question">${esc(I.question)}</p></div>
+      <div class="decision" data-r="decision"></div>
+    </div>
+    <section class="block" aria-labelledby="var-${k}">
+      <div class="sechead"><h2 id="var-${k}">Variants</h2>
+        <span class="small">Tick the variant this index should use. Move the boundaries to see how the classes change.</span></div>
+      <div class="cards" data-r="cards"></div>
+    </section>
+    <section class="reasoning" aria-labelledby="why-${k}">
+      <div><h2 id="why-${k}"><label for="note-${k}">Reasoning</label></h2>
+        <p>Why the team chose this variant and these boundaries. Saved with the team decision and shown on the Summary.</p></div>
+      <textarea id="note-${k}" rows="4" placeholder="For example: Variant B, because the team cares about where the hazard is rising. High above +54 % keeps the wet south coast from dominating."></textarea>
+      <div class="row"><button class="primary" data-r="save">Save as team decision</button>
+        <button data-r="discard">Discard my changes</button><span class="small" data-r="msg" role="status"></span></div>
+    </section>
+    <section class="compare" aria-labelledby="cmp-${k}">
+      <div class="sechead"><h2 id="cmp-${k}">Compare variants</h2>
+        <span class="small">Uses the boundaries on the cards above and updates as they move.</span></div>
+      <div class="grid2">
+        <div class="panel"><h3>Class shares by region</h3><p class="small">Share of each area's land in Low, Medium, High (and no value).</p>
+          <div class="scroll" data-r="shares"></div></div>
+        <div class="panel" ${ids.length < 2 ? "hidden" : ""}><h3>Agreement between variants</h3>
+          <p class="small">Same class: share of land (with a value in both) where both variants give the same class. In brackets: Low in
+            one variant, High in the other. Rank correlation: +1 when both order places the same way (leaves out cells without a value).</p>
+          <div class="scroll" data-r="agree"></div></div>
+      </div>
+      <div class="panel" ${ids.length < 2 ? "hidden" : ""}>
+        <div class="sechead"><h3>Where two variants agree</h3>
+          <span class="row small"><select data-r="pa" aria-label="First variant"></select>
+            <button data-r="swap" title="Swap the two variants" aria-label="Swap the two variants">⇄</button>
+            <select data-r="pb" aria-label="Second variant"></select></span></div>
+        <div class="pairgrid">
+          <div><p class="small" data-r="confhelp" style="margin-bottom:8px"></p><div data-r="conf"></div>
+            <p class="small" data-r="confnote" style="margin-top:8px"></p></div>
+          <div><canvas class="map" data-r="diff" aria-label="Map of where the two variants' classes agree"></canvas>
+            <div class="legend" data-r="difflegend" style="margin-top:6px"></div></div>
+        </div>
+      </div>
+      <div class="panel"><h3>At named places</h3>
+        <p class="small">Value → class with the boundaries above. Places off the data move to the nearest cell with data.</p>
+        <div class="scroll" data-r="places"></div></div>
+    </section>`;
+  const q = s => sec.querySelector(s);
+  const R = IT[k] = { sec, cards: {}, decision: q('[data-r="decision"]'), note: $("note-" + k), save: q('[data-r="save"]'),
+    discard: q('[data-r="discard"]'), msg: q('[data-r="msg"]'), shares: q('[data-r="shares"]'), agree: q('[data-r="agree"]'),
+    pa: q('[data-r="pa"]'), pb: q('[data-r="pb"]'), swap: q('[data-r="swap"]'), conf: q('[data-r="conf"]'),
+    confhelp: q('[data-r="confhelp"]'), confnote: q('[data-r="confnote"]'),
+    diff: q('[data-r="diff"]'), difflegend: q('[data-r="difflegend"]'), places: q('[data-r="places"]') };
+  for (const id of ids) {
+    const m = VM(k, id), step = Math.pow(10, -m.digits), card = document.createElement("article");
+    card.className = "vcard";
+    card.innerHTML = `
+      <div class="vhead">
+        <label class="pick"><input type="checkbox" data-r="pick" aria-label="Use Variant ${esc(m.letter)} for the ${esc(I.name)} index">
+          <span class="letter">Variant ${esc(m.letter)}</span></label>
+        <span class="tag" data-r="state">${esc(m.status)}</span>
+      </div>
+      <div class="vlabel">${esc(m.label)}</div>
+      <div class="mapbox"><canvas class="map" data-r="map" aria-label="Variant ${esc(m.letter)} class map"></canvas></div>
+      <p class="small">${esc(m.description)}<br><span class="muted">${esc(m.details)}</span></p>
+      ${m.method ? `<details class="small method"><summary>How it's computed</summary><p>${esc(m.method)}</p></details>` : ""}
+      <canvas class="hist" data-r="hist" aria-label="Variant ${esc(m.letter)}: land area by value"></canvas>
+      <div class="axisrow num"><span>${(+m.lo).toFixed(m.digits)}</span><span>land area by value</span><span>${(+m.hi).toFixed(m.digits)} ${esc(m.unit)}</span></div>
+      <div class="brk">
+        <label for="b0-${k}-${id}">Low up to</label>
+        <input type="range" data-b="0" min="${m.lo}" max="${m.hi}" step="${(m.hi - m.lo) / 1000}" aria-label="Variant ${esc(m.letter)} Low to Medium boundary">
+        <input type="number" id="b0-${k}-${id}" data-n="0" step="${step}">
+        <label for="b1-${k}-${id}">High above</label>
+        <input type="range" data-b="1" min="${m.lo}" max="${m.hi}" step="${(m.hi - m.lo) / 1000}" aria-label="Variant ${esc(m.letter)} Medium to High boundary">
+        <input type="number" id="b1-${k}-${id}" data-n="1" step="${step}">
+      </div>
+      <div class="row" style="justify-content:space-between"><button data-r="reset" class="small">Reset to defaults</button>
+        <span class="small num" data-r="defaults">default ${esc(m.breaks.map(x => fmt(m, x)).join(", "))}</span></div>
+      <div data-r="bar"></div>
+      <div class="small num" data-r="sharetxt"></div>`;
+    q('[data-r="cards"]').appendChild(card);
+    const c = s => card.querySelector(s);
+    const C = R.cards[id] = { card, pick: c('[data-r="pick"]'), state: c('[data-r="state"]'), map: c('[data-r="map"]'), hist: c('[data-r="hist"]'),
+      ranges: [c('[data-b="0"]'), c('[data-b="1"]')], nums: [c('[data-n="0"]'), c('[data-n="1"]')], bar: c('[data-r="bar"]'), sharetxt: c('[data-r="sharetxt"]') };
+    C.pick.onchange = () => { editIdx(k, w => { w.variant = C.pick.checked ? id : (w.variant === id ? null : w.variant); }); renderIndex(k); };
+    for (const j of [0, 1]) {
+      const set = v => { if (!Number.isFinite(v)) return;
+        editIdx(k, w => { const b = w.breaks[id] = w.breaks[id].slice(); b[j] = v; if (j === 0 && b[1] < v) b[1] = v; if (j === 1 && b[0] > v) b[0] = v; });
+        cardChanged(k, id); };
+      C.ranges[j].addEventListener("input", e => set(+(+e.target.value).toFixed(m.digits)));
+      C.nums[j].addEventListener("input", e => set(parseFloat(e.target.value)));
+    }
+    c('[data-r="reset"]').onclick = () => { editIdx(k, w => { w.breaks[id] = m.breaks.slice(); }); cardChanged(k, id); };
+    C.map.addEventListener("mousemove", ev => indexTip(k, C.map, ev));
+    C.map.addEventListener("mouseleave", hideTip);
+  }
+  R.note.addEventListener("input", () => { editIdx(k, w => { w.note = R.note.value; }); renderStatuses(); });
+  R.save.onclick = async () => {
+    const w = workIdx(k); R.save.disabled = true; R.msg.textContent = "Saving…";
+    try { await saveTeam(k, { variant: w.variant, breaks: w.breaks, note: (w.note || "").trim() }); delete DRAFT.idx[k]; saveLocal();
+      R.msg.textContent = "Saved for the team."; updateNav(); renderIndex(k); }
+    catch (e) { R.msg.textContent = saveError(e); refreshSaveButtons(); }
+  };
+  R.discard.onclick = () => { delete DRAFT.idx[k]; saveLocal(); updateNav(); R.msg.textContent = "Back to the team decision."; renderIndex(k); };
+  const opts = ids.map(id => `<option value="${id}">Variant ${esc(VM(k, id).letter)}</option>`).join("");
+  R.pa.innerHTML = opts; R.pb.innerHTML = opts;
+  const pairNow = () => { const p = UI.pair[k]; return Array.isArray(p) && p.every(id => VARS(k)[id]) ? p : [ids[0], ids[1] || ids[0]]; };
+  [R.pa.value, R.pb.value] = pairNow();
+  for (const s of [R.pa, R.pb]) s.onchange = () => { UI.pair[k] = [R.pa.value, R.pb.value]; saveLocal(); renderCompare(k); };
+  R.swap.onclick = () => { [R.pa.value, R.pb.value] = [R.pb.value, R.pa.value]; R.pa.onchange(); };
+  R.diff.addEventListener("mousemove", ev => indexTip(k, R.diff, ev));
+  R.diff.addEventListener("mouseleave", hideTip);
+}
+function indexTip(k, cv, ev) {
+  const [c, r] = cellAt(cv, BBOX, ev);
+  if (!inGrid(c, r) || !land[r * NX + c]) { hideTip(); return; }
+  const i = r * NX + c, w = workIdx(k);
+  showTip(ev, `<div class="num">${latlonText(c, r)}${regionName(i) ? " · " + esc(regionName(i)) : ""}</div><table>` + VIDS(k).map(id => {
+    const m = VM(k, id), v = valueAt(k, id, i);
+    return `<tr><td>Variant ${esc(m.letter)}</td><td class="num">${esc(fmt(m, v))}</td><td>${chip(classOfValue(m, v, w.breaks[id]))}</td></tr>`; }).join("") + "</table>");
+}
+let cmpTimer = {};
+function cardChanged(k, id) {  // a boundary moved: redraw that card now, the comparison when the slider pauses
+  requestAnimationFrame(() => { renderCard(k, id); renderStatuses(); });
+  clearTimeout(cmpTimer[k]); cmpTimer[k] = setTimeout(() => renderCompare(k), 180);
+}
+function renderCard(k, id) {
+  const C = IT[k].cards[id], m = VM(k, id), w = workIdx(k), b = w.breaks[id], arr = classes(k, id, b);
+  const chosen = w.variant === id;
+  C.pick.checked = chosen; C.card.classList.toggle("chosen", chosen);
+  C.state.textContent = chosen ? "selected" : m.status; C.state.classList.toggle("chosenTag", chosen);
+  for (const j of [0, 1]) { C.ranges[j].value = b[j]; if (document.activeElement !== C.nums[j]) C.nums[j].value = (+b[j]).toFixed(m.digits); }
+  drawGrid(C.map, arr, BBOX, PAL.cls);
+  drawHist(C.hist, k, id, b);
+  const n = areaCounts(arr)[0], tot = n[0] + n[1] + n[2] + n[3];
+  C.bar.innerHTML = barHTML(n);
+  const na = m.na_code ? DATA[`${k}/${id}`].hist[m.na_code] : 0;
+  C.sharetxt.textContent = [0, 1, 2].map(c => `${CLS[c]} ${pct(n[c] / tot)}`).join(" · ") + (n[3] ? ` · no value ${pct(n[3] / tot)}` : "")
+    + (na ? ` (${CLS[m.na_class]} includes ${pct(na / tot)} ${m.na_label})` : "");
+}
+function renderIndex(k) {
+  if (!IT[k]) buildIndexTab(k);
+  const R = IT[k], w = workIdx(k);
+  if (document.activeElement !== R.note) R.note.value = w.note || "";
+  for (const id of VIDS(k)) renderCard(k, id);
+  renderStatuses();
+  renderCompare(k);
+}
+function renderCompare(k) {
+  const R = IT[k], ids = VIDS(k), w = workIdx(k), C = {};
+  if (R.sec.hidden && UI.tab !== k) return;
+  for (const id of ids) C[id] = classes(k, id, w.breaks[id]);
+  const counts = Object.fromEntries(ids.map(id => [id, areaCounts(C[id])]));
+  R.shares.innerHTML = `<table class="t"><tr><th>Variant</th>${AREAS.map(a => `<th>${esc(a)}</th>`).join("")}</tr>` + ids.map(id => {
+    const m = VM(k, id);
+    return `<tr class="${w.variant === id ? "hl" : ""}"><td><b>${esc(m.letter)}</b></td>` + counts[id].map(n => {
+      const t = n[0] + n[1] + n[2] + n[3] || 1;
+      return `<td>${barHTML(n, "cellbar")}<div class="cellnum">${[0, 1, 2].map(c => Math.round(100 * n[c] / t)).join(" · ")}${n[3] / t >= 0.005 ? ` (${Math.round(100 * n[3] / t)})` : ""}</div></td>`;
+    }).join("") + "</tr>"; }).join("") + "</table>";
+  if (ids.length > 1) {
+    const pairs = []; for (let a = 0; a < ids.length; a++) for (let b = a + 1; b < ids.length; b++) pairs.push([ids[a], ids[b]]);
+    R.agree.innerHTML = `<table class="t"><tr><th>Pair</th>${AREAS.map(a => `<th class="c">${esc(a)}</th>`).join("")}<th class="c">Rank corr.</th></tr>` +
+      pairs.map(([a, b]) => { const g = agreement(C[a], C[b]);
+        return `<tr><td style="white-space:nowrap"><b>${esc(VM(k, a).letter)} vs ${esc(VM(k, b).letter)}</b></td>` + g.map(x =>
+          `<td class="c" style="white-space:nowrap"><span class="num">${pct(x.same)}</span> <span class="cellnum">(${pct(x.lh)})</span></td>`).join("")
+          + `<td class="c num">${rankCorr(k, a, b).toFixed(2)}</td></tr>`; }).join("") + "</table>";
+    const a = R.pa.value, b = R.pb.value, ma = VM(k, a), mb = VM(k, b);
+    if (a === b) { R.conf.innerHTML = ""; R.confhelp.textContent = ""; R.confnote.textContent = "Pick two different variants."; }
+    else {
+      // read across: of the land Variant A puts in a class, the share Variant B puts in each class (rows add to 100 %)
+      const g = agreement(C[a], C[b])[0], A = `Variant ${esc(ma.letter)}`, B = `Variant ${esc(mb.letter)}`;
+      R.confhelp.innerHTML = `Read across a row: where ${A} says Low, how often ${B} also says Low, or Medium, or High. Each row adds up to 100 %.`;
+      R.conf.innerHTML = `<table class="conf"><tr><th></th><th colspan="3">… ${B} says</th></tr>
+        <tr><th class="rowh">Where ${A} says</th>${CLS.map(c => `<th>${c}</th>`).join("")}</tr>` +
+        [0, 1, 2].map(x => { const row = g.conf[x * 3] + g.conf[x * 3 + 1] + g.conf[x * 3 + 2];
+          return `<tr><th class="rowh">${CLS[x]}<div class="cellnum">${pct(row)} of land</div></th>` + [0, 1, 2].map(y => {
+            const v = row ? g.conf[x * 3 + y] / row : NaN, d = Math.abs(x - y);
+            return `<td class="ag${d}" title="${d ? "" : "agree: "}${A} ${CLS[x]}, ${B} ${CLS[y]}">${pct(v)}</td>`; }).join("") + "</tr>"; }).join("") + "</table>";
+      const agreeLow = g.conf[0] / ((g.conf[0] + g.conf[1] + g.conf[2]) || 1), agreeHigh = g.conf[8] / ((g.conf[6] + g.conf[7] + g.conf[8]) || 1);
+      R.confnote.innerHTML = `Where ${A} says High, ${B} agrees ${pct(agreeHigh)} of the time; where ${A} says Low, ${pct(agreeLow)}.
+        Over all of Alaska's land they agree on ${pct(g.same)} and are opposite (one Low, the other High) on ${pct(g.lh)}.`;
+    }
+    const d = new Uint8Array(N), A = C[a], B = C[b];
+    for (let i = 0; i < N; i++) { const x = A[i], y = B[i]; d[i] = x === SEA ? SEA : x > 2 || y > 2 ? 3 : x > y ? x - y : y - x; }
+    drawGrid(R.diff, d, BBOX, PAL.dif);
+    R.difflegend.innerHTML = [["--same", "agree"], ["--apart1", "1 class apart"], ["--apart2", "opposite (Low vs High)"], ["--nodata", "no value in one or both"]]
+      .map(([t, l]) => `<span><span class="sw" style="background:var(${t})"></span>${l}</span>`).join("");
+  }
+  R.places.innerHTML = `<table class="t"><tr><th>Place</th>${ids.map(id => `<th class="${w.variant === id ? "hl" : ""}">Variant ${esc(VM(k, id).letter)}</th>`).join("")}</tr>` +
+    META.places.map(p => `<tr><td>${esc(p.name)}</td>` + ids.map(id => {
+      const m = VM(k, id), { v, api } = placeValue(k, id, p);
+      return `<td><span class="num">${esc(fmt(m, v))}</span> ${chip(classOfValue(m, v, w.breaks[id]))}${api ? `<div class="cellnum">watershed average</div>` : ""}</td>`;
+    }).join("") + "</tr>").join("") + "</table>";
+}
+
+// ---------- hazard page ----------
 const maps = {
-  state: { el: document.getElementById("mapState"), aspect: META.ny / META.nx },
-  region: { el: document.getElementById("mapRegion"), aspect: 1 },
-  local: { el: document.getElementById("mapLocal"), aspect: 1 },
+  state: { el: $("mapState") },
+  region: { el: $("mapRegion") },
+  local: { el: $("mapLocal") },
 };
-function view(name) {  // grid window shown by a map: [c0, r0, cols, rows]
-  if (name === "state") return [0, 0, META.nx, META.ny];
-  const km = name === "region" ? S.regionKm : S.localKm, [pc, pr] = cellOf(S.point.x, S.point.y);
+function view(name) {
+  if (name === "state") return BBOX;
+  const km = name === "region" ? UI.regionKm : UI.localKm, [pc, pr] = cellOf(UI.point.x, UI.point.y);
   return [pc + 0.5 - km / 2, pr + 0.5 - km / 2, km, km];
 }
-function sizeCanvas(m) {
-  const dpr = window.devicePixelRatio || 1, w = m.el.clientWidth, h = Math.round(w * m.aspect);
-  m.el.style.height = h + "px";
-  if (m.el.width !== Math.round(w * dpr)) { m.el.width = Math.round(w * dpr); m.el.height = Math.round(h * dpr); }
+let HZS = null;  // current hazard page state: inputs, rule, class grids
+function hazardState() {
+  const inputs = hazardInputs(UI.preview), R = workRule(), T = ruleTable(R);
+  const cls = Object.fromEntries(inputs.map(x => [x.k, classes(x.k, x.id, x.b)]));
+  return HZS = { inputs, R, T, cls, hz: hazardGrid(inputs, R) };
 }
-function drawMap(name) {
-  const m = maps[name], ctx = m.el.getContext("2d"), W = m.el.width, H = m.el.height;
-  const [c0, r0, nc, nr] = view(name), sx = W / nc, sy = H / nr;
-  ctx.imageSmoothingEnabled = false;
-  ctx.fillStyle = COLOR[255]; ctx.fillRect(0, 0, W, H);
-  const a0 = Math.max(0, Math.floor(c0)), b0 = Math.max(0, Math.floor(r0));
-  const a1 = Math.min(META.nx, Math.ceil(c0 + nc)), b1 = Math.min(META.ny, Math.ceil(r0 + nr));
-  if (a1 > a0 && b1 > b0) ctx.drawImage(off, a0, b0, a1 - a0, b1 - b0, (a0 - c0) * sx, (b0 - r0) * sy, (a1 - a0) * sx, (b1 - b0) * sy);
-  const dpr = window.devicePixelRatio || 1;
-  const box = (km) => { const [pc, pr] = cellOf(S.point.x, S.point.y);
-    const x = (pc + 0.5 - km / 2 - c0) * sx, y = (pr + 0.5 - km / 2 - r0) * sy;
-    ctx.lineWidth = 2 * dpr; ctx.strokeStyle = "#0b0b0b"; ctx.strokeRect(x, y, km * sx, km * sy);
-    ctx.lineWidth = 1 * dpr; ctx.strokeStyle = "#fff"; ctx.strokeRect(x - 2 * dpr, y - 2 * dpr, km * sx + 4 * dpr, km * sy + 4 * dpr); };
-  if (name === "state") box(S.regionKm);
-  if (name === "region") box(S.localKm);
-  const [pc, pr] = cellOf(S.point.x, S.point.y);
-  if (name === "local") {  // outline the point's 1 km cell
-    ctx.lineWidth = 2 * dpr; ctx.strokeStyle = "#0b0b0b"; ctx.strokeRect((pc - c0) * sx, (pr - r0) * sy, sx, sy);
+function layerArr() { return UI.layer === "hazard" ? HZS.hz : HZS.cls[UI.layer]; }
+function drawHazardMaps() {
+  const [pc, pr] = cellOf(UI.point.x, UI.point.y);
+  for (const name in maps) {
+    const v = view(name), d = drawGrid(maps[name].el, layerArr(), v, PAL.cls); if (!d) continue;
+    const { ctx, sx, sy, dpr } = d, [c0, r0] = v;
+    const box = km => { const x = (pc + 0.5 - km / 2 - c0) * sx, y = (pr + 0.5 - km / 2 - r0) * sy;
+      ctx.lineWidth = 2 * dpr; ctx.strokeStyle = PAL.g("--ink"); ctx.strokeRect(x, y, km * sx, km * sy); };
+    if (name === "state") box(UI.regionKm);
+    if (name === "region") box(UI.localKm);
+    if (name === "local") { ctx.lineWidth = 2 * dpr; ctx.strokeStyle = PAL.g("--ink"); ctx.strokeRect((pc - c0) * sx, (pr - r0) * sy, sx, sy); }
+    const x = (pc + 0.5 - c0) * sx, y = (pr + 0.5 - r0) * sy;
+    ctx.beginPath(); ctx.arc(x, y, 6 * dpr, 0, 2 * Math.PI); ctx.lineWidth = 4 * dpr; ctx.strokeStyle = PAL.g("--surface"); ctx.stroke();
+    ctx.lineWidth = 2 * dpr; ctx.strokeStyle = PAL.g("--ink"); ctx.stroke();
   }
-  const x = (pc + 0.5 - c0) * sx, y = (pr + 0.5 - r0) * sy, R = 6 * dpr;
-  ctx.beginPath(); ctx.arc(x, y, R, 0, 2 * Math.PI); ctx.lineWidth = 4 * dpr; ctx.strokeStyle = "#fff"; ctx.stroke();
-  ctx.lineWidth = 2 * dpr; ctx.strokeStyle = "#0b0b0b"; ctx.stroke();
+  const n = areaCounts(layerArr())[0], tot = n[0] + n[1] + n[2] + n[3];
+  const name = UI.layer === "hazard" ? "Environmental Hazard" : `${IDX(UI.layer).name} · Variant ${VM(UI.layer, HZS.inputs.find(x => x.k === UI.layer).id).letter}`;
+  $("hzLegend").innerHTML = `<b>${esc(name)}</b>` + [0, 1, 2, 3].map(c =>
+    `<span><span class="sw" style="background:${PAL.classHex[c]}"></span>${clsName(c)} <span class="muted num">${pct(n[c] / tot)}</span></span>`).join("") + `<span class="muted">of Alaska land</span>`;
 }
-function drawMaps() { for (const n in maps) { sizeCanvas(maps[n]); drawMap(n); } }
-function eventCell(name, ev) {
-  const m = maps[name], r = m.el.getBoundingClientRect(), [c0, r0, nc, nr] = view(name);
-  return [Math.floor(c0 + (ev.clientX - r.left) / r.width * nc), Math.floor(r0 + (ev.clientY - r.top) / r.height * nr)];
-}
-
-// ---------- UI: index cards ----------
-const ui = {};
-function variantOptions(k) {
-  return Object.entries(VARS(k)).map(([id, v]) => `<option value="${id}"${v.src ? "" : " disabled"}${id === S.variants[k] ? " selected" : ""}>${v.label}${v.status === "candidate" ? "" : ` · ${v.status}`}${v.src ? "" : " (shared link only)"}</option>`).join("");
-}
-function buildIndexCards() {
-  const host = document.getElementById("indexCards"); host.innerHTML = "";
-  for (const k of KEYS) {
-    const m = V(k), name = NAME(k), step = Math.pow(10, -m.digits);
-    const card = document.createElement("section"); card.className = "card";
-    card.innerHTML = `
-      <div class="spread"><h2>${name} index</h2><span class="small num" data-r="pt"></span></div>
-      <select class="vsel" data-r="variant" aria-label="${name} variant">${variantOptions(k)}</select>
-      <div class="small">${m.description}<br><span class="muted">${m.details} · ${m.status}</span></div>
-      <canvas class="hist" aria-label="${name} distribution across Alaska"></canvas>
-      <div class="axisrow num"><span>${m.lo.toFixed(m.digits)}</span><span>land area by value</span><span>${m.hi.toFixed(m.digits)} ${m.unit}</span></div>
-      <div class="brk">
-        <label>Low up to</label>
-        <input type="range" data-b="0" min="${m.lo}" max="${m.hi}" step="${(m.hi - m.lo) / 1000}" aria-label="${name} Low to Medium boundary">
-        <input type="number" data-n="0" step="${step}" aria-label="${name} Low to Medium boundary value">
-        <label>High above</label>
-        <input type="range" data-b="1" min="${m.lo}" max="${m.hi}" step="${(m.hi - m.lo) / 1000}" aria-label="${name} Medium to High boundary">
-        <input type="number" data-n="1" step="${step}" aria-label="${name} Medium to High boundary value">
-      </div>
-      <div class="shares" data-r="bar"></div>
-      <div class="small num" data-r="shares" style="margin-top:3px"></div>`;
-    host.appendChild(card);
-    const q = s => card.querySelector(s);
-    ui[k] = { card, hist: q("canvas"), pt: q('[data-r="pt"]'), bar: q('[data-r="bar"]'), shares: q('[data-r="shares"]'),
-      variant: q('[data-r="variant"]'), ranges: [q('[data-b="0"]'), q('[data-b="1"]')], nums: [q('[data-n="0"]'), q('[data-n="1"]')] };
-    ui[k].variant.onchange = e => setVariants({ ...S.variants, [k]: e.target.value });
-    for (const j of [0, 1]) {
-      const set = (v) => { if (!Number.isFinite(v)) return; const b = S.breaks[vkey(k)]; b[j] = v;
-        if (j === 0 && b[1] < v) b[1] = v; if (j === 1 && b[0] > v) b[0] = v; changed(k); };
-      ui[k].ranges[j].addEventListener("input", e => set(+(+e.target.value).toFixed(m.digits)));
-      ui[k].nums[j].addEventListener("input", e => set(parseFloat(e.target.value)));
-    }
-  }
-}
-function syncBreakInputs(k) {
-  const m = V(k), b = S.breaks[vkey(k)];
-  for (const j of [0, 1]) {
-    ui[k].ranges[j].value = b[j];
-    if (document.activeElement !== ui[k].nums[j]) ui[k].nums[j].value = (+b[j]).toFixed(m.digits);
-  }
-}
-function drawHist(k) {
-  const m = V(k), cv = ui[k].hist, dpr = window.devicePixelRatio || 1;
-  cv.width = Math.round(cv.clientWidth * dpr); cv.height = Math.round(70 * dpr);
-  const ctx = cv.getContext("2d"), W = cv.width, H = cv.height, NB = 60, bins = new Float64Array(NB), h = hist[k];
-  const byCls = Array.from({ length: NB }, () => [0, 0, 0]), t = lut(k);
-  let total = 0;
-  for (let c = 1; c < h.length; c++) { if (!h[c] || c === m.na_code) continue; const v = decode(k, c);
-    const b = Math.min(NB - 1, Math.max(0, Math.floor((v - m.lo) / (m.hi - m.lo) * NB))); bins[b] += h[c]; byCls[b][t[c]] += h[c]; total += h[c]; }
-  const sorted = Array.from(bins).sort((a, b) => b - a);
-  const clipped = sorted[0] > 3 * sorted[1], ymax = clipped ? sorted[1] * 1.25 : sorted[0];
-  const bw = W / NB, gap = Math.max(1, dpr);
-  ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = COLOR[255]; ctx.fillRect(0, 0, W, H);
-  for (let b = 0; b < NB; b++) {
-    if (!bins[b]) continue;
-    const hh = Math.min(1, bins[b] / ymax) * (H - 14 * dpr);  // stacked by class: Low at the bottom
-    let y = H;
-    for (const c of [0, 1, 2]) { if (!byCls[b][c]) continue; const sh = hh * byCls[b][c] / bins[b];
-      ctx.fillStyle = COLOR[c]; ctx.fillRect(b * bw + gap / 2, y - sh, bw - gap, sh); y -= sh; }
-    if (clipped && bins[b] === sorted[0]) {
-      ctx.fillStyle = "#0b0b0b"; ctx.font = `${11 * dpr}px system-ui`; ctx.textAlign = b < NB / 2 ? "left" : "right";
-      ctx.fillText(`${Math.round(100 * bins[b] / total)}% ↑`, b < NB / 2 ? b * bw + bw + 3 * dpr : b * bw - 3 * dpr, 11 * dpr);
-    }
-  }
-  ctx.strokeStyle = "#0b0b0b"; ctx.lineWidth = 2 * dpr;
-  for (const v of S.breaks[vkey(k)]) { const x = (v - m.lo) / (m.hi - m.lo) * W; if (x < 0 || x > W) continue;
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
-  const pv = pointValue(k);
-  if (pv != null && pv !== NA) { const x = Math.min(W, Math.max(0, (pv - m.lo) / (m.hi - m.lo) * W));
-    ctx.fillStyle = "#0b0b0b"; ctx.beginPath(); ctx.moveTo(x - 6 * dpr, 0); ctx.lineTo(x + 6 * dpr, 0); ctx.lineTo(x, 9 * dpr); ctx.fill(); }
-}
-function classShares(a) {
-  const n = [0, 0, 0, 0]; for (let i = 0; i < N; i++) { const v = a[i]; if (v !== SEA) n[v]++; }
-  return n;
-}
-function sharesFromHist(k) {
-  const t = lut(k), n = [0, 0, 0, 0], h = hist[k]; let landN = 0;
-  for (let c = 1; c < h.length; c++) n[t[c]] += h[c];
-  for (let i = 0; i < N; i++) landN += land[i];
-  n[3] = landN - n[0] - n[1] - n[2];
-  return n;
-}
-function showShares(k) {
-  const n = sharesFromHist(k), tot = n[0] + n[1] + n[2];
-  ui[k].bar.innerHTML = [0, 1, 2].map(c => `<div style="width:${100 * n[c] / tot}%;background:${COLOR[c]}"></div>`).join("");
-  const m = V(k), na = m.na_code ? hist[k][m.na_code] : 0;
-  ui[k].shares.textContent = [0, 1, 2].map(c => `${CLS[c]} ${Math.round(100 * n[c] / tot)}%`).join(" · ") + " of mapped land"
-    + (na ? ` (${CLS[m.na_class]} includes ${Math.round(100 * na / tot)}% ${m.na_label})` : "");
-}
-
-// ---------- point ----------
-// Variants with point_api take the point value from the SNAP API (e.g. the HUC-12 watershed average) instead of the
-// pixel. Places in the list carry those values from build time; other points ask the API (works when the page is
-// opened from disk; claude.ai pages can't reach other sites, so they fall back to the pixel).
-const apiVals = {};  // "lat,lon" -> {"index/id": value | null}
-for (const p of META.points) apiVals[`${p.lat.toFixed(4)},${p.lon.toFixed(4)}`] = { ...p.api };
-const apiJson = {};  // url -> Promise<json | null>
-let apiState = "idle";
-function pointCell() { return cellOf(S.point.x, S.point.y); }
-function pixelValue(k) {
-  const [c, r] = pointCell(); if (!inGrid(c, r)) return null;
-  return valueOf(k, codes[k][r * META.nx + c]);
-}
-function hucKey() { return `${S.point.lat.toFixed(4)},${S.point.lon.toFixed(4)}`; }
-function apiValue(k) { return V(k).point_api ? (apiVals[hucKey()] || {})[vkey(k)] : undefined; }  // undefined: not asked
-function pointValue(k) { const a = apiValue(k); return a != null ? a : pixelValue(k); }
-async function fetchApi() {
-  const key = hucKey(), row = apiVals[key] ||= {};
-  const need = KEYS.filter(k => V(k).point_api && row[vkey(k)] === undefined);
-  if (!need.length) { apiState = "done"; renderPoint(); return; }
-  apiState = "loading"; renderPoint();
-  const get = (j, keys) => keys.reduce((o, x) => o == null ? o : o[x], j);
-  for (const k of need) {
-    const spec = V(k).point_api, vk = vkey(k);
-    const url = "https://earthmaps.io" + spec.route.replace("{lat}", S.point.lat.toFixed(4)).replace("{lon}", S.point.lon.toFixed(4));
-    const j = await (apiJson[url] ||= fetch(url).then(r => r.ok ? r.json() : null).catch(() => { apiState = "error"; return undefined; }));
-    if (j === undefined) { delete apiJson[url]; continue; }  // unreachable: try again next time
-    const v = get(j, spec.value), b = spec.minus ? get(j, spec.minus) : 0;
-    row[vk] = typeof v === "number" && typeof b === "number" ? v - b : null;
-  }
-  if (apiState !== "error") apiState = "done";
-  if (key === hucKey()) { renderPoint(); KEYS.forEach(drawHist); }
-}
-function pointClasses() { return KEYS.map(k => classify(k, pointValue(k))); }
-function renderPoint() {
-  const pcls = pointClasses(), hz = TABLE[(pcls[0] << 4) | (pcls[1] << 2) | pcls[2]];
-  const b = document.getElementById("badge");
-  b.className = "badge c" + hz;
-  document.getElementById("badgeTxt").textContent = hz === MISSING ? "No value" : CLS[hz];
-  document.getElementById("badgeWhere").innerHTML =
-    `${S.point.name}<br>${Math.abs(S.point.lat).toFixed(3)}° N, ${Math.abs(S.point.lon).toFixed(3)}° W`;
-  const rows = KEYS.map((k, i) => {
-    const m = V(k); let src = "1 km pixel";
-    if (m.point_api) {
-      const pix = pixelValue(k), av = apiValue(k), what = m.point_api.label || "SNAP API value";
-      const pixTxt = pix == null ? "no value" : fmt(k, pix);
-      src = av != null ? `${what}, SNAP API · pixel: ${pixTxt}`
-        : apiState === "loading" && av === undefined ? `asking SNAP API for the ${what}…`
-        : apiState === "error" && av === undefined ? `SNAP API not reachable from this page: using pixel (${pixTxt})`
-        : `API gave no value here: using pixel (${pixTxt})`;
-    }
-    ui[k].pt.innerHTML = `point: ${fmt(k, pointValue(k))} <span class="chip c${pcls[i]}">${pcls[i] === MISSING ? "No value" : CLS[pcls[i]]}</span>`;
-    return `<tr><td><b>${NAME(k)}</b><br><span class="small">${src}</span></td><td class="num">${fmt(k, pointValue(k))}</td>
-      <td><span class="chip c${pcls[i]}">${pcls[i] === MISSING ? "No value" : CLS[pcls[i]]}</span></td></tr>`;
+function pointClasses() {
+  const [c, r] = cellOf(UI.point.x, UI.point.y), i = inGrid(c, r) ? r * NX + c : -1;
+  const place = META.places.find(p => p.name === UI.point.name && Math.abs(p.lat - UI.point.lat) < 1e-6);
+  return HZS.inputs.map(x => {
+    const m = VM(x.k, x.id), pv = place ? placeValue(x.k, x.id, place) : { v: i < 0 ? null : valueAt(x.k, x.id, i), api: false };
+    return { ...pv, cls: classOfValue(m, pv.v, x.b), m };
   });
-  document.getElementById("ptab").innerHTML = rows.join("");
-  const miss = KEYS.filter((k, i) => pcls[i] === MISSING).map(NAME);
-  document.getElementById("pnote").textContent = miss.length
-    ? `No ${miss.join(" / ")} value here: ${S.missing === "low" ? "counted as Low" : "hazard left blank"} (see rule settings).` : "";
-  renderMatrices(pcls);
 }
-function setPoint(p) {
-  S.point = p; save();
-  document.getElementById("lat").value = p.lat.toFixed(4); document.getElementById("lon").value = p.lon.toFixed(4);
-  const sel = document.getElementById("place"); sel.value = META.points.some(q => q.name === p.name) ? p.name : "";
-  renderPoint(); drawMaps(); for (const k of KEYS) drawHist(k); fetchApi();
+function renderPoint() {
+  const pc = pointClasses(), cl = pc.map(x => x.cls), hz = HZS.T[(cl[0] << 4) | (cl[1] << 2) | cl[2]];
+  $("badge").className = "badge c" + hz; $("badgeTxt").textContent = clsName(hz);
+  $("badgeWhere").innerHTML = `${esc(UI.point.name)}<br>${Math.abs(UI.point.lat).toFixed(3)}° N, ${Math.abs(UI.point.lon).toFixed(3)}° W`;
+  $("ptab").innerHTML = HZS.inputs.map((x, j) => `<tr><td><b>${esc(IDX(x.k).name)}</b><br><span class="small">Variant ${esc(pc[j].m.letter)}${pc[j].api ? " · watershed average" : ""}</span></td>
+    <td class="num">${esc(fmt(pc[j].m, pc[j].v))}</td><td>${chip(pc[j].cls)}</td></tr>`).join("");
+  const miss = HZS.inputs.filter((x, j) => cl[j] === MISSING).map(x => IDX(x.k).name);
+  $("pnote").textContent = miss.length ? `No ${miss.join(" / ")} value here: ${HZS.R.missing === "low" ? "counted as Low" : "hazard left blank"}.` : "";
+  renderMatrices(cl);
 }
-function pointFromLatLon(name, lat, lon) { const [x, y] = ALB.fwd(lat, lon); return { name, lat, lon, x, y }; }
-
-// ---------- UI: composite ----------
-function ruleSentence() {
-  const w = S.weights;
-  switch (S.rule) {
-    case "worst": return "The hazard takes the highest of the three classes.";
-    case "avg": return `Score each index Low 1, Medium 2, High 3. Take the weighted average (weights ${w.wildfire} / ${w.erosion} / ${w.permafrost}). Below ${S.avgCuts[0]} is Low, ${S.avgCuts[1]} or more is High, otherwise Medium.`;
-    case "product": return `Score each index Low 1, Medium 2, High 3 and multiply (1 to 27). Up to ${S.prodCuts[0]} is Low, up to ${S.prodCuts[1]} is Medium, above is High.`;
-    case "count": return `High if at least ${S.countHigh} index${S.countHigh > 1 ? "es are" : " is"} High. Otherwise Medium if at least ${S.countMed} ${S.countMed > 1 ? "are" : "is"} Medium or High. Otherwise Low.`;
-    case "custom": return "Each of the 27 combinations is set by hand: click a cell to cycle Low → Medium → High.";
-  }
-}
-function numCtl(label, get, set, min, max, step) {
-  const id = "c" + Math.random().toString(36).slice(2, 8);
-  return { html: `<label for="${id}">${label}</label><input type="range" id="${id}r" min="${min}" max="${max}" step="${step}" value="${get()}" aria-label="${label}"><input type="number" id="${id}" min="${min}" max="${max}" step="${step}" value="${get()}">`,
-    bind() { for (const s of [id, id + "r"]) document.getElementById(s).addEventListener("input", e => {
-      const v = parseFloat(e.target.value); if (!Number.isFinite(v)) return; set(v);
-      document.getElementById(s === id ? id + "r" : id).value = v; ruleChanged(false); }); } };
-}
-function renderRuleCtl() {
-  const box = document.getElementById("ruleCtl"); let ctls = [];
-  if (S.rule === "avg") ctls = [
-    ...KEYS.map(k => numCtl(`${NAME(k)} weight`, () => S.weights[k], v => S.weights[k] = v, 0, 3, 0.5)),
-    numCtl("Low below", () => S.avgCuts[0], v => S.avgCuts[0] = v, 1, 3, 0.01),
-    numCtl("High from", () => S.avgCuts[1], v => S.avgCuts[1] = v, 1, 3, 0.01)];
-  if (S.rule === "product") ctls = [numCtl("Low up to", () => S.prodCuts[0], v => S.prodCuts[0] = v, 1, 27, 1),
-    numCtl("Medium up to", () => S.prodCuts[1], v => S.prodCuts[1] = v, 1, 27, 1)];
-  if (S.rule === "count") ctls = [numCtl("Highs needed for High", () => S.countHigh, v => S.countHigh = v, 1, 3, 1),
-    numCtl("Medium-or-High needed for Medium", () => S.countMed, v => S.countMed = v, 1, 3, 1)];
-  if (S.rule === "custom") { box.innerHTML = `<span></span><span class="row"><button id="fillWorst">Start from “worst of three”</button></span><span></span>`;
-    document.getElementById("fillWorst").onclick = () => { S.custom = defaults().custom; ruleChanged(false); };
-    return; }
-  box.innerHTML = ctls.map(c => c.html).join(""); ctls.forEach(c => c.bind());
-}
-function renderMatrices(pcls) {
-  pcls = pcls || pointClasses();
-  const host = document.getElementById("matrices"); let html = "";
-  const here = pcls.map(c => c === MISSING && S.missing === "low" ? 0 : c);
+function renderMatrices(cl) {
+  const here = cl.map(c => c === MISSING && HZS.R.missing === "low" ? 0 : c);
+  let html = "";
   for (let p = 0; p < 3; p++) {
     html += `<table class="mx"><caption>Permafrost ${CLS[p]}</caption><tr><th></th>${CLS.map(c => `<th>E ${c[0]}</th>`).join("")}</tr>`;
     for (let w = 0; w < 3; w++) {
       html += `<tr><th>W ${CLS[w][0]}</th>`;
-      for (let e = 0; e < 3; e++) {
-        const v = TABLE[(w << 4) | (e << 2) | p], isHere = here[0] === w && here[1] === e && here[2] === p;
+      for (let e = 0; e < 3; e++) { const v = HZS.T[(w << 4) | (e << 2) | p], isHere = here[0] === w && here[1] === e && here[2] === p;
         html += `<td><button class="c${v}${isHere ? " here" : ""}" data-w="${w}" data-e="${e}" data-p="${p}"
-          aria-label="Wildfire ${CLS[w]}, Erosion ${CLS[e]}, Permafrost ${CLS[p]}: ${CLS[v]}">${CLS[v][0]}</button></td>`;
-      }
+          aria-label="Wildfire ${CLS[w]}, Erosion ${CLS[e]}, Permafrost ${CLS[p]}: ${CLS[v]}">${CLS[v][0]}</button></td>`; }
       html += "</tr>";
     }
     html += "</table>";
   }
-  host.innerHTML = html;
+  $("matrices").innerHTML = html;
 }
-document.getElementById("matrices").addEventListener("click", e => {
-  const b = e.target.closest("button"); if (!b) return;
-  const w = +b.dataset.w, ee = +b.dataset.e, p = +b.dataset.p;
-  if (S.rule !== "custom") {
-    for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) for (let k = 0; k < 3; k++) S.custom[i * 9 + j * 3 + k] = TABLE[(i << 4) | (j << 2) | k];
-    S.rule = "custom"; document.getElementById("rule").value = "custom";
+function numCtl(label, get, set, min, max, step) {
+  const id = "c" + Math.random().toString(36).slice(2, 8);
+  return { html: `<label for="${id}">${label}</label><input type="range" id="${id}r" min="${min}" max="${max}" step="${step}" value="${get()}" aria-label="${label}"><input type="number" id="${id}" min="${min}" max="${max}" step="${step}" value="${get()}">`,
+    bind() { for (const s of [id, id + "r"]) $(s).addEventListener("input", e => {
+      const v = parseFloat(e.target.value); if (!Number.isFinite(v)) return;
+      editRule(R => set(R, v)); $(s === id ? id + "r" : id).value = v; ruleChanged(false); }); } };
+}
+function renderRuleCtl() {
+  const R = workRule(), box = $("ruleCtl"); let ctls = [];
+  if (R.rule === "avg") ctls = [
+    ...KEYS.map(k => numCtl(`${IDX(k).name} weight`, () => R.weights[k], (S, v) => S.weights[k] = v, 0, 3, 0.5)),
+    numCtl("Low below", () => R.avgCuts[0], (S, v) => S.avgCuts[0] = v, 1, 3, 0.01),
+    numCtl("High from", () => R.avgCuts[1], (S, v) => S.avgCuts[1] = v, 1, 3, 0.01)];
+  if (R.rule === "product") ctls = [numCtl("Low up to", () => R.prodCuts[0], (S, v) => S.prodCuts[0] = v, 1, 27, 1),
+    numCtl("Medium up to", () => R.prodCuts[1], (S, v) => S.prodCuts[1] = v, 1, 27, 1)];
+  if (R.rule === "count") ctls = [numCtl("Highs needed for High", () => R.countHigh, (S, v) => S.countHigh = v, 1, 3, 1),
+    numCtl("Medium-or-High needed for Medium", () => R.countMed, (S, v) => S.countMed = v, 1, 3, 1)];
+  if (R.rule === "custom") { box.innerHTML = `<span></span><span class="row"><button id="fillWorst">Start from “worst of three”</button></span><span></span>`;
+    $("fillWorst").onclick = () => { editRule(S => { S.custom = worstTable(); }); ruleChanged(false); }; return; }
+  box.innerHTML = ctls.map(c => c.html).join(""); ctls.forEach(c => c.bind());
+}
+function ruleChanged(rebuildCtl) { if (rebuildCtl) renderRuleCtl(); requestAnimationFrame(() => renderHazard(true)); }
+function renderHazard(ruleOnly) {
+  hazardState();
+  const R = HZS.R, anyDraft = KEYS.some(dirtyIdx);
+  $("hzQuestion").textContent = META.hazard.question;
+  $("hzPreviewWrap").hidden = !anyDraft; $("hzPreview").checked = UI.preview && anyDraft;
+  if (!ruleOnly) {
+    $("hzInputs").innerHTML = HZS.inputs.map(x => {
+      const m = VM(x.k, x.id), n = areaCounts(HZS.cls[x.k])[0], tot = n[0] + n[1] + n[2] + n[3];
+      const st = x.from === "draft" ? `<span class="pill draft">Your unsaved draft</span>` : x.decided && x.from === "team" ? `<span class="pill team">Team decision</span>`
+        : `<span class="pill start">Not decided yet</span>`;
+      return `<div class="itile"><div class="head"><h3>${esc(IDX(x.k).name)}</h3><span class="lock">set on the <a href="#${x.k}">${esc(IDX(x.k).name)} page</a></span></div>
+        <div class="pills">${st}</div><div><b>Variant ${esc(m.letter)}</b>: ${esc(m.label)}</div>
+        <div class="num small">${esc(boundsText(m, x.b))}</div>${barHTML(n)}
+        <div class="small num">${[0, 1, 2].map(c => `${CLS[c]} ${pct(n[c] / tot)}`).join(" · ")}</div></div>`; }).join("");
+    $("layers").innerHTML = [["hazard", "Environmental Hazard"], ...KEYS.map(k => [k, IDX(k).name])]
+      .map(([k, l]) => `<button data-layer="${k}" aria-pressed="${UI.layer === k}">${esc(l)}</button>`).join("");
   }
-  const i = w * 9 + ee * 3 + p; S.custom[i] = (S.custom[i] + 1) % 3;
-  ruleChanged(true);
-});
-
-// ---------- legend, tabs, tooltip ----------
-function renderLegend() {
-  const n = S.layer === "hazard" ? classShares(hazard) : sharesFromHist(S.layer), tot = n[0] + n[1] + n[2] + n[3];
-  const name = S.layer === "hazard" ? "Environmental Hazard" : `${NAME(S.layer)} · ${V(S.layer).label}`;
-  document.getElementById("legend").innerHTML = `<b>${name}</b>` + [0, 1, 2, 3].map(c =>
-    `<span><span class="sw" style="background:${COLOR[c]}"></span>${c === 3 ? "No value" : CLS[c]} <span class="muted num">${(100 * n[c] / tot).toFixed(0)}%</span></span>`).join("")
-    + `<span class="muted">of Alaska land</span>`;
+  $("rule").value = R.rule; $("missing").value = R.missing;
+  if (document.activeElement !== $("note-hazard")) $("note-hazard").value = R.note || "";
+  if (!ruleOnly) renderRuleCtl();
+  $("sentence").textContent = ruleSentence(R) + " " + missingText(R);
+  const counts = areaCounts(HZS.hz), team = hazardGrid(hazardInputs(false), teamRule()), tc = team === HZS.hz ? null : areaCounts(team);
+  const row = (label, cs) => `<tr><td>${label}</td>` + cs.map(n => { const t = n[0] + n[1] + n[2] + n[3] || 1;
+    return `<td>${barHTML(n, "cellbar")}<div class="cellnum">${[0, 1, 2].map(c => Math.round(100 * n[c] / t)).join(" · ")}${n[3] / t >= 0.005 ? ` (${Math.round(100 * n[3] / t)})` : ""}</div></td>`; }).join("") + "</tr>";
+  $("hzShares").innerHTML = `<table class="t"><tr><th></th>${AREAS.map(a => `<th>${esc(a)}</th>`).join("")}</tr>${row("<b>This rule</b>", counts)}${tc ? row("Saved team rule", tc) : ""}</table>
+    <p class="small">Share of land Low · Medium · High (no value).</p>`;
+  let nh = 0; const by = [0, 0, 0];
+  for (let i = 0; i < N; i++) if (HZS.hz[i] === 2) { nh++; for (let j = 0; j < 3; j++) if (HZS.cls[KEYS[j]][i] === 2) by[j]++; }
+  $("hzDrivers").innerHTML = nh ? `Of the land rated High (${pct(nh / landN)} of Alaska), the share where each index is itself High: ` +
+    KEYS.map((k, j) => `<b>${esc(IDX(k).name)}</b> ${pct(by[j] / nh)}`).join(" · ") + "." : "No land is rated High with this rule.";
+  drawHazardMaps(); renderPoint(); renderStatuses();
 }
-function buildTabs() {
-  const t = document.getElementById("tabs");
-  t.innerHTML = [["hazard", "Environmental Hazard"], ...KEYS.map(k => [k, NAME(k)])]
-    .map(([k, l]) => `<button data-layer="${k}" aria-pressed="${S.layer === k}">${l}</button>`).join("");
-  t.onclick = e => { const b = e.target.closest("button"); if (!b) return; S.layer = b.dataset.layer; save();
-    t.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x.dataset.layer === S.layer));
-    paintOff(); drawMaps(); renderLegend(); };
+function setPoint(p) {
+  UI.point = p; saveLocal();
+  $("lat").value = p.lat.toFixed(4); $("lon").value = p.lon.toFixed(4);
+  $("place").value = META.places.some(q => q.name === p.name) ? p.name : "";
+  drawHazardMaps(); renderPoint();
 }
-const tip = document.getElementById("tip");
-for (const name in maps) {
-  const el = maps[name].el;
-  el.addEventListener("mousemove", ev => {
-    const [c, r] = eventCell(name, ev);
-    if (!inGrid(c, r) || !land[r * META.nx + c]) { tip.style.display = "none"; return; }
-    const i = r * META.nx + c, [lat, lon] = ALB.inv(...cellXY(c, r));
-    const lab = v => v === MISSING ? "No value" : CLS[v];
-    tip.innerHTML = `<div class="num">${lat.toFixed(3)}° N, ${Math.abs(lon).toFixed(3)}° W</div><table>` + KEYS.map(k => {
-      const v = codes[k][i]; return `<tr><td>${NAME(k)}</td><td class="num">${fmt(k, valueOf(k, v))}</td><td><span class="chip c${cls[k][i]}">${lab(cls[k][i])}</span></td></tr>`; }).join("")
-      + `<tr><td><b>Hazard</b></td><td></td><td><span class="chip c${hazard[i]}">${lab(hazard[i])}</span></td></tr></table>`;
-    tip.style.display = "block";
-    const x = ev.clientX + 14, y = ev.clientY + 14, w = tip.offsetWidth, h = tip.offsetHeight;
-    tip.style.left = Math.min(x, innerWidth - w - 8) + "px"; tip.style.top = Math.min(y, innerHeight - h - 8) + "px";
+function initHazardUI() {
+  $("place").innerHTML = `<option value="">(custom point)</option>` + META.places.map(p => `<option>${esc(p.name)}</option>`).join("");
+  $("place").onchange = () => { const p = META.places.find(q => q.name === $("place").value); if (p) setPoint({ ...p }); };
+  const go = () => { const lat = parseFloat($("lat").value), lon = parseFloat($("lon").value);
+    if (Number.isFinite(lat) && Number.isFinite(lon)) { const [x, y] = ALB.fwd(lat, -Math.abs(lon)); setPoint({ name: "Typed point", lat, lon: -Math.abs(lon), x, y }); } };
+  $("go").onclick = go;
+  for (const id of ["lat", "lon"]) $(id).addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+  for (const key of ["regionKm", "localKm"]) { const el = $(key); el.value = String(UI[key]); el.onchange = () => { UI[key] = +el.value; saveLocal(); drawHazardMaps(); }; }
+  $("rule").onchange = () => { editRule(R => { R.rule = $("rule").value; }); ruleChanged(true); };
+  $("missing").onchange = () => { editRule(R => { R.missing = $("missing").value; }); ruleChanged(false); };
+  $("note-hazard").addEventListener("input", () => { editRule(R => { R.note = $("note-hazard").value; }); renderStatuses(); });
+  $("hzPreview").onchange = () => { UI.preview = $("hzPreview").checked; saveLocal(); renderTab("hazard"); };
+  $("layers").onclick = e => { const b = e.target.closest("button"); if (!b) return; UI.layer = b.dataset.layer; saveLocal();
+    $("layers").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x.dataset.layer === UI.layer)); drawHazardMaps(); };
+  $("matrices").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    const i = +b.dataset.w * 9 + +b.dataset.e * 3 + +b.dataset.p;
+    editRule(R => { if (R.rule !== "custom") { for (let j = 0; j < 27; j++) R.custom[j] = HZS.T[(Math.floor(j / 9) << 4) | ((Math.floor(j / 3) % 3) << 2) | (j % 3)]; R.rule = "custom"; }
+      R.custom[i] = (R.custom[i] + 1) % 3; });
+    ruleChanged(true);
   });
-  el.addEventListener("mouseleave", () => tip.style.display = "none");
-  el.addEventListener("click", ev => {
-    const [c, r] = eventCell(name, ev); if (!inGrid(c, r)) return;
-    const [x, y] = cellXY(c, r), [lat, lon] = ALB.inv(x, y);
-    setPoint({ name: "Map click", lat, lon, x, y });
+  $("hzSave").onclick = async () => {
+    const R = workRule(); $("hzSave").disabled = true; $("hzMsg").textContent = "Saving…";
+    try { await saveTeam("hazard", Object.fromEntries([...RULE_KEYS.map(k => [k, R[k]]), ["note", (R.note || "").trim()]]));
+      DRAFT.hazard = null; saveLocal(); updateNav(); $("hzMsg").textContent = "Saved for the team."; renderHazard(); }
+    catch (e) { $("hzMsg").textContent = saveError(e); refreshSaveButtons(); }
+  };
+  $("hzDiscard").onclick = () => { DRAFT.hazard = null; saveLocal(); updateNav(); $("hzMsg").textContent = "Back to the team rule."; renderHazard(); };
+  for (const name in maps) {
+    const el = maps[name].el;
+    el.addEventListener("mousemove", ev => {
+      const [c, r] = cellAt(el, view(name), ev);
+      if (!inGrid(c, r) || !land[r * NX + c]) { hideTip(); return; }
+      const i = r * NX + c;
+      showTip(ev, `<div class="num">${latlonText(c, r)}</div><table>` + HZS.inputs.map(x => {
+        const m = VM(x.k, x.id), v = valueAt(x.k, x.id, i);
+        return `<tr><td>${esc(IDX(x.k).name)}</td><td class="num">${esc(fmt(m, v))}</td><td>${chip(HZS.cls[x.k][i])}</td></tr>`; }).join("")
+        + `<tr><td><b>Hazard</b></td><td></td><td>${chip(HZS.hz[i])}</td></tr></table>`);
+    });
+    el.addEventListener("mouseleave", hideTip);
+    el.addEventListener("click", ev => { const [c, r] = cellAt(el, view(name), ev); if (!inGrid(c, r)) return;
+      const [x, y] = cellXY(c, r), [lat, lon] = ALB.inv(x, y); setPoint({ name: "Map click", lat, lon, x, y }); });
+  }
+}
+
+// ---------- summary page ----------
+const ARROW = `<svg width="34" height="24" viewBox="0 0 34 24" aria-hidden="true"><path d="M2 12h26M20 4l8 8-8 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+function renderSummary() {
+  const inputs = hazardInputs(false), R = teamRule(), T = ruleTable(R), hz = hazardGrid(inputs, R);
+  const decided = KEYS.filter(k => TEAM[k] && TEAM[k].variant).length + (TEAM.hazard ? 1 : 0);
+  const last = Object.values(TEAM).filter(d => d && d.at).sort((a, b) => b.at.localeCompare(a.at))[0];
+  $("sumStatus").innerHTML = `${decided} of 4 decisions made by the team` + (last ? ` · last change by ${whoWhen(last.by, last.at)}` : "")
+    + (decided < 4 ? ". Items marked “not decided yet” show the repo's starting point." : ".");
+  drawGrid($("sumMap"), hz, BBOX, PAL.cls);
+  const counts = areaCounts(hz), n = counts[0], tot = n[0] + n[1] + n[2] + n[3];
+  $("sumLegend").innerHTML = [0, 1, 2, 3].filter(c => c < 3 || n[3]).map(c => `<span><span class="sw" style="background:${PAL.classHex[c]}"></span>${clsName(c)}</span>`).join("")
+    + `<span class="muted">1 km cells · ${esc(inputs.map(x => `${IDX(x.k).name} ${VM(x.k, x.id).letter}`).join(", "))}</span>`;
+  $("sumStats").innerHTML = [2, 1, 0].map(c => `<div class="stat c${c}"><div class="big">${pct(n[c] / tot)}</div><div class="lbl">${CLS[c]}</div></div>`).join("");
+  $("sumRegions").innerHTML = counts.slice(1).map((m, j) => { const t = m[0] + m[1] + m[2] + m[3] || 1;
+    return `<span>${esc(META.regions[j])}</span>${barHTML(m)}<span class="num">${pct(m[2] / t)} High</span>`; }).join("");
+  $("sumPlaces").innerHTML = `<table class="t"><tr><th>Place</th>${KEYS.map(k => `<th class="c">${esc(IDX(k).name)}</th>`).join("")}<th class="c">Hazard</th></tr>` +
+    META.places.map(p => { const cl = inputs.map(x => { const m = VM(x.k, x.id); return classOfValue(m, placeValue(x.k, x.id, p).v, x.b); });
+      return `<tr><td>${esc(p.name.replace(/ \(nearest data.*\)$/, ""))}</td>${cl.map(c => `<td class="c">${chip(c)}</td>`).join("")}<td class="c">${chip(T[(cl[0] << 4) | (cl[1] << 2) | cl[2]])}</td></tr>`; }).join("") + "</table>";
+  const tiles = inputs.map(x => {
+    const m = VM(x.k, x.id), t = teamIdx(x.k), arr = classes(x.k, x.id, x.b);
+    const st = x.decided && x.from === "team" ? `<span class="pill team">Team decision</span>` : `<span class="pill start">Not decided yet</span>`;
+    const naTxt = m.na_label ? ` Places ${esc(m.na_label)} count as ${CLS[m.na_class]}.` : "";
+    return `<div class="ftile"><div class="row" style="justify-content:space-between"><h3>${esc(IDX(x.k).name)}</h3>${st}</div>
+      <canvas class="map" data-sum="${x.k}" aria-label="${esc(IDX(x.k).name)} class map"></canvas>
+      <div><b>Variant ${esc(m.letter)}: ${esc(m.label)}</b></div>
+      <p class="small">${esc(m.description)} (${esc(m.details)}).</p>
+      <p class="means"><span class="chip c2">High</span> above ${esc(fmt(m, x.b[1]))} · <span class="chip c0">Low</span> at or below ${esc(fmt(m, x.b[0]))}.${naTxt}</p>
+      ${t.note && x.from === "team" ? `<p class="why">${esc(t.note)}</p>` : `<p class="small muted">No reasoning recorded yet.</p>`}</div>`; });
+  const rst = TEAM.hazard ? `<span class="pill team">Team decision</span>` : `<span class="pill start">Not decided yet</span>`;
+  const ruleName = document.querySelector(`#rule option[value="${R.rule}"]`).textContent;
+  $("sumFlow").innerHTML = tiles.join("") + `<div class="arrow">${ARROW}</div>` +
+    `<div class="ftile ruletile"><div class="row" style="justify-content:space-between"><h3>Combining rule</h3>${rst}</div>
+      <div><b>${esc(ruleName)}</b></div><p>${esc(ruleSentence(R))} ${esc(missingText(R))}</p>
+      ${R.note && TEAM.hazard ? `<p class="why">${esc(R.note)}</p>` : `<p class="small muted">No reasoning recorded yet.</p>`}
+      <div class="small">Result: ${[2, 1, 0].map(c => `${CLS[c]} ${pct(n[c] / tot)}`).join(" · ")} of Alaska's land.</div></div>`;
+  for (const x of inputs) drawGrid(document.querySelector(`[data-sum="${x.k}"]`), classes(x.k, x.id, x.b), BBOX, PAL.cls);
+  $("sumFoot").textContent = `A working index for team discussion. Each index uses one climate-model data set at about 1 km, mostly for mid-century
+    (see each variant's details); classes depend on boundaries the team chose and are not engineering thresholds. Data built ${META.built}.`;
+}
+
+// ---------- PDF export (Summary page) and reset ----------
+// The PDF is built from the saved team decisions only (never anyone's drafts): page 1 = summary, page 2 = how the
+// index is built, then a specification with the method, sources and exact numbers, and the decisions as JSON.
+const hexU32 = hex => { const h = hex.replace("#", ""); return ((255 << 24) | (parseInt(h.slice(4, 6), 16) << 16) | (parseInt(h.slice(2, 4), 16) << 8) | parseInt(h.slice(0, 2), 16)) >>> 0; };
+const PRINT = new Uint32Array(256);  // fixed light palette for print, whatever the screen theme
+["#0072b2", "#f0e442", "#d55e00", "#cfd3cc"].forEach((h, i) => PRINT[i] = hexU32(h)); PRINT[SEA] = hexU32("#ffffff");
+const P_CLS = [[0, 114, 178], [240, 228, 66], [213, 94, 0], [207, 211, 204]];
+const P_INK = [20, 24, 22], P_INK2 = [74, 82, 77], P_ACCENT = [29, 92, 79], P_LINE = [216, 220, 213], P_WHITE = [255, 255, 255];
+const pdfText = s => String(s ?? "").replace(/≤/g, "<=").replace(/≥/g, ">=").replace(/→/g, "->").replace(/[−–—]/g, "-")
+  .replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/…/g, "...").replace(/ġ/g, "g").replace(/[^\x00-\xff]/g, "?");
+const nameOf = by => by ? (NAMES[by] || "a teammate") : "someone";
+const dateOf = at => new Date(at).toLocaleString(undefined, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+let jsPDFLoading = null;
+function loadJsPDF() {
+  return jsPDFLoading ||= new Promise((ok, fail) => {
+    if (window.jspdf) return ok(window.jspdf.jsPDF);
+    const sc = document.createElement("script");
+    sc.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+    sc.onload = () => window.jspdf ? ok(window.jspdf.jsPDF) : fail(new Error("the PDF library didn't start"));
+    sc.onerror = () => { jsPDFLoading = null; fail(new Error("couldn't load the PDF library")); };
+    document.head.appendChild(sc);
   });
 }
+function pdfWriter(doc) {
+  const PW = doc.internal.pageSize.getWidth(), PH = doc.internal.pageSize.getHeight(), M = 42;
+  const w = { doc, M, W: PW - 2 * M, PW, PH, y: M,
+    need(h) { if (w.y + h > PH - M - 16) w.page(); },
+    page() { doc.addPage(); w.y = M; },
+    font(size, style = "normal", color = P_INK, face = "helvetica") { doc.setFont(face, style); doc.setFontSize(size); doc.setTextColor(...color); },
+    text(str, o = {}) {
+      const size = o.size || 10, x = o.x ?? M, width = o.width || w.W - (x - M), lh = size * (o.lh || 1.32);
+      w.font(size, o.style || "normal", o.color || P_INK, o.face || "helvetica");
+      for (const line of doc.splitTextToSize(pdfText(str), width)) { w.need(lh); doc.text(line, x, w.y + size * 0.85); w.y += lh; }
+      w.y += o.after ?? 4;
+    },
+    h2(str) { w.need(60); w.y += 4; w.text(str, { size: 16, style: "bold", after: 6 }); },
+    h3(str, o = {}) { w.need(o.keep || 40); w.text(str, { size: 11.5, style: "bold", after: 3, x: o.x, width: o.width }); },
+    chip(c, x, y, cw = 50, ch = 12.5) {
+      doc.setFillColor(...P_CLS[c]); doc.roundedRect(x, y, cw, ch, 2.5, 2.5, "F");
+      w.font(8, "bold", c === 1 || c === 3 ? P_INK : P_WHITE); doc.text(clsName(c), x + cw / 2, y + ch * 0.72, { align: "center" });
+    },
+    table(cols, rows) {  // cols: [{h, w, align}]; a cell is text or {cls}
+      const rh = 16, total = cols.reduce((a, c) => a + c.w, 0);
+      const at = (c, x) => c.align === "center" ? x + c.w / 2 : x + 2;
+      w.need(rh * 3); w.font(8.5, "bold", P_INK2);
+      let x = M; for (const c of cols) { doc.text(pdfText(c.h), at(c, x), w.y + 10, { align: c.align || "left" }); x += c.w; }
+      w.y += rh - 2; doc.setDrawColor(...P_LINE); doc.setLineWidth(0.7); doc.line(M, w.y, M + total, w.y); w.y += 3;
+      for (const r of rows) {
+        w.need(rh); x = M;
+        r.forEach((cell, j) => { const c = cols[j];
+          if (cell && typeof cell === "object") w.chip(cell.cls, x + (c.w - 50) / 2, w.y + 1.5);
+          else { w.font(9, "normal", P_INK); doc.text(pdfText(cell), at(c, x), w.y + 10.5, { align: c.align || "left" }); }
+          x += c.w; });
+        w.y += rh;
+      }
+      w.y += 8;
+    },
+  };
+  return w;
+}
+function sharesLine(n) { const t = n[0] + n[1] + n[2] + n[3] || 1;
+  return [0, 1, 2].map(c => `${CLS[c]} ${pct(n[c] / t)}`).join(" · ") + (n[3] / t >= 0.005 ? ` · no value ${pct(n[3] / t)}` : ""); }
+function ruleParams(R) {
+  const w = R.weights;
+  return R.rule === "avg" ? `Weights: Wildfire ${w.wildfire}, Erosion ${w.erosion}, Permafrost ${w.permafrost}. Score = weighted average of points (Low 1, Medium 2, High 3). Low if score < ${R.avgCuts[0]}; High if score >= ${R.avgCuts[1]}; otherwise Medium.`
+    : R.rule === "product" ? `Product of points (Low 1, Medium 2, High 3), 1 to 27. Low if product <= ${R.prodCuts[0]}; Medium if <= ${R.prodCuts[1]}; otherwise High.`
+    : R.rule === "count" ? `High if at least ${R.countHigh} of the three indices are High; otherwise Medium if at least ${R.countMed} are Medium or High; otherwise Low.`
+    : R.rule === "custom" ? "Each of the 27 combinations set by hand (table below)."
+    : "Hazard = the highest of the three classes.";
+}
+async function buildPdf() {
+  const jsPDF = await loadJsPDF(), inputs = hazardInputs(false);
+  await Promise.all(inputs.map(x => loadVariant(x.k, x.id)));
+  const R = teamRule(), T = ruleTable(R), hz = hazardGrid(inputs, R), counts = areaCounts(hz), n = counts[0], tot = n[0] + n[1] + n[2] + n[3];
+  const doc = new jsPDF({ unit: "pt", format: "letter", compress: true }), w = pdfWriter(doc), M = w.M, stamp = dateOf(new Date());
+  const ruleName = document.querySelector(`#rule option[value="${R.rule}"]`).textContent;
+  const decided = KEYS.filter(k => TEAM[k] && TEAM[k].variant).length + (TEAM.hazard ? 1 : 0);
+  const last = Object.values(TEAM).filter(d => d && d.at).sort((a, b) => b.at.localeCompare(a.at))[0];
+  const status = x => x.decided && x.from === "team" ? "team decision" : "not decided yet (repo starting point)";
+  doc.setProperties({ title: "Environmental Hazard Index: team decisions", subject: `Exported ${stamp}` });
 
-// ---------- variants and presets ----------
-function buildPresetSelect() {
-  const sel = document.getElementById("setup"), mp = matchingPreset();
-  sel.innerHTML = META.presets.map(p => `<option value="${p.id}">${p.name}</option>`).join("")
-    + `<option value="" disabled>Custom mix</option>`;
-  sel.value = mp ? mp.id : "";
-  sel.title = mp ? mp.description || "" : "Variants picked by hand on the index cards";
+  // page 1: summary
+  w.text("ENVIRONMENTAL HAZARD INDEX  ·  TEAM WORKBENCH  ·  SUMMARY OF TEAM DECISIONS", { size: 8.5, style: "bold", color: P_ACCENT, after: 2 });
+  w.text("Environmental Hazard", { size: 24, style: "bold", after: 4 });
+  w.text(`Exported ${stamp}. ${decided} of 4 decisions made by the team` + (last ? `; last change by ${nameOf(last.by)}, ${dateOf(last.at)}` : "") + "."
+    + (decided < 4 ? " Items not decided yet use the repo's starting point." : ""), { size: 9.5, color: P_INK2, after: 12 });
+  const top = w.y, mapW = 318, mapH = mapW * BBOX[3] / BBOX[2];
+  doc.addImage(gridPNG(hz, BBOX, 1100, PRINT), "PNG", M, top, mapW, mapH, "hazard", "FAST");
+  let lx = M; const ly = top + mapH + 6;
+  [0, 1, 2].forEach(c => { doc.setFillColor(...P_CLS[c]); doc.rect(lx, ly, 9, 9, "F"); w.font(8.5, "normal", P_INK2); doc.text(CLS[c], lx + 13, ly + 7.5); lx += 62; });
+  w.font(8, "normal", P_INK2); doc.text(pdfText(`1 km cells · ${inputs.map(x => `${IDX(x.k).name} ${VM(x.k, x.id).letter}`).join(", ")}`), lx + 4, ly + 7.5);
+  const rx = M + mapW + 20, rw = w.W - mapW - 20; let ry = top;
+  w.font(10, "bold"); doc.text("Share of Alaska's land", rx, ry + 9); ry += 16;
+  for (const c of [2, 1, 0]) {
+    doc.setFillColor(...P_CLS[c]); doc.roundedRect(rx, ry, rw, 38, 4, 4, "F");
+    w.font(20, "bold", c === 1 ? P_INK : P_WHITE); doc.text(pct(n[c] / tot), rx + 10, ry + 25);
+    w.font(10, "bold", c === 1 ? P_INK : P_WHITE); doc.text(CLS[c], rx + rw - 10, ry + 24, { align: "right" }); ry += 44;
+  }
+  ry += 8; w.font(10, "bold"); doc.text("By region (% of land)", rx, ry + 9); ry += 26;
+  w.font(8, "bold", P_INK2); ["Low", "Medium", "High"].forEach((h, j) => doc.text(h, rx + 70 + j * 42, ry, { align: "center" })); ry += 4;
+  counts.slice(1).forEach((m, j) => { const t = m[0] + m[1] + m[2] + m[3] || 1; ry += 14;
+    w.font(9, "normal", P_INK); doc.text(META.regions[j], rx, ry);
+    [0, 1, 2].forEach(c => doc.text(String(Math.round(100 * m[c] / t)), rx + 70 + c * 42, ry, { align: "center" })); });
+  w.y = Math.max(ly + 22, ry + 16);
+  w.h2("At named places");
+  w.table([{ h: "Place", w: 190 }, ...KEYS.map(k => ({ h: IDX(k).name, w: 78, align: "center" })), { h: "Hazard", w: 78, align: "center" }],
+    META.places.map(p => { const cl = inputs.map(x => classOfValue(VM(x.k, x.id), placeValue(x.k, x.id, p).v, x.b));
+      return [p.name.replace(/ \(nearest data.*\)$/, ""), ...cl.map(c => ({ cls: c })), { cls: T[(cl[0] << 4) | (cl[1] << 2) | cl[2]] }]; }));
+
+  // page 2: how it's built
+  w.page(); w.h2("How the index is built");
+  w.text("Each index puts every 1 km cell of Alaska in Low, Medium or High. The combining rule turns the three classes into one Environmental Hazard class.", { color: P_INK2, after: 10 });
+  for (const x of inputs) {
+    const m = VM(x.k, x.id), t = teamIdx(x.k), arr = classes(x.k, x.id, x.b), iw = 150, ih = iw * BBOX[3] / BBOX[2];
+    w.need(ih + 20); const y0 = w.y, tx = M + iw + 14, tw = w.W - iw - 14;
+    doc.addImage(gridPNG(arr, BBOX, 600, PRINT), "PNG", M, y0, iw, ih, `map-${x.k}`, "FAST");
+    w.h3(`${IDX(x.k).name}: Variant ${m.letter}, ${m.label}`, { x: tx, width: tw, keep: 10 });
+    w.text(`Status: ${status(x)}`, { size: 8.5, color: P_ACCENT, style: "bold", x: tx, width: tw, after: 3 });
+    w.text(`${m.description} (${m.details}).`, { size: 9.5, x: tx, width: tw });
+    w.text(`High above ${fmt(m, x.b[1])}; Low at or below ${fmt(m, x.b[0])}; Medium between.` + (m.na_label ? ` Places ${m.na_label} count as ${CLS[m.na_class]}.` : ""), { size: 9.5, style: "bold", x: tx, width: tw });
+    w.text(`Share of land: ${sharesLine(areaCounts(arr)[0])}.`, { size: 9, color: P_INK2, x: tx, width: tw });
+    w.text(x.from === "team" && t.note ? `Reasoning: ${t.note}` : "Reasoning: none recorded yet.", { size: 9.5, style: "italic", x: tx, width: tw, after: 2 });
+    if (x.from === "team" && t.at) w.text(`Saved by ${nameOf(t.by)}, ${dateOf(t.at)}.`, { size: 8.5, color: P_INK2, x: tx, width: tw });
+    w.y = Math.max(w.y, y0 + ih) + 14;
+  }
+  w.h3(`Combining rule: ${ruleName}`, { keep: 190 });
+  w.text(`Status: ${TEAM.hazard ? "team decision" : "not decided yet (repo starting point)"}`, { size: 8.5, color: P_ACCENT, style: "bold", after: 3 });
+  w.text(`${ruleSentence(R)} ${missingText(R)}`, { size: 9.5 });
+  w.text(R.note && TEAM.hazard ? `Reasoning: ${R.note}` : "Reasoning: none recorded yet.", { size: 9.5, style: "italic", after: 2 });
+  if (TEAM.hazard && R.at) w.text(`Saved by ${nameOf(R.by)}, ${dateOf(R.at)}.`, { size: 8.5, color: P_INK2 });
+  w.text("Every combination (rows: Wildfire, columns: Erosion, one table per Permafrost class):", { size: 9, color: P_INK2, after: 6 });
+  w.need(84); const gy = w.y;
+  for (let p = 0; p < 3; p++) {
+    const gx = M + p * 170; w.font(8.5, "bold"); doc.text(`Permafrost ${CLS[p]}`, gx, gy + 8);
+    w.font(7.5, "normal", P_INK2); CLS.forEach((c, e) => doc.text(`E ${c[0]}`, gx + 28 + e * 30 + 13, gy + 20, { align: "center" }));
+    for (let wi = 0; wi < 3; wi++) {
+      const yy = gy + 24 + wi * 18; w.font(7.5, "normal", P_INK2); doc.text(`W ${CLS[wi][0]}`, gx, yy + 10);
+      for (let e = 0; e < 3; e++) { const v = T[(wi << 4) | (e << 2) | p];
+        doc.setFillColor(...P_CLS[v]); doc.roundedRect(gx + 28 + e * 30, yy, 26, 15, 2, 2, "F");
+        w.font(8, "bold", v === 1 ? P_INK : P_WHITE); doc.text(CLS[v][0], gx + 28 + e * 30 + 13, yy + 10.5, { align: "center" }); }
+    }
+  }
+  w.y = gy + 84;
+  w.text(`Result: ${sharesLine(n)} of Alaska's land.`, { size: 9.5, style: "bold" });
+
+  // page 3+: specification
+  w.page(); w.h2("Specification for rebuilding");
+  w.text(`Everything needed to rebuild the index from scratch. Grid: the GIPL 2.0 1 km grid, EPSG:3338 (Alaska Albers), ${NX} columns × ${NY} rows, `
+    + `cell edges from x = ${META.x0} m (west) and y = ${META.ytop} m (north), cut to the GIPL land mask (${landN.toLocaleString("en-US")} cells). `
+    + "Classes: Low if value <= lower boundary; Medium if value <= upper boundary; otherwise High (a value equal to a boundary goes to the lower class). "
+    + `Regions: Arctic, Interior, West, South. Data built ${META.built}.`, { size: 9.5, color: P_INK2, after: 10 });
+  for (const x of inputs) {
+    const m = VM(x.k, x.id);
+    w.h3(`${IDX(x.k).name} index: Variant ${m.letter}, ${m.label}`, { keep: 90 });
+    w.text(`Repo variant: toy_index/${x.k}/variants/${x.id} (${status(x)})`, { size: 8.5, face: "courier", color: P_INK2, after: 3 });
+    w.text(`Method: ${m.method || m.description}`, { size: 9.5 });
+    w.text(`Units: ${m.unit}. Boundaries: Low <= ${x.b[0]} ${m.unit} < Medium <= ${x.b[1]} ${m.unit} < High.`
+      + (m.na_label ? ` Cells flagged "${m.na_label}" have no value and are classed ${CLS[m.na_class]}.` : "")
+      + " Cells without a value (and not flagged) count as missing.", { size: 9.5 });
+    w.text(`Sources: ${(m.sources || []).join("; ")}.`, { size: 9, color: P_INK2, after: 10 });
+  }
+  w.h3(`Combining rule: ${ruleName}`, { keep: 80 });
+  w.text(ruleParams(R), { size: 9.5 });
+  w.text(`Missing index: ${R.missing === "low" ? "an index with no value counts as Low" : "if any index has no value, the hazard is left blank"}; if all three have no value, the hazard has none.`, { size: 9.5 });
+  const combos = []; for (let i = 0; i < 27; i++) { const a = Math.floor(i / 9), b = Math.floor(i / 3) % 3, c = i % 3;
+    combos.push(`${CLS[a][0]}${CLS[b][0]}${CLS[c][0]}->${CLS[T[(a << 4) | (b << 2) | c]][0]}`); }
+  w.text(`All 27 combinations (Wildfire, Erosion, Permafrost -> Hazard): ${combos.join("  ")}`, { size: 9, face: "courier", after: 12 });
+  w.h3("Decision record (JSON, same shape as toy_index/composite/decisions.json)", { keep: 60 });
+  const rec = { exported: new Date().toISOString(), data_built: META.built };
+  for (const x of inputs) { const t = teamIdx(x.k); rec[x.k] = { variant: x.id, letter: VM(x.k, x.id).letter, breaks: { [x.id]: x.b }, note: x.from === "team" ? t.note : "", decided: x.decided && x.from === "team" }; }
+  rec.hazard = { ...Object.fromEntries(RULE_KEYS.map(k => [k, R[k]])), note: TEAM.hazard ? R.note : "", decided: !!TEAM.hazard };
+  w.text(JSON.stringify(rec, null, 1).replace(/\n\s*(-?[\d.]+,?)(?=\n)/g, " $1").replace(/\[\s+/g, "[").replace(/\s+\]/g, "]"), { size: 7.5, face: "courier", lh: 1.25 });
+
+  const pages = doc.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i); w.font(7.5, "normal", P_INK2);
+    doc.text(pdfText(`Environmental Hazard Index team workbench · team decisions · exported ${stamp}`), M, w.PH - 24);
+    doc.text(`Page ${i} of ${pages}`, w.PW - M, w.PH - 24, { align: "right" });
+  }
+  return doc;
 }
-let busy = Promise.resolve();
-function setVariants(variants, preset) {  // load what's needed, then switch everything at once
-  return busy = busy.then(async () => {
-    document.body.classList.add("loading");
-    try {
-      await Promise.all(KEYS.map(k => loadVariant(k, variants[k])));
-      if (preset) presetInto(S, preset); else S.variants = { ...variants };
-      await loadChosen();
-      refreshAll();
-    } catch (e) {
-      document.getElementById("loadErr").textContent = `Could not load map data (${e.message || e}). Reload the page to try again.`;
-    } finally { document.body.classList.remove("loading"); }
-  });
+async function exportPdf() {
+  const btn = $("pdfBtn"), msg = $("pdfMsg"); btn.disabled = true; msg.textContent = "Preparing the PDF…";
+  try {
+    const doc = await buildPdf(), blob = doc.output("blob");
+    const name = `hazard-index-team-decisions-${new Date().toISOString().slice(0, 10)}.pdf`;
+    if (window.claude && window.claude.use) {
+      const dl = await window.claude.use("downloads");
+      if (!dl) { msg.textContent = "Downloads aren't available in this view. Open the page on claude.ai to download the PDF."; return; }
+      try { await dl.save({ filename: name, data: blob }); msg.textContent = "PDF saved."; }
+      catch (e) { msg.textContent = e && e.code === "declined" ? "" : e && e.code === "rate_limited" ? "A save prompt is already open." : "Couldn't save the PDF. Try again."; }
+    } else {  // a local copy of the page (tests): a plain link download works there
+      const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: name }); a.click(); msg.textContent = "PDF downloaded.";
+    }
+  } catch (e) { msg.textContent = `Couldn't build the PDF (${e.message || e}).`; }
+  finally { btn.disabled = false; }
 }
-function refreshAll() {
-  buildIndexCards(); buildPresetSelect();
-  document.getElementById("rule").value = S.rule; document.getElementById("missing").value = S.missing; renderRuleCtl();
-  KEYS.forEach(k => pending.idx.add(k)); pending.hazard = true; flush(); fetchApi();
-}
-function presetFromHash() {
-  const h = location.hash, m = h.match(/^#preset-([\w-]+)/) || h.match(/mode=(raw|delta)/);  // #mode= kept for old links
-  const id = m && ({ raw: "future", delta: "change" }[m[1]] || m[1]);
-  return META.presets.find(p => p.id === id);
+let resetArmed = 0;  // two-click confirmation (artifacts can't show confirm dialogs)
+async function resetTeam() {
+  const b = $("resetBtn"), msg = $("resetMsg");
+  if (!resetArmed) { b.textContent = "Click again to clear all four decisions";
+    resetArmed = setTimeout(() => { resetArmed = 0; b.textContent = "Reset all team decisions"; }, 5000); return; }
+  clearTimeout(resetArmed); resetArmed = 0; b.textContent = "Reset all team decisions"; b.disabled = true; msg.textContent = "Resetting…";
+  try {
+    for (const key of [...KEYS, "hazard"]) await db.doc("decisions/" + key).delete();
+    try { await db.collection("history").add({ key: "reset", value: {}, by: uid, at: new Date().toISOString() }); } catch (e) {}
+    TEAM = {}; teamChanged(); msg.textContent = "All team decisions cleared.";
+  } catch (e) { msg.textContent = saveError(e); }
+  finally { b.disabled = false; }
 }
 
-// ---------- update cycle ----------
-let pending = { idx: new Set(), hazard: false }, raf = 0;
-function schedule() { if (!raf) raf = requestAnimationFrame(flush); }
-function flush() {
-  raf = 0; const p = pending; pending = { idx: new Set(), hazard: false };
-  for (const k of p.idx) { computeClasses(k); syncBreakInputs(k); drawHist(k); showShares(k); }
-  if (p.idx.size || p.hazard) { buildTable(); computeHazard(); }
-  paintOff(); drawMaps(); renderLegend(); renderPoint();
-  document.getElementById("sentence").textContent = ruleSentence();
-  save();
-}
-function changed(k) { pending.idx.add(k); schedule(); }
-function ruleChanged(rebuildCtl) { if (rebuildCtl) renderRuleCtl(); pending.hazard = true; schedule(); }
-
-function presetJSON() {  // paste into toy_index/composite/presets/<id>.json to make it a named preset
-  const p = { name: "New preset", description: "", variants: { ...S.variants },
-    breaks: Object.fromEntries(KEYS.map(k => [vkey(k), S.breaks[vkey(k)]])) };
-  for (const key of RULE_KEYS) if (key !== "custom" || S.rule === "custom") p[key] = S[key];
-  return JSON.stringify(p, null, 2);
-}
-function settingsText() {
-  const mp = matchingPreset();
-  const L = ["Toy Environmental Hazard Index settings", `Saved ${new Date().toISOString().slice(0, 16).replace("T", " ")}`,
-    `Preset: ${mp ? mp.name : "custom mix"}`, ""];
-  for (const k of KEYS) { const m = V(k), b = S.breaks[vkey(k)];
-    L.push(`${NAME(k)} [${vkey(k)}, ${m.status}]: Low ≤ ${b[0]} ${m.unit} < Medium ≤ ${b[1]} ${m.unit} < High   (${m.description}; ${m.details})`); }
-  L.push("", "Rule: " + document.getElementById("rule").selectedOptions[0].text, ruleSentence(),
-    "Missing index: " + document.getElementById("missing").selectedOptions[0].text);
-  if (S.rule === "custom") for (let i = 0; i < 27; i++)
-    L.push(`  W ${CLS[Math.floor(i / 9)]}, E ${CLS[Math.floor(i / 3) % 3]}, P ${CLS[i % 3]} -> ${CLS[S.custom[i]]}`);
-  const pc = pointClasses(); L.push("", `Point: ${S.point.name} (${S.point.lat.toFixed(4)}, ${S.point.lon.toFixed(4)})`);
-  KEYS.forEach((k, i) => L.push(`  ${NAME(k)}: ${fmt(k, pointValue(k))} -> ${pc[i] === MISSING ? "No value" : CLS[pc[i]]}`));
-  const hz = TABLE[(pc[0] << 4) | (pc[1] << 2) | pc[2]]; L.push(`  Environmental Hazard: ${hz === MISSING ? "No value" : CLS[hz]}`);
-  L.push("", "As a preset file (toy_index/composite/presets/<id>.json):", presetJSON());
-  return L.join("\n");
+// ---------- self-test (#selftest, local copies only) ----------
+async function selfTest() {
+  const L = ["SELF-TEST (default boundaries): shares L/M/H/none % by area; pairs same % / LvH % by area, rho; places"];
+  for (const k of KEYS) {
+    await Promise.all(VIDS(k).map(id => loadVariant(k, id)));
+    const C = {};
+    for (const id of VIDS(k)) { const m = VM(k, id); C[id] = classes(k, id, m.breaks);
+      L.push(`${k}/${id} [${m.letter}] breaks ${m.breaks}: ` + areaCounts(C[id]).map(n => { const t = n[0] + n[1] + n[2] + n[3]; return n.map(x => (100 * x / t).toFixed(1)).join("/"); }).join("  ")); }
+    const ids = VIDS(k);
+    for (let a = 0; a < ids.length; a++) for (let b = a + 1; b < ids.length; b++) {
+      const g = agreement(C[ids[a]], C[ids[b]]);
+      L.push(`${k} ${ids[a]} vs ${ids[b]}: ` + g.map(x => `${(100 * x.same).toFixed(1)}/${(100 * x.lh).toFixed(1)}`).join("  ") + `  rho ${rankCorr(k, ids[a], ids[b]).toFixed(3)}`);
+    }
+    for (const p of META.places.slice(0, 3)) L.push(`  ${p.name}: ` + ids.map(id => { const m = VM(k, id), { v } = placeValue(k, id, p); return `${m.letter} ${fmt(m, v)} -> ${clsName(classOfValue(m, v, m.breaks))}`; }).join(" | "));
+  }
+  const inputs = hazardInputs(false), hz = hazardGrid(inputs, teamRule());
+  L.push(`hazard (repo starting point, ${teamRule().rule}): ` + areaCounts(hz).map(n => { const t = n[0] + n[1] + n[2] + n[3]; return n.map(x => (100 * x / t).toFixed(1)).join("/"); }).join("  "));
+  for (const p of META.places.slice(0, 2)) { const [x, y] = ALB.fwd(p.lat, p.lon), [c, r] = cellOf(p.x, p.y); L.push(`projection ${p.name}: dx=${(x - p.x).toFixed(3)} dy=${(y - p.y).toFixed(3)} cell=${c},${r} (build ${p.col},${p.row})`); }
+  L.push(`mode: ${mode}`);
+  $("selftest").textContent = L.join("\n"); $("selftest").hidden = false;
 }
 
 // ---------- init ----------
 async function init() {
-  loadLand();
-  const hp = presetFromHash();
-  if (hp) presetInto(S, hp);
-  try { await loadChosen(); }
-  catch (e) {  // e.g. a variant file that didn't load: fall back to the first preset
-    document.getElementById("loadErr").textContent = `Could not load some map data (${e.message || e}).`;
-    presetInto(S, META.presets[0]); await loadChosen();
-  }
-  buildIndexCards(); buildTabs(); buildPresetSelect();
-  document.getElementById("setup").onchange = e => { const p = META.presets.find(q => q.id === e.target.value); if (p) setVariants(p.variants, p); };
-  window.addEventListener("hashchange", () => { const p = presetFromHash(); if (p) setVariants(p.variants, p); });
-  const sel = document.getElementById("place");
-  sel.innerHTML = `<option value="">(custom point)</option>` + META.points.map(p => `<option>${p.name}</option>`).join("");
-  sel.onchange = () => { const p = META.points.find(q => q.name === sel.value); if (p) setPoint({ ...p }); };
-  const go = () => { const lat = parseFloat(document.getElementById("lat").value), lon = parseFloat(document.getElementById("lon").value);
-    if (Number.isFinite(lat) && Number.isFinite(lon)) setPoint(pointFromLatLon("Typed point", lat, -Math.abs(lon))); };
-  document.getElementById("go").onclick = go;
-  for (const id of ["lat", "lon"]) document.getElementById(id).addEventListener("keydown", e => { if (e.key === "Enter") go(); });
-  for (const [id, key] of [["regionKm", "regionKm"], ["localKm", "localKm"]]) {
-    const el = document.getElementById(id); el.value = String(S[key]);
-    el.onchange = () => { S[key] = +el.value; save(); drawMaps(); };
-  }
-  const rule = document.getElementById("rule"); rule.value = S.rule;
-  rule.onchange = () => { S.rule = rule.value; ruleChanged(true); };
-  const miss = document.getElementById("missing"); miss.value = S.missing;
-  miss.onchange = () => { S.missing = miss.value; ruleChanged(false); };
-  let armed = 0;  // two-click reset (hosted pages can't show confirm dialogs)
-  const resetBtn = document.getElementById("reset");
-  resetBtn.onclick = async () => {
-    if (!armed) { resetBtn.textContent = "Click again to reset"; armed = setTimeout(() => { armed = 0; resetBtn.textContent = "Reset all"; }, 4000); return; }
-    clearTimeout(armed); armed = 0; resetBtn.textContent = "Reset all";
-    const d = defaults(); S = d;
-    document.getElementById("regionKm").value = String(S.regionKm); document.getElementById("localKm").value = String(S.localKm);
-    document.querySelectorAll("#tabs button").forEach(x => x.setAttribute("aria-pressed", x.dataset.layer === S.layer));
-    await setVariants(d.variants); setPoint(S.point);
-  };
-  document.getElementById("copy").onclick = async () => {
-    const t = settingsText(), box = document.getElementById("copyBox");
-    box.value = t; box.style.display = "block"; box.select();
-    try { await navigator.clipboard.writeText(t); document.getElementById("copy").textContent = "Copied ✓";
-      setTimeout(() => document.getElementById("copy").textContent = "Copy settings", 1500); } catch (e) {}
-  };
-  renderRuleCtl();
-  KEYS.forEach(k => pending.idx.add(k)); pending.hazard = true;
-  flush();
-  setPoint(S.point);
-  window.addEventListener("resize", () => { drawMaps(); KEYS.forEach(drawHist); });
-  if (location.hash.includes("selftest")) selfTest();
+  readPalette();
+  await loadBase();
+  UI.point = UI.point && Number.isFinite(UI.point.x) ? UI.point : { ...META.places[0] };
+  if (!["hazard", ...KEYS].includes(UI.layer)) UI.layer = "hazard";
+  buildNav(); initHazardUI();
+  $("pdfBtn").onclick = exportPdf; $("resetBtn").onclick = resetTeam;
+  $("lat").value = UI.point.lat.toFixed(4); $("lon").value = UI.point.lon.toFixed(4);
+  $("place").value = META.places.some(q => q.name === UI.point.name) ? UI.point.name : "";
+  setMode("connecting");
+  window.addEventListener("hashchange", route);
+  let resizeT = 0;
+  window.addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(() => renderTab(UI.tab), 150); });
+  const retheme = () => { readPalette(); renderTab(UI.tab); };
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", retheme);
+  new MutationObserver(retheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  if (location.hash === "#selftest") { await selfTest(); showTab("summary"); }
+  else route();
+  connect().catch(() => setMode("local"));
+  setTimeout(() => { if (mode === "connecting") setMode("local"); }, 12000);
 }
-async function selfTest() {
-  const L = ["SELF-TEST: projection vs pyproj (m), inverse (deg), values at the cell, point API values"];
-  const keep = JSON.stringify(S);
-  for (const k of KEYS) for (const id of Object.keys(VARS(k))) {
-    if (!usable(k, id)) { L.push(`${k}/${id}: not in this build`); continue; }
-    try { await loadVariant(k, id); } catch (e) { L.push(`${k}/${id}: LOAD FAILED ${e}`); }
-  }
-  for (const pr of META.presets) {
-    if (!KEYS.every(k => usable(k, pr.variants[k]))) { L.push(`preset ${pr.id}: not in this build`); continue; }
-    presetInto(S, pr); await loadChosen();
-    for (const p of META.points) {
-      const [x, y] = ALB.fwd(p.lat, p.lon), [la, lo] = ALB.inv(p.x, p.y), [c, r] = cellOf(p.x, p.y);
-      const vals = KEYS.map(k => { const v = valueOf(k, inGrid(c, r) ? codes[k][r * META.nx + c] : 0);
-        return v == null ? "nan" : v === NA ? "NA" : v.toFixed(4); });
-      L.push(`${pr.id.padEnd(7)} ${p.name.padEnd(22)} dx=${(x - p.x).toFixed(3)} dy=${(y - p.y).toFixed(3)} dlat=${(la - p.lat).toExponential(1)} dlon=${(lo - p.lon).toExponential(1)} cell=${c},${r} W/E/P=${vals.join(" / ")} api=${JSON.stringify(p.api)}`);
-    }
-  }
-  S = JSON.parse(keep); await loadChosen();
-  const tab = () => Array.from({ length: 27 }, (_, i) =>
-    CLS[TABLE[(Math.floor(i / 9) << 4) | ((Math.floor(i / 3) % 3) << 2) | (i % 3)]][0]).join("");
-  for (const r of ["worst", "avg", "product", "count", "custom"]) {
-    S.rule = r; renderRuleCtl(); buildTable(); computeHazard();
-    L.push(`rule ${r.padEnd(8)} WEP LLL..HHH = ${tab()}  land L/M/H/none = ${classShares(hazard).join(" / ")}`);
-  }
-  S.rule = "worst"; renderRuleCtl();
-  const num = ui.erosion.nums[1]; num.value = "6.5"; num.dispatchEvent(new Event("input")); flush();
-  L.push(`typed erosion "High above" 6.5 -> breaks ${S.breaks[vkey("erosion")]}, ${ui.erosion.shares.textContent}`);
-  document.querySelector('#matrices button[data-w="0"][data-e="0"][data-p="0"]').click(); flush();
-  L.push(`clicked cell W L / E L / P L -> rule ${S.rule}, that cell now ${CLS[S.custom[0]]}, sentence: ${document.getElementById("sentence").textContent}`);
-  const other = Object.keys(VARS("permafrost")).find(id => id !== S.variants.permafrost && usable("permafrost", id));
-  if (other) { await setVariants({ ...S.variants, permafrost: other });
-    L.push(`picked permafrost variant ${other} in the dropdown -> preset shown: ${document.getElementById("setup").selectedOptions[0].text}, card: ${ui.permafrost.variant.value}`); }
-  S = JSON.parse(keep); save(); await setVariants(S.variants);
-  try {
-    const x = new XMLHttpRequest(), p = META.points[0];
-    x.open("GET", `https://earthmaps.io/alfresco/flammability/local/${p.lat.toFixed(4)}/${p.lon.toFixed(4)}`, false); x.send();
-    L.push(`API from this page: HTTP ${x.status}, 2040-2069 5modelAvg rcp45 = ${JSON.parse(x.responseText)["2040-2069"]["5modelAvg"]["rcp45"]}`);
-  } catch (e) { L.push("API from this page FAILED: " + e); }
-  const t = document.getElementById("selftest"); t.textContent = L.join("\n"); t.style.display = "block";
-}
-window.addEventListener("load", init);
+window.addEventListener("load", () => init().catch(e => { $("loadErr").textContent = `The page failed to start (${e.message || e}).`; }));
 </script>
 </body>
 </html>

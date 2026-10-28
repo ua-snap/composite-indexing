@@ -1,7 +1,9 @@
 {
+  "letter": "A",
   "label": "24-hour, 100-year storm, mid-century",
   "description": "DOT precipitation: rain in the 24-hour, 100-year storm",
   "details": "2050–2079 · mean of GFDL-CM3 and NCAR-CCSM4 · RCP 8.5",
+  "method": "Rain depth (inches) of the 24-hour storm with a 100-year return interval, 2050–2079, from SNAP's Alaska DOT precipitation-frequency projections (Rasdaman coverage dot_precip; WRF-downscaled GFDL-CM3 and NCAR-CCSM4, RCP 8.5, the only scenario). Mean of the two models; the ~480 m cells are averaged to the 1 km EPSG:3338 grid.",
   "unit": "in",
   "digits": 2,
   "offset": 0,
@@ -15,7 +17,6 @@
     "Rasdaman dot_precip pf, duration 3 (24 h), era 1, interval 100, models 0 and 1"
   ],
   "status": "candidate",
-  "in_single_file": true,
   "author": "Joshdpaul",
   "created": "2026-10-27"
 }

@@ -2,21 +2,14 @@
 
 **Question:** how should Wildfire, Erosion and Permafrost classes combine into one Environmental Hazard class?
 
-## Presets
-A preset names a set of variants and, optionally, their class boundaries and the combining rule. It shows up in the
-app's **Preset** picker and opens from a link ending in `#preset-<id>`.
-
-| id | Variants | Rule |
-|---|---|---|
-| `future` | flam-future · storm-24h-100yr-future · temp-1m-future | app default (worst of three) |
-| `change` | flam-change · storm-24h-100yr-change · thaw-progress | app default (worst of three) |
-
-To save a setup the team agreed on: **Copy settings** in the app, take the JSON at the end, save it here as
-`presets/<id>.json` (fill in `name` and `description`), and rebuild the app.
+## Decisions
+The team picks each index's variant and boundaries on the index pages and the rule on the Environmental Hazard page
+of the app, and saves them there. [decisions.json](decisions.json) is the repo copy: Claude refreshes it from the app,
+and the app uses it for anything the team hasn't decided yet (today: Variant A of each index, worst of three).
 
 ## Rules in the app
-Worst of the three · weighted average of points · product of points · count the Highs · custom 27-cell table. Each
-rule's settings can be stored in a preset.
+Worst of the three · weighted average of points · product of points · count the Highs · custom 27-cell table. The rule
+and its settings are saved with the team decision.
 
 ## Open questions
 - Should one High always make the hazard High ("worst of three" puts 52–72 % of land in High)?

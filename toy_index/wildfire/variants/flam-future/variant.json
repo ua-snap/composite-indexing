@@ -1,7 +1,9 @@
 {
+  "letter": "A",
   "label": "Flammability, mid-century",
   "description": "ALFRESCO relative flammability: average chance of burning per year",
   "details": "2040–2069 · 5-model average · RCP 4.5",
+  "method": "ALFRESCO relative flammability: the average chance that a 1 km cell burns in a year, over 2040–2069, for the average of five CMIP5 models (5modelAvg) under RCP 4.5. Source: SNAP Rasdaman coverage alfresco_relative_flammability_30yr (era 2040–2069, model 5modelAvg, scenario RCP 4.5), already on a 1 km EPSG:3338 grid; used as is (nearest cell). Cells the model treats as not burnable have no value.",
   "unit": "/yr",
   "digits": 4,
   "offset": 0,
@@ -26,7 +28,6 @@
     "point: earthmaps.io HUC-12 average"
   ],
   "status": "candidate",
-  "in_single_file": true,
   "author": "Joshdpaul",
   "created": "2026-10-27"
 }
