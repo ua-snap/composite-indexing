@@ -21,23 +21,25 @@ session's work. The loop for every workstream: build variants → publish to the
 app, picks one, sets its boundaries and saves the decision → Claude copies the decisions back into the repo.
 
 ## Using the app (team workbench)
-**Shared link** (claude.ai): https://claude.ai/artifact/BUwzxzSDTSzFa6exz8zwAN. Tabs along the top:
+**Shared link** (claude.ai): https://claude.ai/artifact/9Wj3hFgUuExGYjScgBTM3e (team account, since 2026-10-30; the old individual-account link BUwzxzSDTSzFa6exz8zwAN is retired). The Summary is the home page; there is no tab bar. Each
+tile at the bottom of the Summary has an **Edit** button that opens that part, and every page links **Back to summary**
+(top and bottom).
 
 - **Summary**: the team's saved decisions for a non-technical reader. The hazard map, the share of Alaska's land in
   each class (statewide, by region, at named places), and the three indices → rule as a flow, each with what High
-  means and the team's reason. Anything not yet decided shows the repo's starting point and says so.
+  means and the team's reason, and an **Edit** button. Anything not yet decided shows the repo's starting point and
+  says so.
 - **Wildfire / Erosion / Permafrost**: one page per index. One card per variant (**Variant A, B, …**): class map,
   description, histogram, and sliders or typed numbers for the Low/Medium and Medium/High boundaries. Tick **Use this
-  variant** on the one the index should use. Below, **Compare variants** updates as the boundaries move: class shares
-  by region, agreement between every pair (same class, Low vs High, rank correlation), a map of where two variants
-  differ, and values at named places.
-- **Environmental Hazard**: the three chosen variants and their boundaries, read only (change them on the index
+  variant** on the one the index should use, then write the **Reasoning** and save. (The in-app variant comparison
+  was removed on 2026-10-30 to keep the page simple; it is in git history, commit 85ba9f1, if the team wants it back.)
+- **Combining rule** (the Environmental Hazard page): the three chosen variants and their boundaries, read only (change them on the index
   pages). Pick the combining rule and adjust it; the grid shows all 27 combinations (click a cell to set it by hand).
-  Hazard shares by region, what makes cells High, and maps at three scales with a point inspector.
+  Below it, **Result**: maps at three scales (hazard or any one index) with a point inspector, then the Reasoning.
 
 **Team decisions.** Moving sliders, ticking a variant or changing the rule is a personal draft (kept in your browser,
-marked "Your unsaved changes" and with a dot on the tab). **Save as team decision** (with a short "why") makes it the
-team's: everyone with the link then sees it on every tab, the Summary included. **Discard my changes** returns to the
+marked "Your unsaved changes" on the page and on its Summary tile). **Save as team decision** (with a short "why") makes it the
+team's: everyone with the link then sees it on every page, the Summary included. **Discard my changes** returns to the
 team decision. Saving needs Contributor access or higher; viewers see the decisions read only. Every save is also
 kept in a history the team (and Claude) can read.
 

@@ -45,7 +45,7 @@ statewide flammability request, 19 MB each) or a metadata check · 3 = needs new
 | `smoke-days` | days with heavy smoke (historical only, ~60 km; not SNAP) | [F6] PM2.5 GEOS-Chem 2003–2020 | new download | 3 |
 
 ## 4. How we'll compare variants
-- **Standard comparison** (the app's **Compare variants** section): side-by-side maps, distributions, class shares statewide and by
+- **Standard comparison** (was the app's **Compare variants** section; removed 2026-10-30, in git history): side-by-side maps, distributions, class shares statewide and by
   region (Arctic / Interior / West / South), class agreement between variants, values at the preset places.
 - **Reality check:** does the 1980–2008 historical run put fire where fire actually burned? Compare with observed
   burned area by region: [F1] AICC perimeters (1980–2008 overlap) and [F7] Arctic Boreal Burned Area (2002–2022,

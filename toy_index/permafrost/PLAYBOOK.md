@@ -49,7 +49,7 @@ Priority 1 = local data or existing results · 2 = more work · 3 = new data.
 | `ground-ice` | weight by ground-ice content | permafrost ground-ice map (NSIDC) | new download | 3 |
 
 ## 4. How we'll compare variants
-- **Standard comparison** (the app's **Compare variants** section): maps, distributions, class shares by region, class agreement, preset places.
+- **Standard comparison** (was the app's **Compare variants** section; removed 2026-10-30, in git history): maps, distributions, class shares by region, class agreement, preset places.
 - **Reality check:** GIPL against measured borehole temperatures (`<data>/boreholes/`, TSP network), ESA CCI [P2]
   and the Obu et al. 2019 permafrost zones [P8]. Coarse model products [P5, P6] (~50 km) can show whether GIPL's
   statewide trend is typical.

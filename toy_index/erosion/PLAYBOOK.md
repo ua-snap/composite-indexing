@@ -47,7 +47,7 @@ Priority 1 = local data, no requests · 2 = more work or a metadata check · 3 =
 | `coastal` | shoreline loss and sea-level exposure | [S1] EPA sea level rise (30 m), [S2] storm surge (2.5 km); not SNAP | new download, separate hazard | 3 |
 
 ## 4. How we'll compare variants
-- **Standard comparison** (the app's **Compare variants** section): maps, distributions, class shares by region, class agreement, preset places.
+- **Standard comparison** (was the app's **Compare variants** section; removed 2026-10-30, in git history): maps, distributions, class shares by region, class agreement, preset places.
 - **Model spread:** every change variant also reported per model; where the models disagree in sign, the variant
   is shaky there.
 - **Reality check:** recent observed extremes ([C1] WRF-downscaled ERA5, 1960–2023 hourly; Rasdaman

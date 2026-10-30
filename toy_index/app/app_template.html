@@ -30,12 +30,6 @@
   --high: #d55e00;
   --nodata: #cfd3cc;
   --sea: #ffffff;
-  --same: #d4e4f7;
-  --apart1: #5598e7;
-  --apart2: #0d366b;
-  --same-ink: #141816;
-  --apart1-ink: #141816;
-  --apart2-ink: #ffffff;
   --seq: #2a78d6;
   --font-display: "IBM Plex Sans Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
   --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
@@ -46,16 +40,14 @@
     --page: #101312; --surface: #181c1a; --sunk: #222724; --ink: #edf0ed; --ink-2: #b8c1bb; --muted: #858f89;
     --line: #2d3430; --axis: #46504a; --accent: #74c3ad; --accent-ink: #0c1311; --accent-soft: #1f3530;
     --warn: #f1b558; --warn-soft: #3a2c14; --nodata: #3a413d; --sea: #181c1a;
-    --same: #22364a; --apart1: #4f8fdc; --apart2: #b9d7f7;
-    --same-ink: #edf0ed; --apart1-ink: #0c1311; --apart2-ink: #0c1311; --seq: #3987e5; color-scheme: dark;
+    --seq: #3987e5; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --page: #101312; --surface: #181c1a; --sunk: #222724; --ink: #edf0ed; --ink-2: #b8c1bb; --muted: #858f89;
   --line: #2d3430; --axis: #46504a; --accent: #74c3ad; --accent-ink: #0c1311; --accent-soft: #1f3530;
   --warn: #f1b558; --warn-soft: #3a2c14; --nodata: #3a413d; --sea: #181c1a;
-  --same: #22364a; --apart1: #4f8fdc; --apart2: #b9d7f7;
-    --same-ink: #edf0ed; --apart1-ink: #0c1311; --apart2-ink: #0c1311; --seq: #3987e5; color-scheme: dark;
+  --seq: #3987e5; color-scheme: dark;
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.45 var(--font-body); }
@@ -92,23 +84,16 @@ button.primary:hover:not(:disabled) { background: var(--accent); filter: brightn
 a { color: var(--accent); }
 [hidden] { display: none !important; }
 
-/* top bar */
-.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface);
-  border-bottom: 1px solid var(--line); }
-.top .wrap { display: flex; align-items: center; gap: 6px 22px; flex-wrap: wrap; padding-block: 10px 0; }
-.brand { font-family: var(--font-display); font-weight: 700; font-size: 17px; padding-bottom: 10px; }
-.brand span { color: var(--muted); font-weight: 500; }
-nav { display: flex; gap: 2px; overflow-x: auto; max-width: 100%; }
-nav button { border: none; border-radius: 0; background: none; padding: 8px 14px 10px; font-family: var(--font-display);
-  font-size: 15px; font-weight: 600; color: var(--ink-2); border-bottom: 3px solid transparent; white-space: nowrap; }
-nav button:hover:not(:disabled) { background: var(--sunk); }
-nav button[aria-selected=true] { color: var(--ink); border-bottom-color: var(--accent); }
-nav .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--warn);
-  margin-left: 6px; vertical-align: 2px; }
-.conn { margin-left: auto; font-size: 12px; color: var(--muted); padding-bottom: 10px; }
+/* no tab bar: the Summary is home; its tiles open the section pages, which link back */
+.crumbs { display: flex; align-items: center; gap: 6px 16px; flex-wrap: wrap; padding-top: 14px; }
+.back { font-family: var(--font-display); font-size: 15px; font-weight: 600; text-decoration: none; }
+.back:hover { text-decoration: underline; }
+.crumbs .where { font-size: 13px; color: var(--muted); }
+.conn { margin-left: auto; font-size: 12px; color: var(--muted); }
 #loadErr { color: var(--warn); font-weight: 600; padding-block: 8px 0; }
 #loadErr:empty { display: none; }
-main { padding-block: 22px 40px; }
+main { padding-block: 18px 40px; }
+.backrow { padding-top: 4px; }
 .tab { display: grid; gap: 22px; }
 .loading .tab { opacity: .55; cursor: progress; }
 
@@ -162,8 +147,6 @@ canvas.hist { width: 100%; height: 72px; display: block; }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px;
   display: grid; gap: 10px; align-content: start; min-width: 0; }
 .sechead { display: flex; align-items: baseline; gap: 6px 14px; flex-wrap: wrap; }
-.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); gap: 16px; }
-.compare { display: grid; gap: 18px; }
 .scroll { overflow-x: auto; }
 table.t { border-collapse: collapse; width: 100%; font-size: 13px; }
 table.t th { font-family: var(--font-display); font-weight: 600; font-size: 12.5px; text-align: left; color: var(--ink-2);
@@ -183,16 +166,6 @@ table.t th.hl { color: var(--accent); }
 .c3 { background: var(--nodata); color: var(--ink); font-weight: 500; }
 .sw { display: inline-block; width: 13px; height: 13px; border-radius: 3px; vertical-align: -2px; margin-right: 5px; }
 .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; align-items: center; }
-.pairgrid { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 720px); gap: 24px; align-items: start; }
-@media (max-width: 800px) { .pairgrid { grid-template-columns: minmax(0, 1fr); } }
-table.conf { border-collapse: separate; border-spacing: 3px; font-size: 13px; }
-table.conf th { font-family: var(--font-display); font-weight: 600; font-size: 12px; color: var(--ink-2); padding: 2px 4px; }
-table.conf td { width: 72px; height: 44px; text-align: center; border-radius: 4px; font-family: var(--font-data); }
-table.conf td.ag0 { background: var(--same); color: var(--same-ink); font-weight: 600; }
-table.conf td.ag1 { background: var(--apart1); color: var(--apart1-ink); }
-table.conf td.ag2 { background: var(--apart2); color: var(--apart2-ink); }
-table.conf th.rowh { text-align: right; padding-right: 8px; }
-table.conf .cellnum { font-weight: 400; }
 
 /* hazard tab */
 .inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; }
@@ -200,9 +173,7 @@ table.conf .cellnum { font-weight: 400; }
   gap: 6px; align-content: start; }
 .itile .head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .lock { font-size: 12px; color: var(--muted); }
-.hzgrid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; align-items: start; }
-@media (max-width: 1100px) { .hzgrid { grid-template-columns: minmax(0, 1fr); } }
-.rulesel { font-size: 16px; padding: 6px 8px; font-weight: 600; }
+.rulesel { font-size: 16px; padding: 6px 8px; font-weight: 600; max-width: 520px; }
 .sentence { background: var(--sunk); border-radius: 6px; padding: 8px 10px; }
 .ctl { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px 10px; align-items: center; font-size: 14px; }
 .matrices { display: flex; gap: 14px; flex-wrap: wrap; }
@@ -239,8 +210,13 @@ table.conf .cellnum { font-weight: 400; }
 @media (max-width: 1200px) { .flow { grid-template-columns: repeat(3, minmax(0, 1fr)); } .flow .arrow { display: none; }
   .flow .ruletile { grid-column: 1 / -1; } }
 @media (max-width: 760px) { .flow { grid-template-columns: minmax(0, 1fr); } }
-.ftile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid;
-  gap: 8px; align-content: start; min-width: 0; }
+.ftile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex;
+  flex-direction: column; gap: 8px; min-width: 0; }
+.ftile.drafted { border-color: var(--warn); }
+.editrow { margin-top: auto; padding-top: 6px; display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
+a.btn { display: inline-block; border-radius: 6px; padding: 6px 16px; text-decoration: none; font-weight: 600; font-size: 14px;
+  background: var(--accent); color: var(--accent-ink); }
+a.btn:hover { filter: brightness(1.08); }
 .ftile .means { font-size: 14px; }
 .arrow { display: grid; place-items: center; color: var(--accent); }
 .ruletile { border-color: var(--accent); }
@@ -262,13 +238,11 @@ table.conf .cellnum { font-weight: 400; }
 </style>
 </head>
 <body>
-<header class="top">
-  <div class="wrap">
-    <div class="brand">Environmental Hazard Index <span>· team workbench</span></div>
-    <nav role="tablist" aria-label="Pages" id="nav"></nav>
-    <span class="conn" id="conn"></span>
-  </div>
-</header>
+<div class="wrap crumbs">
+  <a class="back" id="backTop" href="#summary" hidden>← Back to summary</a>
+  <span class="where" id="where"></span>
+  <span class="conn" id="conn"></span>
+</div>
 <div class="wrap"><div id="loadErr" role="alert"></div></div>
 <main class="wrap">
   <section class="tab" id="tab-summary" role="tabpanel" hidden>
@@ -302,7 +276,8 @@ table.conf .cellnum { font-weight: 400; }
       </div>
     </div>
     <div class="sechead"><h2>How the index is built</h2>
-      <span class="small">Each index puts every 1 km cell in Low, Medium or High. The rule turns the three classes into one.</span></div>
+      <span class="small">Each of the three indices puts every 1 km cell in Low, Medium or High. The combining rule turns the three
+        classes into the one on the map above. Use <b>Edit</b> on a tile to change that part.</span></div>
     <div class="flow" id="sumFlow"></div>
     <p class="foot" id="sumFoot"></p>
     <section class="panel" id="resetPanel" hidden>
@@ -319,7 +294,7 @@ table.conf .cellnum { font-weight: 400; }
 
   <section class="tab hz" id="tab-hazard" role="tabpanel" hidden>
     <div class="pagehead">
-      <div><p class="eyebrow">Combining rule</p><h1>Environmental Hazard</h1><p class="question" id="hzQuestion"></p></div>
+      <div><p class="eyebrow">Combining rule · turns the three indices into one class</p><h1>Environmental Hazard</h1><p class="question" id="hzQuestion"></p></div>
       <div class="decision" id="hzDecision"></div>
     </div>
     <div>
@@ -329,33 +304,61 @@ table.conf .cellnum { font-weight: 400; }
       <label class="row small" id="hzPreviewWrap" style="margin-top:10px" hidden>
         <input type="checkbox" id="hzPreview"> Preview with my unsaved index changes (otherwise the saved team decisions)</label>
     </div>
-    <div class="hzgrid">
-      <section class="panel" aria-labelledby="ruleH">
-        <h2 id="ruleH">Combining rule</h2>
-        <select id="rule" class="rulesel" aria-label="Combining rule">
-          <option value="worst">Worst of the three</option>
-          <option value="avg">Average of points (weighted)</option>
-          <option value="product">Multiply points (Wildfire × Erosion × Permafrost)</option>
-          <option value="count">Count the Highs</option>
-          <option value="custom">Custom table (set each combination)</option>
-        </select>
-        <div class="sentence" id="sentence"></div>
-        <div class="ctl" id="ruleCtl"></div>
-        <div class="row" style="font-size:14px">
-          <label for="missing">If an index has no value:</label>
-          <select id="missing"><option value="low">count it as Low</option><option value="blank">leave the hazard blank</option></select>
-        </div>
-        <div class="matrices" id="matrices"></div>
-        <p class="small">Every combination and the hazard it gets. Rows: Wildfire, columns: Erosion. The outlined cell is
-          the point on the map. Click a cell to change it (switches to Custom table).</p>
-      </section>
-      <section class="panel" aria-labelledby="hzSharesH">
-        <h2 id="hzSharesH">Result</h2>
-        <div class="scroll" id="hzShares"></div>
-        <h3>What makes a cell High</h3>
-        <div id="hzDrivers" class="small"></div>
-      </section>
-    </div>
+    <section class="panel" aria-labelledby="ruleH">
+      <h2 id="ruleH">Combining rule</h2>
+      <select id="rule" class="rulesel" aria-label="Combining rule">
+        <option value="worst">Worst of the three</option>
+        <option value="avg">Average of points (weighted)</option>
+        <option value="product">Multiply points (Wildfire × Erosion × Permafrost)</option>
+        <option value="count">Count the Highs</option>
+        <option value="custom">Custom table (set each combination)</option>
+      </select>
+      <div class="sentence" id="sentence"></div>
+      <div class="ctl" id="ruleCtl"></div>
+      <div class="row" style="font-size:14px">
+        <label for="missing">If an index has no value:</label>
+        <select id="missing"><option value="low">count it as Low</option><option value="blank">leave the hazard blank</option></select>
+      </div>
+      <div class="matrices" id="matrices"></div>
+      <p class="small">Every combination and the hazard it gets. Rows: Wildfire, columns: Erosion. The outlined cell is
+        the point on the map. Click a cell to change it (switches to Custom table).</p>
+    </section>
+    <section class="block" aria-labelledby="hzResultH">
+      <div class="sechead"><h2 id="hzResultH">Result</h2>
+        <span class="small">The Environmental Hazard from this rule and the three inputs. Switch layers to see each index.</span></div>
+      <div class="mapsrow">
+        <section class="panel" id="pointCard">
+          <div class="row" style="justify-content:space-between"><h3>Point</h3><span class="small">or click any map</span></div>
+          <div class="row">
+            <select id="place" aria-label="Choose a place"></select>
+            <input type="text" id="lat" aria-label="Latitude" placeholder="lat">
+            <input type="text" id="lon" aria-label="Longitude" placeholder="lon">
+            <button id="go">Go</button>
+          </div>
+          <div class="badge c3" id="badge"><span><span class="lbl">Environmental Hazard</span><br><span id="badgeTxt">–</span></span>
+            <span class="lbl num" id="badgeWhere" style="text-align:right"></span></div>
+          <table class="ptab" id="ptab"></table>
+          <div class="small" id="pnote"></div>
+        </section>
+        <section class="panel">
+          <div class="row" style="justify-content:space-between">
+            <div class="layers" role="group" aria-label="Map layer" id="layers"></div>
+            <span class="small">Hover for values · click to move the point</span>
+          </div>
+          <div class="maps3">
+            <div><div class="spread"><b>Alaska</b><span class="muted">1 km grid</span></div>
+              <canvas class="map" id="mapState" aria-label="Statewide map"></canvas></div>
+            <div><div class="spread"><b>Region</b>
+              <select id="regionKm" aria-label="Region size"><option>150</option><option>300</option><option>500</option></select></div>
+              <canvas class="map" id="mapRegion" aria-label="Regional map"></canvas></div>
+            <div><div class="spread"><b>Local</b>
+              <select id="localKm" aria-label="Local size"><option>20</option><option>40</option><option>80</option></select></div>
+              <canvas class="map" id="mapLocal" aria-label="Local map"></canvas></div>
+          </div>
+          <div class="legend" id="hzLegend"></div>
+        </section>
+      </div>
+    </section>
     <section class="reasoning" aria-labelledby="whyH">
       <div><h2 id="whyH"><label for="note-hazard">Reasoning</label></h2>
         <p>Why the team chose this rule. Saved with the team decision and shown on the Summary.</p></div>
@@ -363,38 +366,7 @@ table.conf .cellnum { font-weight: 400; }
       <div class="row"><button class="primary" id="hzSave">Save rule as team decision</button>
         <button id="hzDiscard">Discard my changes</button><span class="small" id="hzMsg" role="status"></span></div>
     </section>
-    <div class="mapsrow">
-      <section class="panel" id="pointCard">
-        <div class="row" style="justify-content:space-between"><h2>Point</h2><span class="small">or click any map</span></div>
-        <div class="row">
-          <select id="place" aria-label="Choose a place"></select>
-          <input type="text" id="lat" aria-label="Latitude" placeholder="lat">
-          <input type="text" id="lon" aria-label="Longitude" placeholder="lon">
-          <button id="go">Go</button>
-        </div>
-        <div class="badge c3" id="badge"><span><span class="lbl">Environmental Hazard</span><br><span id="badgeTxt">–</span></span>
-          <span class="lbl num" id="badgeWhere" style="text-align:right"></span></div>
-        <table class="ptab" id="ptab"></table>
-        <div class="small" id="pnote"></div>
-      </section>
-      <section class="panel">
-        <div class="row" style="justify-content:space-between">
-          <div class="layers" role="group" aria-label="Map layer" id="layers"></div>
-          <span class="small">Hover for values · click to move the point</span>
-        </div>
-        <div class="maps3">
-          <div><div class="spread"><b>Alaska</b><span class="muted">1 km grid</span></div>
-            <canvas class="map" id="mapState" aria-label="Statewide map"></canvas></div>
-          <div><div class="spread"><b>Region</b>
-            <select id="regionKm" aria-label="Region size"><option>150</option><option>300</option><option>500</option></select></div>
-            <canvas class="map" id="mapRegion" aria-label="Regional map"></canvas></div>
-          <div><div class="spread"><b>Local</b>
-            <select id="localKm" aria-label="Local size"><option>20</option><option>40</option><option>80</option></select></div>
-            <canvas class="map" id="mapLocal" aria-label="Local map"></canvas></div>
-        </div>
-        <div class="legend" id="hzLegend"></div>
-      </section>
-    </div>
+    <div class="backrow"><a class="back" href="#summary">← Back to summary</a></div>
   </section>
   <pre id="selftest" hidden></pre>
 </main>
@@ -405,7 +377,7 @@ table.conf .cellnum { font-weight: 400; }
 const META = /*__META__*/null;
 const KEYS = ["wildfire", "erosion", "permafrost"];
 const TABS = ["summary", ...KEYS, "hazard"];
-const TAB_NAMES = { summary: "Summary", wildfire: "Wildfire", erosion: "Erosion", permafrost: "Permafrost", hazard: "Environmental Hazard" };
+const TAB_NAMES = { summary: "Summary", wildfire: "Wildfire", erosion: "Erosion", permafrost: "Permafrost", hazard: "Combining rule" };
 const CLS = ["Low", "Medium", "High"];
 const MISSING = 3, SEA = 255, NA = "na";
 const NX = META.nx, NY = META.ny, N = NX * NY;
@@ -429,12 +401,10 @@ function readPalette() {
   const cs = getComputedStyle(document.documentElement), g = n => cs.getPropertyValue(n).trim();
   const u32 = hex => { const h = hex.replace("#", ""); const r = parseInt(h.slice(0, 2), 16), gg = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
     return ((255 << 24) | (b << 16) | (gg << 8) | r) >>> 0; };
-  const cls = new Uint32Array(256), dif = new Uint32Array(256);
+  const cls = new Uint32Array(256);
   ["--low", "--med", "--high", "--nodata"].forEach((n, i) => cls[i] = u32(g(n)));
   cls[SEA] = u32(g("--sea"));
-  ["--same", "--apart1", "--apart2", "--nodata"].forEach((n, i) => dif[i] = u32(g(n)));
-  dif[SEA] = cls[SEA];
-  PAL = { cls, dif, g, classHex: [g("--low"), g("--med"), g("--high"), g("--nodata")] };
+  PAL = { cls, g, classHex: [g("--low"), g("--med"), g("--high"), g("--nodata")] };
 }
 
 // ---------- base grid: land + regions ----------
@@ -495,7 +465,7 @@ function boundsText(m, b) { return `Low ≤ ${fmt(m, b[0])} · Medium ≤ ${fmt(
 
 // ---------- state: team record (db), personal drafts (this browser), repo defaults ----------
 let TEAM = {}, DRAFT = { idx: {}, hazard: null };
-const UI = { tab: "summary", point: null, regionKm: 300, localKm: 40, pair: {}, layer: "hazard", preview: false };
+const UI = { tab: "summary", point: null, regionKm: 300, localKm: 40, layer: "hazard", preview: false };
 try {
   const s = JSON.parse(localStorage.getItem(STORE) || "null");
   if (s) { if (s.draft) DRAFT = { idx: s.draft.idx || {}, hazard: s.draft.hazard || null }; Object.assign(UI, s.ui || {}); }
@@ -526,7 +496,7 @@ function editIdx(k, fn) {
   const w = clone(workIdx(k)); fn(w);
   DRAFT.idx[k] = { variant: w.variant, breaks: w.breaks, note: w.note };
   if (!dirtyIdx(k)) delete DRAFT.idx[k];
-  saveLocal(); updateNav();
+  saveLocal();
 }
 function ruleDefaults() { return { rule: "worst", weights: { wildfire: 1, erosion: 1, permafrost: 1 }, avgCuts: [1.5, 2.5],
   prodCuts: [4, 12], countHigh: 2, countMed: 1, custom: worstTable(), missing: "low", note: "" }; }
@@ -543,7 +513,7 @@ function editRule(fn) {
   const w = workRule(); fn(w);
   DRAFT.hazard = Object.fromEntries([...RULE_KEYS, "note"].map(k => [k, w[k]]));
   if (!dirtyRule()) DRAFT.hazard = null;
-  saveLocal(); updateNav();
+  saveLocal();
 }
 // the variant + boundaries each index feeds into the hazard
 function hazardInputs(useDrafts) {
@@ -602,7 +572,7 @@ function saveError(e) {
   return "Couldn't save. Check your connection and try again.";
 }
 function teamChanged() {
-  resolveNames(); updateNav(); renderStatuses();
+  resolveNames(); renderStatuses();
   renderTab(UI.tab);
 }
 
@@ -785,22 +755,19 @@ const cellOf = (x, y) => [Math.floor((x - META.x0) / META.res), Math.floor((META
 const cellXY = (c, r) => [META.x0 + (c + 0.5) * META.res, META.ytop - (r + 0.5) * META.res];
 
 // ---------- navigation ----------
-function buildNav() {
-  $("nav").innerHTML = TABS.map(t => `<button role="tab" id="nav-${t}" aria-controls="tab-${t}" data-tab="${t}">${TAB_NAMES[t]}</button>`).join("");
-  $("nav").onclick = e => { const b = e.target.closest("button"); if (b) location.hash = b.dataset.tab; };
-  updateNav();
-}
-function updateNav() {
-  for (const t of TABS) {
-    const b = $("nav-" + t), dirty = KEYS.includes(t) ? dirtyIdx(t) : t === "hazard" ? dirtyRule() : false;
-    b.innerHTML = TAB_NAMES[t] + (dirty ? `<span class="dot" title="Unsaved changes"></span>` : "");
-    b.setAttribute("aria-selected", String(t === UI.tab));
-  }
+// No tab bar: the Summary is home, its tiles' Edit buttons open the other pages, and each page links back.
+function updateChrome() {
+  const home = UI.tab === "summary";
+  $("backTop").hidden = home;
+  $("where").textContent = home ? "Environmental Hazard Index · team workbench" : `Editing: ${TAB_NAMES[UI.tab]}`;
+  document.title = home ? "Hazard Index Team Workbench" : `${TAB_NAMES[UI.tab]} · Hazard Index Team Workbench`;
 }
 let renderSeq = 0;
 async function showTab(t) {
-  UI.tab = t; saveLocal(); updateNav(); hideTip();
+  const moved = t !== UI.tab;
+  UI.tab = t; saveLocal(); updateChrome(); hideTip();
   for (const x of TABS) $("tab-" + x).hidden = x !== t;
+  if (moved) window.scrollTo(0, 0);
   await renderTab(t);
 }
 async function renderTab(t) {
@@ -860,7 +827,7 @@ function buildIndexTab(k) {
   const sec = $("tab-" + k), I = IDX(k), ids = VIDS(k);
   sec.innerHTML = `
     <div class="pagehead">
-      <div><p class="eyebrow">Index</p><h1>${esc(I.name)}</h1><p class="question">${esc(I.question)}</p></div>
+      <div><p class="eyebrow">Index ${KEYS.indexOf(k) + 1} of 3 · feeds the combining rule</p><h1>${esc(I.name)}</h1><p class="question">${esc(I.question)}</p></div>
       <div class="decision" data-r="decision"></div>
     </div>
     <section class="block" aria-labelledby="var-${k}">
@@ -875,39 +842,10 @@ function buildIndexTab(k) {
       <div class="row"><button class="primary" data-r="save">Save as team decision</button>
         <button data-r="discard">Discard my changes</button><span class="small" data-r="msg" role="status"></span></div>
     </section>
-    <section class="compare" aria-labelledby="cmp-${k}">
-      <div class="sechead"><h2 id="cmp-${k}">Compare variants</h2>
-        <span class="small">Uses the boundaries on the cards above and updates as they move.</span></div>
-      <div class="grid2">
-        <div class="panel"><h3>Class shares by region</h3><p class="small">Share of each area's land in Low, Medium, High (and no value).</p>
-          <div class="scroll" data-r="shares"></div></div>
-        <div class="panel" ${ids.length < 2 ? "hidden" : ""}><h3>Agreement between variants</h3>
-          <p class="small">Same class: share of land (with a value in both) where both variants give the same class. In brackets: Low in
-            one variant, High in the other. Rank correlation: +1 when both order places the same way (leaves out cells without a value).</p>
-          <div class="scroll" data-r="agree"></div></div>
-      </div>
-      <div class="panel" ${ids.length < 2 ? "hidden" : ""}>
-        <div class="sechead"><h3>Where two variants agree</h3>
-          <span class="row small"><select data-r="pa" aria-label="First variant"></select>
-            <button data-r="swap" title="Swap the two variants" aria-label="Swap the two variants">⇄</button>
-            <select data-r="pb" aria-label="Second variant"></select></span></div>
-        <div class="pairgrid">
-          <div><p class="small" data-r="confhelp" style="margin-bottom:8px"></p><div data-r="conf"></div>
-            <p class="small" data-r="confnote" style="margin-top:8px"></p></div>
-          <div><canvas class="map" data-r="diff" aria-label="Map of where the two variants' classes agree"></canvas>
-            <div class="legend" data-r="difflegend" style="margin-top:6px"></div></div>
-        </div>
-      </div>
-      <div class="panel"><h3>At named places</h3>
-        <p class="small">Value → class with the boundaries above. Places off the data move to the nearest cell with data.</p>
-        <div class="scroll" data-r="places"></div></div>
-    </section>`;
+    <div class="backrow"><a class="back" href="#summary">← Back to summary</a></div>`;
   const q = s => sec.querySelector(s);
   const R = IT[k] = { sec, cards: {}, decision: q('[data-r="decision"]'), note: $("note-" + k), save: q('[data-r="save"]'),
-    discard: q('[data-r="discard"]'), msg: q('[data-r="msg"]'), shares: q('[data-r="shares"]'), agree: q('[data-r="agree"]'),
-    pa: q('[data-r="pa"]'), pb: q('[data-r="pb"]'), swap: q('[data-r="swap"]'), conf: q('[data-r="conf"]'),
-    confhelp: q('[data-r="confhelp"]'), confnote: q('[data-r="confnote"]'),
-    diff: q('[data-r="diff"]'), difflegend: q('[data-r="difflegend"]'), places: q('[data-r="places"]') };
+    discard: q('[data-r="discard"]'), msg: q('[data-r="msg"]') };
   for (const id of ids) {
     const m = VM(k, id), step = Math.pow(10, -m.digits), card = document.createElement("article");
     card.className = "vcard";
@@ -955,18 +893,10 @@ function buildIndexTab(k) {
   R.save.onclick = async () => {
     const w = workIdx(k); R.save.disabled = true; R.msg.textContent = "Saving…";
     try { await saveTeam(k, { variant: w.variant, breaks: w.breaks, note: (w.note || "").trim() }); delete DRAFT.idx[k]; saveLocal();
-      R.msg.textContent = "Saved for the team."; updateNav(); renderIndex(k); }
+      R.msg.textContent = "Saved for the team."; renderIndex(k); }
     catch (e) { R.msg.textContent = saveError(e); refreshSaveButtons(); }
   };
-  R.discard.onclick = () => { delete DRAFT.idx[k]; saveLocal(); updateNav(); R.msg.textContent = "Back to the team decision."; renderIndex(k); };
-  const opts = ids.map(id => `<option value="${id}">Variant ${esc(VM(k, id).letter)}</option>`).join("");
-  R.pa.innerHTML = opts; R.pb.innerHTML = opts;
-  const pairNow = () => { const p = UI.pair[k]; return Array.isArray(p) && p.every(id => VARS(k)[id]) ? p : [ids[0], ids[1] || ids[0]]; };
-  [R.pa.value, R.pb.value] = pairNow();
-  for (const s of [R.pa, R.pb]) s.onchange = () => { UI.pair[k] = [R.pa.value, R.pb.value]; saveLocal(); renderCompare(k); };
-  R.swap.onclick = () => { [R.pa.value, R.pb.value] = [R.pb.value, R.pa.value]; R.pa.onchange(); };
-  R.diff.addEventListener("mousemove", ev => indexTip(k, R.diff, ev));
-  R.diff.addEventListener("mouseleave", hideTip);
+  R.discard.onclick = () => { delete DRAFT.idx[k]; saveLocal(); R.msg.textContent = "Back to the team decision."; renderIndex(k); };
 }
 function indexTip(k, cv, ev) {
   const [c, r] = cellAt(cv, BBOX, ev);
@@ -976,10 +906,8 @@ function indexTip(k, cv, ev) {
     const m = VM(k, id), v = valueAt(k, id, i);
     return `<tr><td>Variant ${esc(m.letter)}</td><td class="num">${esc(fmt(m, v))}</td><td>${chip(classOfValue(m, v, w.breaks[id]))}</td></tr>`; }).join("") + "</table>");
 }
-let cmpTimer = {};
-function cardChanged(k, id) {  // a boundary moved: redraw that card now, the comparison when the slider pauses
+function cardChanged(k, id) {  // a boundary moved: redraw that card
   requestAnimationFrame(() => { renderCard(k, id); renderStatuses(); });
-  clearTimeout(cmpTimer[k]); cmpTimer[k] = setTimeout(() => renderCompare(k), 180);
 }
 function renderCard(k, id) {
   const C = IT[k].cards[id], m = VM(k, id), w = workIdx(k), b = w.breaks[id], arr = classes(k, id, b);
@@ -1001,53 +929,6 @@ function renderIndex(k) {
   if (document.activeElement !== R.note) R.note.value = w.note || "";
   for (const id of VIDS(k)) renderCard(k, id);
   renderStatuses();
-  renderCompare(k);
-}
-function renderCompare(k) {
-  const R = IT[k], ids = VIDS(k), w = workIdx(k), C = {};
-  if (R.sec.hidden && UI.tab !== k) return;
-  for (const id of ids) C[id] = classes(k, id, w.breaks[id]);
-  const counts = Object.fromEntries(ids.map(id => [id, areaCounts(C[id])]));
-  R.shares.innerHTML = `<table class="t"><tr><th>Variant</th>${AREAS.map(a => `<th>${esc(a)}</th>`).join("")}</tr>` + ids.map(id => {
-    const m = VM(k, id);
-    return `<tr class="${w.variant === id ? "hl" : ""}"><td><b>${esc(m.letter)}</b></td>` + counts[id].map(n => {
-      const t = n[0] + n[1] + n[2] + n[3] || 1;
-      return `<td>${barHTML(n, "cellbar")}<div class="cellnum">${[0, 1, 2].map(c => Math.round(100 * n[c] / t)).join(" · ")}${n[3] / t >= 0.005 ? ` (${Math.round(100 * n[3] / t)})` : ""}</div></td>`;
-    }).join("") + "</tr>"; }).join("") + "</table>";
-  if (ids.length > 1) {
-    const pairs = []; for (let a = 0; a < ids.length; a++) for (let b = a + 1; b < ids.length; b++) pairs.push([ids[a], ids[b]]);
-    R.agree.innerHTML = `<table class="t"><tr><th>Pair</th>${AREAS.map(a => `<th class="c">${esc(a)}</th>`).join("")}<th class="c">Rank corr.</th></tr>` +
-      pairs.map(([a, b]) => { const g = agreement(C[a], C[b]);
-        return `<tr><td style="white-space:nowrap"><b>${esc(VM(k, a).letter)} vs ${esc(VM(k, b).letter)}</b></td>` + g.map(x =>
-          `<td class="c" style="white-space:nowrap"><span class="num">${pct(x.same)}</span> <span class="cellnum">(${pct(x.lh)})</span></td>`).join("")
-          + `<td class="c num">${rankCorr(k, a, b).toFixed(2)}</td></tr>`; }).join("") + "</table>";
-    const a = R.pa.value, b = R.pb.value, ma = VM(k, a), mb = VM(k, b);
-    if (a === b) { R.conf.innerHTML = ""; R.confhelp.textContent = ""; R.confnote.textContent = "Pick two different variants."; }
-    else {
-      // read across: of the land Variant A puts in a class, the share Variant B puts in each class (rows add to 100 %)
-      const g = agreement(C[a], C[b])[0], A = `Variant ${esc(ma.letter)}`, B = `Variant ${esc(mb.letter)}`;
-      R.confhelp.innerHTML = `Read across a row: where ${A} says Low, how often ${B} also says Low, or Medium, or High. Each row adds up to 100 %.`;
-      R.conf.innerHTML = `<table class="conf"><tr><th></th><th colspan="3">… ${B} says</th></tr>
-        <tr><th class="rowh">Where ${A} says</th>${CLS.map(c => `<th>${c}</th>`).join("")}</tr>` +
-        [0, 1, 2].map(x => { const row = g.conf[x * 3] + g.conf[x * 3 + 1] + g.conf[x * 3 + 2];
-          return `<tr><th class="rowh">${CLS[x]}<div class="cellnum">${pct(row)} of land</div></th>` + [0, 1, 2].map(y => {
-            const v = row ? g.conf[x * 3 + y] / row : NaN, d = Math.abs(x - y);
-            return `<td class="ag${d}" title="${d ? "" : "agree: "}${A} ${CLS[x]}, ${B} ${CLS[y]}">${pct(v)}</td>`; }).join("") + "</tr>"; }).join("") + "</table>";
-      const agreeLow = g.conf[0] / ((g.conf[0] + g.conf[1] + g.conf[2]) || 1), agreeHigh = g.conf[8] / ((g.conf[6] + g.conf[7] + g.conf[8]) || 1);
-      R.confnote.innerHTML = `Where ${A} says High, ${B} agrees ${pct(agreeHigh)} of the time; where ${A} says Low, ${pct(agreeLow)}.
-        Over all of Alaska's land they agree on ${pct(g.same)} and are opposite (one Low, the other High) on ${pct(g.lh)}.`;
-    }
-    const d = new Uint8Array(N), A = C[a], B = C[b];
-    for (let i = 0; i < N; i++) { const x = A[i], y = B[i]; d[i] = x === SEA ? SEA : x > 2 || y > 2 ? 3 : x > y ? x - y : y - x; }
-    drawGrid(R.diff, d, BBOX, PAL.dif);
-    R.difflegend.innerHTML = [["--same", "agree"], ["--apart1", "1 class apart"], ["--apart2", "opposite (Low vs High)"], ["--nodata", "no value in one or both"]]
-      .map(([t, l]) => `<span><span class="sw" style="background:var(${t})"></span>${l}</span>`).join("");
-  }
-  R.places.innerHTML = `<table class="t"><tr><th>Place</th>${ids.map(id => `<th class="${w.variant === id ? "hl" : ""}">Variant ${esc(VM(k, id).letter)}</th>`).join("")}</tr>` +
-    META.places.map(p => `<tr><td>${esc(p.name)}</td>` + ids.map(id => {
-      const m = VM(k, id), { v, api } = placeValue(k, id, p);
-      return `<td><span class="num">${esc(fmt(m, v))}</span> ${chip(classOfValue(m, v, w.breaks[id]))}${api ? `<div class="cellnum">watershed average</div>` : ""}</td>`;
-    }).join("") + "</tr>").join("") + "</table>";
 }
 
 // ---------- hazard page ----------
@@ -1164,15 +1045,6 @@ function renderHazard(ruleOnly) {
   if (document.activeElement !== $("note-hazard")) $("note-hazard").value = R.note || "";
   if (!ruleOnly) renderRuleCtl();
   $("sentence").textContent = ruleSentence(R) + " " + missingText(R);
-  const counts = areaCounts(HZS.hz), team = hazardGrid(hazardInputs(false), teamRule()), tc = team === HZS.hz ? null : areaCounts(team);
-  const row = (label, cs) => `<tr><td>${label}</td>` + cs.map(n => { const t = n[0] + n[1] + n[2] + n[3] || 1;
-    return `<td>${barHTML(n, "cellbar")}<div class="cellnum">${[0, 1, 2].map(c => Math.round(100 * n[c] / t)).join(" · ")}${n[3] / t >= 0.005 ? ` (${Math.round(100 * n[3] / t)})` : ""}</div></td>`; }).join("") + "</tr>";
-  $("hzShares").innerHTML = `<table class="t"><tr><th></th>${AREAS.map(a => `<th>${esc(a)}</th>`).join("")}</tr>${row("<b>This rule</b>", counts)}${tc ? row("Saved team rule", tc) : ""}</table>
-    <p class="small">Share of land Low · Medium · High (no value).</p>`;
-  let nh = 0; const by = [0, 0, 0];
-  for (let i = 0; i < N; i++) if (HZS.hz[i] === 2) { nh++; for (let j = 0; j < 3; j++) if (HZS.cls[KEYS[j]][i] === 2) by[j]++; }
-  $("hzDrivers").innerHTML = nh ? `Of the land rated High (${pct(nh / landN)} of Alaska), the share where each index is itself High: ` +
-    KEYS.map((k, j) => `<b>${esc(IDX(k).name)}</b> ${pct(by[j] / nh)}`).join(" · ") + "." : "No land is rated High with this rule.";
   drawHazardMaps(); renderPoint(); renderStatuses();
 }
 function setPoint(p) {
@@ -1205,10 +1077,10 @@ function initHazardUI() {
   $("hzSave").onclick = async () => {
     const R = workRule(); $("hzSave").disabled = true; $("hzMsg").textContent = "Saving…";
     try { await saveTeam("hazard", Object.fromEntries([...RULE_KEYS.map(k => [k, R[k]]), ["note", (R.note || "").trim()]]));
-      DRAFT.hazard = null; saveLocal(); updateNav(); $("hzMsg").textContent = "Saved for the team."; renderHazard(); }
+      DRAFT.hazard = null; saveLocal(); $("hzMsg").textContent = "Saved for the team."; renderHazard(); }
     catch (e) { $("hzMsg").textContent = saveError(e); refreshSaveButtons(); }
   };
-  $("hzDiscard").onclick = () => { DRAFT.hazard = null; saveLocal(); updateNav(); $("hzMsg").textContent = "Back to the team rule."; renderHazard(); };
+  $("hzDiscard").onclick = () => { DRAFT.hazard = null; saveLocal(); $("hzMsg").textContent = "Back to the team rule."; renderHazard(); };
   for (const name in maps) {
     const el = maps[name].el;
     el.addEventListener("mousemove", ev => {
@@ -1227,6 +1099,8 @@ function initHazardUI() {
 }
 
 // ---------- summary page ----------
+const editRow = (t, draft) => `<div class="editrow"><a class="btn" href="#${t}" aria-label="Edit ${esc(TAB_NAMES[t])}">Edit</a>`
+  + (draft ? `<span class="pill draft">Your unsaved changes</span>` : "") + "</div>";
 const ARROW = `<svg width="34" height="24" viewBox="0 0 34 24" aria-hidden="true"><path d="M2 12h26M20 4l8 8-8 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 function renderSummary() {
   const inputs = hazardInputs(false), R = teamRule(), T = ruleTable(R), hz = hazardGrid(inputs, R);
@@ -1247,20 +1121,23 @@ function renderSummary() {
   const tiles = inputs.map(x => {
     const m = VM(x.k, x.id), t = teamIdx(x.k), arr = classes(x.k, x.id, x.b);
     const st = x.decided && x.from === "team" ? `<span class="pill team">Team decision</span>` : `<span class="pill start">Not decided yet</span>`;
+    const draft = dirtyIdx(x.k);
     const naTxt = m.na_label ? ` Places ${esc(m.na_label)} count as ${CLS[m.na_class]}.` : "";
-    return `<div class="ftile"><div class="row" style="justify-content:space-between"><h3>${esc(IDX(x.k).name)}</h3>${st}</div>
+    return `<div class="ftile${draft ? " drafted" : ""}"><div class="row" style="justify-content:space-between"><h3>${esc(IDX(x.k).name)}</h3>${st}</div>
       <canvas class="map" data-sum="${x.k}" aria-label="${esc(IDX(x.k).name)} class map"></canvas>
       <div><b>Variant ${esc(m.letter)}: ${esc(m.label)}</b></div>
       <p class="small">${esc(m.description)} (${esc(m.details)}).</p>
       <p class="means"><span class="chip c2">High</span> above ${esc(fmt(m, x.b[1]))} · <span class="chip c0">Low</span> at or below ${esc(fmt(m, x.b[0]))}.${naTxt}</p>
-      ${t.note && x.from === "team" ? `<p class="why">${esc(t.note)}</p>` : `<p class="small muted">No reasoning recorded yet.</p>`}</div>`; });
+      ${t.note && x.from === "team" ? `<p class="why">${esc(t.note)}</p>` : `<p class="small muted">No reasoning recorded yet.</p>`}
+      ${editRow(x.k, draft)}</div>`; });
   const rst = TEAM.hazard ? `<span class="pill team">Team decision</span>` : `<span class="pill start">Not decided yet</span>`;
   const ruleName = document.querySelector(`#rule option[value="${R.rule}"]`).textContent;
   $("sumFlow").innerHTML = tiles.join("") + `<div class="arrow">${ARROW}</div>` +
-    `<div class="ftile ruletile"><div class="row" style="justify-content:space-between"><h3>Combining rule</h3>${rst}</div>
+    `<div class="ftile ruletile${dirtyRule() ? " drafted" : ""}"><div class="row" style="justify-content:space-between"><h3>Combining rule</h3>${rst}</div>
       <div><b>${esc(ruleName)}</b></div><p>${esc(ruleSentence(R))} ${esc(missingText(R))}</p>
       ${R.note && TEAM.hazard ? `<p class="why">${esc(R.note)}</p>` : `<p class="small muted">No reasoning recorded yet.</p>`}
-      <div class="small">Result: ${[2, 1, 0].map(c => `${CLS[c]} ${pct(n[c] / tot)}`).join(" · ")} of Alaska's land.</div></div>`;
+      <div class="small">Result: ${[2, 1, 0].map(c => `${CLS[c]} ${pct(n[c] / tot)}`).join(" · ")} of Alaska's land.</div>
+      ${editRow("hazard", dirtyRule())}</div>`;
   for (const x of inputs) drawGrid(document.querySelector(`[data-sum="${x.k}"]`), classes(x.k, x.id, x.b), BBOX, PAL.cls);
   $("sumFoot").textContent = `A working index for team discussion. Each index uses one climate-model data set at about 1 km, mostly for mid-century
     (see each variant's details); classes depend on boundaries the team chose and are not engineering thresholds. Data built ${META.built}.`;
@@ -1505,7 +1382,7 @@ async function init() {
   await loadBase();
   UI.point = UI.point && Number.isFinite(UI.point.x) ? UI.point : { ...META.places[0] };
   if (!["hazard", ...KEYS].includes(UI.layer)) UI.layer = "hazard";
-  buildNav(); initHazardUI();
+  updateChrome(); initHazardUI();
   $("pdfBtn").onclick = exportPdf; $("resetBtn").onclick = resetTeam;
   $("lat").value = UI.point.lat.toFixed(4); $("lon").value = UI.point.lon.toFixed(4);
   $("place").value = META.places.some(q => q.name === UI.point.name) ? UI.point.name : "";
