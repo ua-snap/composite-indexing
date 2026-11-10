@@ -42,7 +42,8 @@
     "Rasdaman alfresco_relative_flammability_30yr era 3/1, model 1/0, scenario 1/0",
     "point: earthmaps.io HUC-12 averages"
   ],
-  "status": "candidate",
+  "status": "retired",
   "author": "Joshdpaul",
-  "created": "2026-10-27"
+  "created": "2026-10-27",
+  "retired": "2026-11-10 (Joshdpaul): change in flammability is not meaningful here: a place that burns often both in 1980–2008 and in 2040–2069 shows no change and would be rated Low, though it is still highly flammable. Letter B given to the fire weather variant (never chosen as a team decision)."
 }

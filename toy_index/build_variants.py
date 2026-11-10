@@ -1,7 +1,7 @@
 """Build every variant's grid (toy_index/<index>/variants/<id>/build.py -> <data>/toy_index/variants/<index>/<id>.tif).
 
   python -I toy_index/build_variants.py                    # build the missing ones
-  python -I toy_index/build_variants.py wildfire           # only this index (or wildfire/flam-change for one)
+  python -I toy_index/build_variants.py wildfire           # only this index (or wildfire/fwi-future for one)
   python -I toy_index/build_variants.py --force [...]      # rebuild even if the file exists
 Values are cut to the land mask; a quantile summary is printed per variant.
 """

@@ -130,3 +130,45 @@ def dot_change_models(duration="24h", interval=100, era="2050-2079"):
 def pct(new, old):
     with np.errstate(all="ignore"):
         return 100 * (new / old - 1)
+
+
+FWI_SUMMARY = C.DATA / "fwi/fwi_alaska_2040-2069_ssp585.nc"  # scripts/01_data/summarize_fwi.py
+FWI_HIGH = ("High", "VHigh", "Ext")  # Alaska fire danger ratings counted as "high or worse" (FWI >= 18)
+
+
+def fwi_models(stat="season_mean"):
+    """Per-model FWI statistic for 2040-2069 (SSP5-8.5) on the native 0.25 deg grid:
+    (values[model, lat, lon], transform, model names). stat:
+      season_mean  mean daily FWI, April-October (months weighted by their days)
+      peak_week    highest 7-day centred rolling mean of the 2040-2069 mean seasonal curve (SNAP API
+                   op=7_day_rolling_average "mean", then its highest day; only full windows inside Apr-Oct)
+      high_days    mean days per June-August with FWI >= 18 (High, Very High or Extreme fire danger; API
+                   op=summer_fire_danger_rating_days, summed over those ratings)"""
+    with xr.open_dataset(FWI_SUMMARY) as ds:
+        if stat == "season_mean":
+            days = {4: 30, 5: 31, 6: 30, 7: 31, 8: 31, 9: 30, 10: 31}
+            w = xr.DataArray(list(days.values()), dims="month", coords=dict(month=list(days)))
+            f = ds.fwi_mean.weighted(w).mean("month").values
+        elif stat == "peak_week":
+            f = ds.fwi_doy.rolling(day=7, center=True).mean().max("day").values
+        elif stat == "high_days":
+            f = ds.summer_days.sel(rating=list(FWI_HIGH)).sum("rating", skipna=False).values
+        else:
+            raise ValueError(stat)
+        lat, lon, names = ds.lat.values, ds.lon.values, list(ds.model.values)
+    res = float(lon[1] - lon[0])
+    assert lat[0] > lat[-1] and np.isclose(lat[0] - lat[1], res)
+    return f, Affine(res, 0, lon[0] - res / 2, 0, -res, lat[0] + res / 2), names
+
+
+def fwi(stat="season_mean"):
+    """4-model mean of fwi_models(stat) on the GIPL grid: (values, na). Bilinear from the ~25 km cells; land cells
+    inside the release's boreal domain that bilinear leaves blank (next to ocean cells) take the nearest cell. na =
+    land outside the boreal domain (no fire weather data): fixed class Low (user, 2026-11-10)."""
+    f, tr, _ = fwi_models(stat)
+    f = f.mean(0)
+    v = G.to_grid(f, tr, G.Resampling.bilinear, np.nan, crs="EPSG:4326")
+    near = G.to_grid(f, tr, G.Resampling.nearest, np.nan, crs="EPSG:4326")
+    fill = ~np.isfinite(v) & np.isfinite(near)
+    v[fill] = near[fill]
+    return v, G.land() & ~np.isfinite(v)
