@@ -3,7 +3,7 @@
   "label": "Fire danger days, summer",
   "description": "Days per summer (June–August) with High, Very High or Extreme fire danger",
   "details": "FWI ≥ 18 · June–August 2040–2069 · mean of 4 CMIP6 models · SSP5-8.5",
-  "method": "Days per summer (June–August) on which the Canadian Fire Weather Index (FWI) is 18 or more: the High (18–28), Very High (28–35) and Extreme (35 and over) fire danger ratings of the Alaska Interagency Fire Danger Operating Plan, as used by the SNAP API (summer_fire_danger_rating_days, earthmaps.io/fire_weather). Mean per summer over 2040–2069 for each model, then the mean of four bias-corrected CMIP6 models (CNRM-CM6-1-HR, EC-Earth3-Veg, MPI-ESM1-2-HR, MRI-ESM2-0) under SSP5-8.5. Source: SNAP's CMIP6 fire weather data release (Young, Littell & Rupp 2025, doi:10.5066/P1AAMRUF; the same data as Rasdaman cmip6_fwi and the API), local file cmip6_fwi_combined.nc, 0.25° (about 25 km) cells, interpolated (bilinear) to the 1 km grid. Land outside the release's boreal region has no fire weather data and counts as Low.",
+  "method": "Days per summer (June–August) on which the Canadian Fire Weather Index (FWI; weather-driven fuel moisture and wind, Canadian Forest Fire Danger Rating System) is 18 or more: the High (18–28), Very High (28–35) and Extreme (35 and over) fire danger ratings of the Alaska Interagency Fire Danger Operating Plan, as used by the SNAP API (summer_fire_danger_rating_days, earthmaps.io/fire_weather). Mean per summer over 2040–2069 for each model, then the mean of four bias-corrected CMIP6 models (CNRM-CM6-1-HR, EC-Earth3-Veg, MPI-ESM1-2-HR, MRI-ESM2-0) under SSP5-8.5. Source: SNAP's CMIP6 fire weather data release (Young, Littell & Rupp 2025, doi:10.5066/P1AAMRUF; the same data as Rasdaman cmip6_fwi and the API), local file cmip6_fwi_combined.nc, 0.25° (about 25 km) cells, interpolated (bilinear) to the 1 km grid. Land outside the release's boreal region has no fire weather data and counts as Low.",
   "unit": "days",
   "digits": 1,
   "offset": 0,
@@ -26,7 +26,6 @@
     "Nearly the same map as Variants B and C (rank correlation 0.96–0.98)",
     "The models differ a lot in how many: MRI-ESM2-0 has a median of under 1 day, the others 8–10",
     "Summer only (June–August): misses spring fire weather (Fairbanks peaks in late May)",
-    "Weather only: says nothing about fuel",
     "About 25 km cells: no detail below that",
     "SSP5-8.5 only (high emissions): doesn't match Variant A or the permafrost index (RCP 4.5)"
   ],

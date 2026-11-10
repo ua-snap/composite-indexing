@@ -8,8 +8,9 @@ first session needs no server requests.
 **Key terms**
 - **Relative flammability:** the share of ALFRESCO's simulation runs in which a pixel burns, per year (0.004 = 0.4 %
   a year, roughly once in 250 years).
-- **Fire Weather Index (FWI):** a daily rating of how weather (heat, dryness, wind) favors fire spread, regardless
-  of what fuel is there.
+- **Fire Weather Index (FWI):** a daily rating of fire intensity from the Canadian Forest Fire Danger Rating System.
+  Noon weather (heat, humidity, wind, rain) drives three fuel moisture codes (fine litter, duff, deep organic
+  layers), which combine with wind into the FWI.
 - **HUC-12:** the smallest standard US watershed unit (typically 40–160 km²).
 
 Catalog IDs in brackets (F1, F4, ...) refer to the Arctic-EDS Candidate Data Catalog. It lists the wildfire hazards
