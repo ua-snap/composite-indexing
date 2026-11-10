@@ -5,7 +5,8 @@ Repo:  toy_index/<index>/variants/<id>/variant.json   description (fields below)
 Data:  <data>/toy_index/variants/<index>/<id>.tif     band 1 values (NaN = no value); band 2 (if any) na mask
 
 variant.json fields
-  letter         the variant's name in the app: "A", "B", ... (unique within the index; never reused)
+  letter         the variant's name in the app: "A", "B", ... (unique among the index's active variants; reuse a
+                 retired variant's letter only if no team decision ever chose that variant)
   label          short name shown under the letter, e.g. "Flammability, change"
   description    one line: what a value means
   details        periods · models · scenario
@@ -19,7 +20,9 @@ variant.json fields
   clip           [lo, hi] clip values for the app (classes still right if the breaks lie inside)
   na_label, na_class   cells flagged in band 2: no value, fixed class (0 Low, 1 Medium, 2 High), shown as na_label
   point_api      watershed point value from the SNAP API instead of the pixel: {route, value: [keys], minus: [keys]}
-  status         draft | candidate | recommended | retired (retired variants are left out of the app)
+  status         draft | candidate | recommended | retired (retired variants are left out of the app; say why in
+                 "retired")
+  pros, cons     starting lists of short points, shown on the card; the team adds and removes points in the app
   sources, author, created
 """
 import importlib.util

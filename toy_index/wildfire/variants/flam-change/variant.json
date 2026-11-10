@@ -29,6 +29,15 @@
       "historical"
     ]
   },
+  "pros": [
+    "Shows where fire is becoming more common, not just where it is common already",
+    "Baseline comes from the same coverage, so no product mismatch"
+  ],
+  "cons": [
+    "The difference of two noisy pixels is noisier still (rank correlation with Variant A only 0.15)",
+    "The 1980–2008 baseline is a model run, not observed fire",
+    "Absolute change: places that already burn often dominate"
+  ],
   "sources": [
     "Rasdaman alfresco_relative_flammability_30yr era 3/1, model 1/0, scenario 1/0",
     "point: earthmaps.io HUC-12 averages"

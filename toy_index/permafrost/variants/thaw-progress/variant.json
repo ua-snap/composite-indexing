@@ -2,8 +2,8 @@
   "letter": "B",
   "label": "Progress to thaw at 1 m",
   "description": "Progress to thaw at 1 m: warming as a share of the distance to 0 °C (100 % = crosses 0 °C)",
-  "details": "2004–2015 → 2040–2069 · GIPL 2.0 · 5-model average · RCP 4.5 · ground not frozen at the start counts as Low",
-  "method": "Warming at 1 m as a share of the distance to 0 °C: 100 × (T_future − T_base) ÷ (0 − T_base). T_base = GIPL 2.0 1 m temperature averaged over climate years 2004–2015 (the years run on observed weather); T_future = 2040–2069 (as Variant A; 5-model average, RCP 4.5). 100 % means the ground crosses 0 °C. Ground not frozen at the start (T_base ≥ 0 °C) has no permafrost to lose: it gets no value and counts as Low. Stuck cells removed as in Variant A.",
+  "details": "2004–2015 → 2040–2069 · GIPL 2.0 · 5-model average · RCP 4.5 · outside the ESA permafrost zone or not frozen at the start counts as Low",
+  "method": "Warming at 1 m as a share of the distance to 0 °C: 100 × (T_future − T_base) ÷ (0 − T_base). T_base = GIPL 2.0 1 m temperature averaged over climate years 2004–2015 (the years run on observed weather); T_future = 2040–2069 (as Variant A; 5-model average, RCP 4.5). 100 % means the ground crosses 0 °C. Only cells where ESA CCI Permafrost v5 shows permafrost in 2023 (permafrost fraction above 0) get a value; everywhere else there is no permafrost to thaw and the class is always Low. Inside that zone, ground GIPL shows as not frozen at the start (T_base ≥ 0 °C) has no permafrost to lose: it also gets no value and counts as Low. Stuck cells removed as in Variant A.",
   "unit": "%",
   "digits": 0,
   "offset": 200,
@@ -20,11 +20,22 @@
     -200,
     400
   ],
-  "na_label": "not frozen at start",
+  "na_label": "outside the permafrost zone or not frozen at start",
   "na_class": 0,
+  "pros": [
+    "Measures movement toward thaw relative to where each cell starts",
+    "Combines level and change in one number"
+  ],
+  "cons": [
+    "Divides by the starting temperature: values blow up near 0 °C (clipped for display)",
+    "Still relies on GIPL's own 0 °C line",
+    "The baseline is only 12 years (2004–2015)",
+    "Cells GIPL shows as unfrozen inside the ESA zone count as Low"
+  ],
   "sources": [
     "GIPL 2.0 magt1m local GeoTIFFs (gipl_file_year)",
-    "stuck-cell mask D17"
+    "stuck-cell mask D17",
+    "ESA CCI Permafrost v5 PFR 2023 (features_1km.nc pfr_2023)"
   ],
   "status": "candidate",
   "author": "Joshdpaul",

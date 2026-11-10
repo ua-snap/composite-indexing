@@ -32,10 +32,10 @@ Priority 1 = local data, no requests · 2 = more work or a metadata check · 3 =
 
 | Proposed id | Idea | Data | Cost | Priority |
 |---|---|---|---|---|
-| `storm-1h-100yr-change` | short, intense bursts (convective; the paper finds these grow fastest) | local DOT netCDFs | local | 1 |
-| `storm-3d-100yr-change` | multi-day rain (saturated slopes) | local DOT | local | 1 |
-| `storm-24h-10yr-change` | frequent storms (wear on roads every few years) | local DOT | local | 1 |
-| `storm-models-agree` | do both models project an increase? (they disagree at Fort Wainwright: +43 % vs −11 %) | local DOT | local | 1 |
+| `storm-1h-100yr-change` | short, intense bursts (convective; the paper finds these grow fastest) | local DOT netCDFs + Atlas 14 grid (small download) | local | done 2026-11-09 |
+| `storm-3d-100yr-change` | multi-day rain (saturated slopes) | local DOT + Atlas 14 | local | done 2026-11-09 |
+| `storm-24h-10yr-change` | frequent storms (wear on roads every few years) | local DOT + Atlas 14 | local | done 2026-11-09 (also `storm-24h-2yr-change`) |
+| `storm-models-agree` | do both models project an increase? (done 2026-11-09 as the D–F "× model agreement" variants; note: the earlier "Fort Wainwright +43 % vs −11 %" was change 2020–2049 → 2050–2079; from Atlas 14 both models increase there, +90 % and +4 %) | local DOT | local | done |
 | `storm-24h-100yr-upper` | 90 % upper confidence bound (precautionary) | local DOT `pf_upper` | local | 1 |
 | `storm-late-century-change` | 2080–2099 | local DOT | local | 1 |
 | `storm-multi-duration` | mean % change across 1 h, 24 h, 3 d | local DOT | local | 2 |

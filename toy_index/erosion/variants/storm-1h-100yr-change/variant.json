@@ -1,0 +1,34 @@
+{
+  "letter": "A",
+  "label": "1-hour, 100-year storm, change",
+  "description": "Change in rain in the 1-hour, 100-year storm: short, intense bursts (thunderstorm-type rain: flash runoff, gullies, culvert overtopping)",
+  "details": "NOAA Atlas 14 (model’s 1979–2005) → 2050–2079 · mean of GFDL-CM3 and NCAR-CCSM4 · RCP 8.5",
+  "method": "Percent change in the 1-hour, 100-year storm: 100 × (2050–2079 depth ÷ NOAA Atlas 14 depth − 1). The 2050–2079 depth is the mean of SNAP's DOT precipitation-frequency projections for GFDL-CM3 and NCAR-CCSM4 (WRF-downscaled, RCP 8.5; local netCDFs pcpt_<model>_sum_wrf_60m_2050-2079.nc, interval 100), ~480 m cells averaged to the 1 km grid. Atlas 14 is Volume 7 (Alaska), annual maximum series (hdsc.nws.noaa.gov/pub/hdsc/data/ak/ak100yr60ma_ams.zip, 1/1000 inch, NAD83 lon/lat), averaged over 3 × 3 points per 1 km cell. SNAP's DOT depths are Atlas 14 × each model's change since 1979–2005 (Bieniek et al. 2022; SNAP's pipeline uses the annual maximum series), so this is the models' projected change since 1979–2005.",
+  "unit": "%",
+  "digits": 0,
+  "offset": 100,
+  "scale": 100,
+  "range_q": [
+    0.005,
+    0.995
+  ],
+  "breaks": "thirds",
+  "signed": true,
+  "pros": [
+    "Short bursts grow fastest (median +59 %), as Bieniek et al. 2022 found",
+    "Matches flash runoff, gullying and culverts overtopping"
+  ],
+  "cons": [
+    "Models disagree on the direction in 18 % of land (27 % of the Interior)",
+    "The two models don't agree on where the change is largest (rank correlation near 0); the average's pattern mostly follows GFDL-CM3, which projects about twice the change of NCAR-CCSM4",
+    "1-hour rain from 20 km WRF is a rough guide to thunderstorm-scale bursts"
+  ],
+  "sources": [
+    "SNAP DOT precipitation frequency, local netCDFs (60m, 2050–2079, interval 100, both models)",
+    "NOAA Atlas 14 Vol. 7 ak100yr60ma_ams",
+    "Bieniek et al. 2022, JAMC 61(2), doi:10.1175/JAMC-D-21-0106.1"
+  ],
+  "status": "candidate",
+  "author": "Joshdpaul",
+  "created": "2026-11-09"
+}

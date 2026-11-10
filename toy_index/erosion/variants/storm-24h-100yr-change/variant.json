@@ -14,6 +14,16 @@
   ],
   "breaks": "thirds",
   "signed": true,
+  "pros": [
+    "Projected change since 1979–2005, measured against the gauge record",
+    "Highlights where heavy rain grows, not where it is already heavy"
+  ],
+  "cons": [
+    "The models can differ a lot in size: at Fort Wainwright GFDL-CM3 +90 % vs NCAR-CCSM4 +4 %; they disagree in direction on 23 % of land",
+    "A percentage ignores whether the storm is big to begin with",
+    "RCP 8.5 only, two models and 2050–2079: doesn't match the other indices",
+    "The two models don't agree on where the change is largest (rank correlation near 0); the average's pattern mostly follows GFDL-CM3, which projects about twice the change of NCAR-CCSM4"
+  ],
   "sources": [
     "Rasdaman dot_precip (as storm-24h-100yr-future)",
     "NOAA Atlas 14 Vol. 7 ak100yr24ha_ams",

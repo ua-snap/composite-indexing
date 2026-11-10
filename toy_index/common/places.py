@@ -27,11 +27,12 @@ POINTS = [  # (name, lat, lon); first = default
 
 
 def default_ok():
-    """Cells with values in the repo's chosen erosion and permafrost variants (the app snaps places to these)."""
+    """Cells with values (or a fixed na class) in the repo's chosen erosion and permafrost variants (the app snaps places to these)."""
     d = V.decisions()
     ok = G.land()
     for k in ("erosion", "permafrost"):
-        ok &= np.isfinite(V.load(k, d[k]["variant"])[0])
+        values, na = V.load(k, d[k]["variant"])
+        ok &= np.isfinite(values) | (na if na is not None else False)
     return ok
 
 

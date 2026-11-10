@@ -13,10 +13,20 @@
     0.99
   ],
   "breaks": "thirds",
+  "pros": [
+    "Built for Alaska DOT design work and tied to NOAA Atlas 14 rain gauges",
+    "90 % confidence bounds exist if we want a precautionary version"
+  ],
+  "cons": [
+    "RCP 8.5 only, two models and 2050–2079: doesn't match the other indices",
+    "High mostly where it is always wet (South coast): more a climate map than a change signal",
+    "One storm (24 h, 100 yr) out of 15 lengths × 9 return intervals"
+  ],
   "sources": [
     "Rasdaman dot_precip pf, duration 3 (24 h), era 1, interval 100, models 0 and 1"
   ],
-  "status": "candidate",
+  "status": "retired",
   "author": "Joshdpaul",
-  "created": "2026-10-27"
+  "created": "2026-10-27",
+  "retired": "2026-11-09 (Joshdpaul): depth, not change: mostly a map of where it is always wet. Letter A given to another variant (never chosen as a team decision)."
 }

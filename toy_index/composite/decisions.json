@@ -1,19 +1,25 @@
 {
-  "note": "Repo copy of the team decisions. The app starts from these until the team saves its own; Claude copies the app's saved decisions back here. breaks: per variant, only where they differ from variant.json.",
+  "note": "Repo copy of the team decisions. The app starts from these until the team saves its own; Claude copies the app's saved decisions back here. breaks: per variant, only where they differ from variant.json. high / low: the team's answers to \"what does High / Low mean?\".",
   "wildfire": {
     "variant": "flam-future",
     "breaks": {},
-    "note": ""
+    "note": "",
+    "high": "",
+    "low": ""
   },
   "erosion": {
-    "variant": "storm-24h-100yr-future",
+    "variant": "storm-24h-100yr-change",
     "breaks": {},
-    "note": ""
+    "note": "",
+    "high": "",
+    "low": ""
   },
   "permafrost": {
     "variant": "temp-1m-future",
     "breaks": {},
-    "note": ""
+    "note": "",
+    "high": "",
+    "low": ""
   },
   "hazard": {
     "rule": "worst",
@@ -34,6 +40,8 @@
     "countMed": 1,
     "custom": null,
     "missing": "low",
-    "note": ""
+    "note": "",
+    "high": "",
+    "low": ""
   }
 }

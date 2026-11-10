@@ -15,7 +15,11 @@ from composite_indexing import config as C
 from . import grid as G
 from . import sources as S
 
-ATLAS14 = C.DATA / "noaa_atlas14/ak/grid/ak100yr24ha_ams.asc"  # hdsc.nws.noaa.gov/pub/hdsc/data/ak/ak100yr24ha_ams.zip
+ATLAS14_DIR = C.DATA / "noaa_atlas14/ak/grid"  # hdsc.nws.noaa.gov/pub/hdsc/data/ak/<name>.zip, unzipped
+# DOT duration label -> Atlas 14 file duration code (SNAP's pipeline multiplies the annual maximum series, *_ams)
+ATLAS14_DUR = {"60m": "60ma", "2h": "02ha", "3h": "03ha", "6h": "06ha", "12h": "12ha", "24h": "24ha", "2d": "48ha",
+               "3d": "03da", "4d": "04da", "7d": "07da", "10d": "10da", "20d": "20da", "30d": "30da", "45d": "45da",
+               "60d": "60da"}
 DOT_NC = Path("/import/SNAP/poseidon/CKAN/CKAN_Data/Base/Other/DOT_Precipitation")  # read-only
 SUB = 3  # Atlas 14 samples per 1 km cell side (its cells are ~0.9 km N-S, ~0.4 km E-W)
 
@@ -51,6 +55,11 @@ def dot_rasdaman():
 
 def dot_local(era, duration="24h", interval=100.0):
     """Mean of the two models' pf (inches) from the local SNAP netCDFs, averaged up to 1 km."""
+    return np.mean(dot_models(era, duration, interval), axis=0)
+
+
+def dot_models(era, duration="24h", interval=100.0):
+    """[GFDL-CM3, NCAR-CCSM4] pf (inches) from the local SNAP netCDFs, each averaged up to 1 km."""
     models = []
     for m in ("GFDL-CM3", "NCAR-CCSM4"):
         with xr.open_dataset(DOT_NC / f"pcpt_{m}_sum_wrf_{duration}_{era}.nc") as ds:
@@ -58,14 +67,14 @@ def dot_local(era, duration="24h", interval=100.0):
             x, y = ds.xc.values, ds.yc.values
         dx, dy = x[1] - x[0], y[1] - y[0]
         tr = Affine(dx, 0, x[0] - dx / 2, 0, dy, y[0] - dy / 2)
-        models.append(G.to_grid(a, tr, G.Resampling.average, np.nan))
-    return np.mean(models, axis=0) / 1000.0
+        models.append(G.to_grid(a, tr, G.Resampling.average, np.nan) / 1000.0)
+    return models
 
 
-def atlas14():
-    """NOAA Atlas 14 Vol. 7 24 h, 100-yr AMS (1/1000 in, NAD83 lon/lat, 0-360 longitudes), inches, averaged over
-    SUB x SUB points per 1 km cell."""
-    with rasterio.open(ATLAS14) as ds:
+def atlas14(duration="24h", interval=100):
+    """NOAA Atlas 14 Vol. 7 annual-maximum-series depth (1/1000 in, NAD83 lon/lat, 0-360 longitudes) for a DOT
+    duration label and return interval, inches, averaged over SUB x SUB points per 1 km cell."""
+    with rasterio.open(ATLAS14_DIR / f"ak{int(interval)}yr{ATLAS14_DUR[duration]}_ams.asc") as ds:
         a, t, nd = ds.read(1).astype("float32"), ds.transform, ds.nodata
     a[a == nd] = np.nan
     off = (np.arange(SUB) + 0.5) / SUB * C.GIPL_RES
@@ -97,6 +106,25 @@ def gipl_mean(years, var="magt1m", run="5ModelAvg", scen="rcp45"):
     out = (acc / len(years)).astype("float32")
     out[~np.isin(G.frozen_class(), (1, 2))] = np.nan
     return out
+
+
+def esa_gate():
+    """ESA CCI Permafrost v5 permafrost zone: PFR 2023 > 0 (the PTI gate, D12/D26). Cells with no ESA value (85 % in
+    the South, where GIPL also shows no permafrost) count as outside. Every permafrost variant uses it (2026-11-09)."""
+    with xr.open_dataset(C.DATA / "features/features_1km.nc") as ds:
+        return ds.pfr_2023.values > 0
+
+
+def esa_gst_today():
+    """ESA CCI ground surface temperature, mean of 2014-2023 (degC), on the GIPL grid."""
+    with xr.open_dataset(C.DATA / "features/features_1km.nc") as ds:
+        return ds.esa_gst_recent.values
+
+
+def dot_change_models(duration="24h", interval=100, era="2050-2079"):
+    """[GFDL-CM3, NCAR-CCSM4] % change from NOAA Atlas 14 (annual maximum series) to `era`."""
+    at = atlas14(duration, interval)
+    return [pct(m, at) for m in dot_models(era, duration, float(interval))]
 
 
 def pct(new, old):
