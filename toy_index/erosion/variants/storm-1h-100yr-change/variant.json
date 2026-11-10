@@ -19,7 +19,7 @@
     "Matches flash runoff, gullying and culverts overtopping"
   ],
   "cons": [
-    "Models disagree on the direction in 18 % of land (27 % of the Interior)",
+    "Models disagree on the direction in 18 % of land (27 % of the Interior): there the average mixes an increase with a decrease. Accepted as is (an agreement multiplier was tried and dropped as not intuitive)",
     "The two models don't agree on where the change is largest (rank correlation near 0); the average's pattern mostly follows GFDL-CM3, which projects about twice the change of NCAR-CCSM4",
     "1-hour rain from 20 km WRF is a rough guide to thunderstorm-scale bursts"
   ],

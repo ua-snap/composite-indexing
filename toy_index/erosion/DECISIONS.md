@@ -5,6 +5,7 @@ in the README.
 
 | Date | Decision | Why | Who |
 |---|---|---|---|
+| 2026-11-10 | Drop the × model agreement variants (old D–F); D–F = % change in the 10-year storm, 1 h / 24 h / 3 d. Accept that the two-model average sometimes mixes models that disagree on direction (a con on A–C) | Feedback: the multiplier is not intuitive | Joshdpaul |
 | 2026-11-09 | Drop the depth variant and the 10-/2-year storms; keep 100-year change for 1 h, 24 h, 3 d (A–C) plus each × model agreement on direction (D–F); repo starting point = B | Change, not where it is always wet; agreement should raise the score where both models project an increase | Joshdpaul |
 | 2026-11-09 | No soil data for now; test other storm lengths and return intervals (1 h, 3 d, 10 yr, 2 yr), downloading the Atlas 14 grids needed | Keep the index rain-driven while the storm choice is explored | Joshdpaul |
 | 2026-10-27 | Change baseline = NOAA Atlas 14 | DOT = Atlas 14 × model change since 1979–2005 (Bieniek et al. 2022), so the ratio is the projected change | Joshdpaul |

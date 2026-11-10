@@ -15,21 +15,20 @@
   "breaks": "thirds",
   "signed": true,
   "pros": [
-    "A storm that comes about once a decade: repeated damage within a road's life",
+    "A heavy storm that comes about once a decade: repeated damage within a road's life",
     "Both models project an increase on 93 % of land",
-    "Frequent storms are estimated from more events, so less noisy than the 100-year storm"
+    "Estimated from more events than the 100-year storm, so less noisy"
   ],
   "cons": [
     "The two models don't agree on where the change is largest (rank correlation near 0); the average's pattern mostly follows GFDL-CM3, which projects about twice the change of NCAR-CCSM4",
-    "Smaller changes (median +32 %) in a narrow range: boundaries 27 % / 37 % are only 10 points apart"
+    "Smaller changes in a narrow range: median +32 %, middle 90 % of land +12 to +54 %"
   ],
   "sources": [
     "SNAP DOT precipitation frequency, local netCDFs (24h, 2050–2079, interval 10, both models)",
     "NOAA Atlas 14 Vol. 7 ak10yr24ha_ams",
     "Bieniek et al. 2022, JAMC 61(2), doi:10.1175/JAMC-D-21-0106.1"
   ],
-  "status": "retired",
+  "status": "candidate",
   "author": "Joshdpaul",
-  "created": "2026-11-09",
-  "retired": "2026-11-09 (Joshdpaul): team kept the 100-year storm only. Letter E given to another variant (never chosen as a team decision)."
+  "created": "2026-11-09"
 }

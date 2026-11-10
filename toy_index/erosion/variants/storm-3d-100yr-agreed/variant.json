@@ -29,7 +29,8 @@
     "NOAA Atlas 14 Vol. 7 ak100yr03da_ams",
     "Bieniek et al. 2022, JAMC 61(2), doi:10.1175/JAMC-D-21-0106.1"
   ],
-  "status": "candidate",
+  "status": "retired",
   "author": "Joshdpaul",
-  "created": "2026-11-09"
+  "created": "2026-11-09",
+  "retired": "2026-11-10 (Joshdpaul): the agreement multiplier was not intuitive to the team; we accept that the two-model average sometimes mixes models that disagree on direction (noted as a con on A–C). Letter F given to a 10-year storm variant (never chosen as a team decision)."
 }

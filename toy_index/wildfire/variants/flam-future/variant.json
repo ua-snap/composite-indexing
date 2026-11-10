@@ -29,7 +29,7 @@
   ],
   "cons": [
     "SNAP advises against reading single ALFRESCO pixels: the map is noisy",
-    "26 % of land is exactly 0, so the default Low/Medium boundary sits at 0.0001 per year",
+    "26 % of land is exactly 0: a quarter of the state ties at the bottom of the scale",
     "About 20 % of land is not burnable and has no value",
     "Which fire-management version Rasdaman serves is not documented"
   ],
