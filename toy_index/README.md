@@ -93,6 +93,7 @@ default boundaries, values at places, projection).
 | `build_variants.py` | Builds variant grids |
 | `app/` | `app_template.html` (the page), `build_app.py` (packs variants, questions and decisions into it) |
 | `DATA_ISSUES.md` | Running list of data-structure issues |
+| `coverage/` | Workbench PDF → 4-band Rasdaman coverage (`.nc`, ingest recipe, checks); see `coverage/README.md` |
 
 Data used: Rasdaman coverages (10 cached statewide requests), local GIPL GeoTIFFs, NOAA Atlas 14 Vol. 7
 (hdsc.nws.noaa.gov/pub/hdsc/data/ak/ak100yr24ha_ams.zip, in `<data>/noaa_atlas14/`), SNAP DOT netCDFs (local archive).

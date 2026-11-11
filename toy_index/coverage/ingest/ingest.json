@@ -1,0 +1,108 @@
+{
+  "config": {
+    "service_url": "https://localhost/rasdaman/ows",
+    "tmp_directory": "/tmp/",
+    "blocking": true,
+    "mock": false,
+    "automated": true,
+    "track_files": false
+  },
+  "input": {
+    "coverage_id": "environmental_hazard_index_test",
+    "paths": [
+      "/opt/rasdaman-storage/coverage_data/environmental_hazard_index/environmental_hazard_index_test.nc"
+    ]
+  },
+  "recipe": {
+    "name": "general_coverage",
+    "options": {
+      "wms_import": true,
+      "import_order": "ascending",
+      "tiling": "ALIGNED [0:511, 0:511] tile size 1048576",
+      "coverage": {
+        "crs": "EPSG/0/3338",
+        "metadata": {
+          "type": "xml",
+          "global": {
+            "Title": "Environmental Hazard Index for Alaska, 1 km (TEST: team decisions are not final)",
+            "Abstract": "Low / Medium / High classes for three hazard indices (wildfire, erosion, permafrost) and the combined Environmental Hazard, on a 1 km grid over Alaska (EPSG:3338). Each index puts every cell in a class using a variant and boundaries chosen by the team in the Environmental Hazard Index workbench; the combining rule then gives the hazard class. TEST coverage for front-end development: the decisions, and so the classes, will change.",
+            "Status": "test",
+            "Version": "2026-11-11T23:35:18Z",
+            "Institution": "Scenarios Network for Alaska and Arctic Planning (SNAP), University of Alaska Fairbanks",
+            "Encoding": "{\"wildfire\":{\"0\":\"Low\",\"1\":\"Medium\",\"2\":\"High\",\"255\":\"No data\"},\"erosion\":{\"0\":\"Low\",\"1\":\"Medium\",\"2\":\"High\",\"255\":\"No data\"},\"permafrost\":{\"0\":\"Low\",\"1\":\"Medium\",\"2\":\"High\",\"255\":\"No data\"},\"hazard\":{\"0\":\"Low\",\"1\":\"Medium\",\"2\":\"High\",\"255\":\"No data\"}}",
+            "Bands": "{\"wildfire\":{\"band\":\"wildfire\",\"index\":\"Wildfire\",\"variant\":\"fwi-high-days\",\"variant_letter\":\"D\",\"variant_label\":\"Fire danger days, summer\",\"description\":\"Days per summer (June-August) with High, Very High or Extreme fire danger\",\"details\":\"FWI at least 18; June-August 2040-2069; mean of 4 CMIP6 models; SSP5-8.5\",\"method\":\"Days per summer (June-August) on which the Canadian Fire Weather Index (FWI; weather-driven fuel moisture and wind, Canadian Forest Fire Danger Rating System) is 18 or more: the High (18-28), Very High (28-35) and Extreme (35 and over) fire danger ratings of the Alaska Interagency Fire Danger Operating Plan, as used by the SNAP API (summer_fire_danger_rating_days, earthmaps.io/fire_weather). Mean per summer over 2040-2069 for each model, then the mean of four bias-corrected CMIP6 models (CNRM-CM6-1-HR, EC-Earth3-Veg, MPI-ESM1-2-HR, MRI-ESM2-0) under SSP5-8.5. Source: SNAP's CMIP6 fire weather data release (Young, Littell and Rupp 2025, doi:10.5066/P1AAMRUF; the same data as Rasdaman cmip6_fwi and the API), local file cmip6_fwi_combined.nc, 0.25 deg (about 25 km) cells, interpolated (bilinear) to the 1 km grid. Land outside the release's boreal region has no fire weather data and counts as Low.\",\"unit\":\"days\",\"low_upper_bound\":5,\"medium_upper_bound\":10,\"classes\":\"Low: value at most 5 days; Medium: more than 5 and at most 10 days; High: more than 10 days\",\"no_data\":\"255: outside the land mask, or no value for this index at the cell\",\"sources\":[\"SNAP CMIP6 CFFDRS fire weather, data release v2 (local cmip6_fwi_combined.nc; = Rasdaman cmip6_fwi)\",\"Young, A.M., Littell, J., and Rupp, S., 2025, USGS data release, doi:10.5066/P1AAMRUF\",\"Alaska Interagency Fire Danger Operating Plan, Table 1 (FWI ratings; via ua-snap/data-api luts.py)\"],\"repo_variant\":\"toy_index/wildfire/variants/fwi-high-days\",\"high_means\":\"This place is projected to experience High, Very High or Extreme fire danger for 10 or more days each summer.\",\"low_means\":\"This place is projected to experience High, Very High or Extreme fire danger for less than 5 days each summer.\",\"team_decision\":\"yes\",\"fixed_class\":\"cells outside the boreal area (no fire weather data) have no value and are classed Low\"},\"erosion\":{\"band\":\"erosion\",\"index\":\"Erosion\",\"variant\":\"storm-24h-10yr-change\",\"variant_letter\":\"E\",\"variant_label\":\"24-hour, 10-year storm, change\",\"description\":\"Change in rain in the 24-hour, 10-year storm: a heavy storm that comes about once a decade (wear and repeated damage)\",\"details\":\"NOAA Atlas 14 (model's 1979-2005) to 2050-2079; mean of GFDL-CM3 and NCAR-CCSM4; RCP 8.5\",\"method\":\"Percent change in the 24-hour, 10-year storm: 100 x (2050-2079 depth / NOAA Atlas 14 depth - 1). The 2050-2079 depth is the mean of SNAP's DOT precipitation-frequency projections for GFDL-CM3 and NCAR-CCSM4 (WRF-downscaled, RCP 8.5; local netCDFs pcpt_MODEL_sum_wrf_24h_2050-2079.nc, interval 10), ~480 m cells averaged to the 1 km grid. Atlas 14 is Volume 7 (Alaska), annual maximum series (hdsc.nws.noaa.gov/pub/hdsc/data/ak/ak10yr24ha_ams.zip, 1/1000 inch, NAD83 lon/lat), averaged over 3 x 3 points per 1 km cell. SNAP's DOT depths are Atlas 14 x each model's change since 1979-2005 (Bieniek et al. 2022; SNAP's pipeline uses the annual maximum series), so this is the models' projected change since 1979-2005.\",\"unit\":\"%\",\"low_upper_bound\":27,\"medium_upper_bound\":37,\"classes\":\"Low: value at most 27 %; Medium: more than 27 and at most 37 %; High: more than 37 %\",\"no_data\":\"255: outside the land mask, or no value for this index at the cell\",\"sources\":[\"SNAP DOT precipitation frequency, local netCDFs (24h, 2050-2079, interval 10, both models)\",\"NOAA Atlas 14 Vol. 7 ak10yr24ha_ams\",\"Bieniek et al. 2022, JAMC 61(2), doi:10.1175/JAMC-D-21-0106.1\"],\"repo_variant\":\"toy_index/erosion/variants/storm-24h-10yr-change\",\"high_means\":\"Relatively frequent, one-day rainfall totals are projected to increase substantially, which suggests increased hazards associated with erosion.\",\"low_means\":\"Relatively frequent, one-day rainfall totals are projected to stay the same or decrease, which suggests stable erosion conditions.\",\"team_decision\":\"yes\"},\"permafrost\":{\"band\":\"permafrost\",\"index\":\"Permafrost\",\"variant\":\"temp-1m-future\",\"variant_letter\":\"A\",\"variant_label\":\"Ground temperature at 1 m, mid-century\",\"description\":\"GIPL 2.0 mean annual ground temperature at 1 m, where ESA shows permafrost\",\"details\":\"2040-2069; 5-model average; RCP 4.5; outside the ESA permafrost zone counts as Low\",\"method\":\"Mean annual ground temperature at 1 m depth from GIPL 2.0 (SNAP, 1 km EPSG:3338), 5-model average, RCP 4.5, averaged over climate years 2040-2069. The GIPL files are labelled 20 years late (file year = climate year + 20). Only cells where ESA CCI Permafrost v5 shows permafrost in 2023 (permafrost fraction above 0) get a value; everywhere else there is no permafrost to thaw and the class is always Low. Inside that zone, cells with stuck GIPL data, and a 2 km border around them, are removed (no value).\",\"unit\":\"degC\",\"low_upper_bound\":-4.25,\"medium_upper_bound\":-2.85,\"classes\":\"Low: value at most -4.25 degC; Medium: more than -4.25 and at most -2.85 degC; High: more than -2.85 degC\",\"no_data\":\"255: outside the land mask, or no value for this index at the cell\",\"sources\":[\"GIPL 2.0 magt1m local GeoTIFFs (gipl_file_year)\",\"stuck-cell mask D17\",\"ESA CCI Permafrost v5 PFR 2023 (features_1km.nc pfr_2023)\"],\"repo_variant\":\"toy_index/permafrost/variants/temp-1m-future\",\"high_means\":\"This is a permafrost area and the ground temperature at 1m will be above freezing by mid-century, which suggests increased hazards associated with thawing ground.\",\"low_means\":\"This is a permafrost area and the ground temperature at 1m will stay below freezing by mid-century, which suggests stable ground.\",\"team_decision\":\"yes\",\"fixed_class\":\"cells outside the permafrost zone have no value and are classed Low\"},\"hazard\":{\"band\":\"hazard\",\"index\":\"Environmental Hazard\",\"rule\":\"product\",\"rule_name\":\"Multiply points (Wildfire x Erosion x Permafrost)\",\"rule_text\":\"Score each index Low 1, Medium 2, High 3 and multiply (1 to 27). Low if product at most 4; Medium if at most 8; otherwise High.\",\"rule_parameters\":{\"prodCuts\":[4,8]},\"missing\":\"an index with no value counts as Low; if all three have no value, the hazard has none (255)\",\"combinations\":{\"LLL\":\"L\",\"LLM\":\"L\",\"LLH\":\"L\",\"LML\":\"L\",\"LMM\":\"L\",\"LMH\":\"M\",\"LHL\":\"L\",\"LHM\":\"M\",\"LHH\":\"H\",\"MLL\":\"L\",\"MLM\":\"L\",\"MLH\":\"M\",\"MML\":\"L\",\"MMM\":\"M\",\"MMH\":\"H\",\"MHL\":\"M\",\"MHM\":\"H\",\"MHH\":\"H\",\"HLL\":\"L\",\"HLM\":\"M\",\"HLH\":\"H\",\"HML\":\"M\",\"HMM\":\"H\",\"HMH\":\"H\",\"HHL\":\"H\",\"HHM\":\"H\",\"HHH\":\"H\"},\"combinations_key\":\"Wildfire, Erosion, Permafrost classes (L/M/H) to hazard class\",\"no_data\":\"255: outside the land mask\",\"high_means\":\"\",\"low_means\":\"\",\"team_decision\":\"yes\"}}",
+            "Grid": "{\"crs\":\"EPSG:3338\",\"resolution_m\":1000.0,\"columns\":2471,\"rows\":1941,\"x_edges\":[-979791.709,1491208.291],\"y_edges\":[434479.751,2375479.751],\"note\":\"GIPL 2.0 1 km grid: the same cells as Rasdaman crrel_gipl_outputs_nc; land = GIPL land mask\"}",
+            "Source": "{\"pdf\":\"hazard-index-team-decisions-2026-11-10.pdf\",\"pdf_sha256\":\"e0f14d7c26ae47be077b7999aef3479f76f3ec1762b3a727b0203bda7215c8c1\",\"exported_utc\":\"2026-11-11T00:08:26.945Z\",\"app_data_built\":\"2026-11-10\",\"team_decisions\":\"4 of 4\",\"code\":\"composite-indexing coverage_from_pdf@933a930 (uncommitted changes): toy_index/coverage/build_coverage.py\"}",
+            "Coverage": "environmental_hazard_index_test"
+          }
+        },
+        "slicer": {
+          "type": "netcdf",
+          "pixelIsPoint": true,
+          "bands": [
+            {
+              "name": "wildfire",
+              "identifier": "wildfire",
+              "nilValue": "255"
+            },
+            {
+              "name": "erosion",
+              "identifier": "erosion",
+              "nilValue": "255"
+            },
+            {
+              "name": "permafrost",
+              "identifier": "permafrost",
+              "nilValue": "255"
+            },
+            {
+              "name": "hazard",
+              "identifier": "hazard",
+              "nilValue": "255"
+            }
+          ],
+          "axes": {
+            "X": {
+              "min": "${netcdf:variable:x:min}",
+              "max": "${netcdf:variable:x:max}",
+              "resolution": "${netcdf:variable:x:resolution}",
+              "gridOrder": 1
+            },
+            "Y": {
+              "min": "${netcdf:variable:y:min}",
+              "max": "${netcdf:variable:y:max}",
+              "resolution": "${netcdf:variable:y:resolution}",
+              "gridOrder": 0
+            }
+          }
+        }
+      }
+    }
+  },
+  "hooks": [
+    {
+      "description": "Create Wildfire class style",
+      "when": "after_import",
+      "cmd": ". /etc/default/rasdaman; curl --user $RASCURL \"https://datacubes.earthmaps.io/rasdaman/admin/layer/style/add?COVERAGEID=environmental_hazard_index_test&STYLEID=environmental_hazard_index_test_wildfire&ABSTRACT=Wildfire%20class%20%28Low%20%2F%20Medium%20%2F%20High%29&WCPSQUERYFRAGMENT=%24c.wildfire&COLORTABLETYPE=ColorMap&\" --data-urlencode \"COLORTABLEDEFINITION={\\\"type\\\":\\\"values\\\",\\\"colorTable\\\":{\\\"0\\\":[0,114,178,255],\\\"1\\\":[240,228,66,255],\\\"2\\\":[213,94,0,255],\\\"255\\\":[0,0,0,0]}}\"",
+      "abort_on_error": true
+    },
+    {
+      "description": "Create Erosion class style",
+      "when": "after_import",
+      "cmd": ". /etc/default/rasdaman; curl --user $RASCURL \"https://datacubes.earthmaps.io/rasdaman/admin/layer/style/add?COVERAGEID=environmental_hazard_index_test&STYLEID=environmental_hazard_index_test_erosion&ABSTRACT=Erosion%20class%20%28Low%20%2F%20Medium%20%2F%20High%29&WCPSQUERYFRAGMENT=%24c.erosion&COLORTABLETYPE=ColorMap&\" --data-urlencode \"COLORTABLEDEFINITION={\\\"type\\\":\\\"values\\\",\\\"colorTable\\\":{\\\"0\\\":[0,114,178,255],\\\"1\\\":[240,228,66,255],\\\"2\\\":[213,94,0,255],\\\"255\\\":[0,0,0,0]}}\"",
+      "abort_on_error": true
+    },
+    {
+      "description": "Create Permafrost class style",
+      "when": "after_import",
+      "cmd": ". /etc/default/rasdaman; curl --user $RASCURL \"https://datacubes.earthmaps.io/rasdaman/admin/layer/style/add?COVERAGEID=environmental_hazard_index_test&STYLEID=environmental_hazard_index_test_permafrost&ABSTRACT=Permafrost%20class%20%28Low%20%2F%20Medium%20%2F%20High%29&WCPSQUERYFRAGMENT=%24c.permafrost&COLORTABLETYPE=ColorMap&\" --data-urlencode \"COLORTABLEDEFINITION={\\\"type\\\":\\\"values\\\",\\\"colorTable\\\":{\\\"0\\\":[0,114,178,255],\\\"1\\\":[240,228,66,255],\\\"2\\\":[213,94,0,255],\\\"255\\\":[0,0,0,0]}}\"",
+      "abort_on_error": true
+    },
+    {
+      "description": "Create Environmental Hazard class style",
+      "when": "after_import",
+      "cmd": ". /etc/default/rasdaman; curl --user $RASCURL \"https://datacubes.earthmaps.io/rasdaman/admin/layer/style/add?COVERAGEID=environmental_hazard_index_test&STYLEID=environmental_hazard_index_test_hazard&ABSTRACT=Environmental%20Hazard%20class%20%28Low%20%2F%20Medium%20%2F%20High%29&WCPSQUERYFRAGMENT=%24c.hazard&COLORTABLETYPE=ColorMap&\" --data-urlencode \"COLORTABLEDEFINITION={\\\"type\\\":\\\"values\\\",\\\"colorTable\\\":{\\\"0\\\":[0,114,178,255],\\\"1\\\":[240,228,66,255],\\\"2\\\":[213,94,0,255],\\\"255\\\":[0,0,0,0]}}\"",
+      "abort_on_error": true
+    }
+  ]
+}
