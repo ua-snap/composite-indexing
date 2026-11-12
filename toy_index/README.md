@@ -43,6 +43,17 @@ team's: everyone with the link then sees it on every page, the Summary included.
 team decision. Saving needs Contributor access or higher; viewers see the decisions read only. Every save is also
 kept in a history the team (and Claude) can read.
 
+**What High and Low mean** (top of each Reasoning box, on the index pages and the combining-rule page): two short
+answers saved with the team decision (fields `high`, `low` in `decisions/<key>`, beside the free-form `note`) and
+shown on the Summary tiles next to the numeric limits, in the PDF and in its decision record. Until the team saves
+them, the Summary says "Not defined yet".
+
+**Pros and cons** (bottom of each variant card): starting points come from the variant's `variant.json` (`pros`,
+`cons`); anyone with Contributor access can add a pro or con, or remove any point (×), and everyone sees it live.
+Team points are stored in the page's database (collection `notes`: `{index, variant, kind, text, by, at}`; a removed
+starting point is a `notes/seed--…` doc with `hidden: true`), and each add or removal is logged in the history. They
+are included in the PDF specification. Claude can fold them into `variant.json` when syncing.
+
 **Download PDF** (Summary page, top right): the saved team decisions as a PDF, to keep after each work session.
 Page 1 is the summary, page 2 how the index is built (with each reasoning note and all 27 rule combinations), then a
 specification with each chosen variant's method, sources and exact boundaries, the full rule, and the decisions as

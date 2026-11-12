@@ -1,0 +1,39 @@
+{
+  "letter": "C",
+  "label": "Fire weather, peak week",
+  "description": "Fire Weather Index in the worst week of a typical fire season",
+  "details": "7-day rolling mean · 2040–2069 · mean of 4 CMIP6 models · SSP5-8.5",
+  "method": "Canadian Fire Weather Index (FWI), a daily rating of fire intensity from weather-driven fuel moisture and wind (Canadian Forest Fire Danger Rating System). For each model: the mean FWI on each day of the April–October season over 2040–2069, smoothed with a 7-day centred rolling mean (the SNAP API's 7_day_rolling_average, \"mean\" statistic, as at earthmaps.io/fire_weather), and its highest value: the worst week of a typical season. Then the mean of four bias-corrected CMIP6 models (CNRM-CM6-1-HR, EC-Earth3-Veg, MPI-ESM1-2-HR, MRI-ESM2-0) under SSP5-8.5. Source: SNAP's CMIP6 fire weather data release (Young, Littell & Rupp 2025, doi:10.5066/P1AAMRUF; the same data as Rasdaman cmip6_fwi and the API), local file cmip6_fwi_combined.nc, 0.25° (about 25 km) cells, interpolated (bilinear) to the 1 km grid. Land outside the release's boreal region has no fire weather data and counts as Low.",
+  "unit": "",
+  "digits": 1,
+  "offset": 0,
+  "scale": 1000,
+  "range_q": [
+    0.005,
+    0.995
+  ],
+  "breaks": "thirds",
+  "na_label": "outside the boreal area (no fire weather data)",
+  "na_class": 0,
+  "pros": [
+    "Says how bad fire weather gets at its seasonal peak, when large fires start",
+    "Same statistic as SNAP's fire weather API (7-day rolling average)",
+    "The four models mostly agree on where the peak is worst (rank correlation 0.77–0.94)",
+    "Smooth map: no single-pixel noise"
+  ],
+  "cons": [
+    "No fire weather data outside the boreal region (about 60 % of Alaska's land: most of the Arctic, the South and much of the West), so it counts as Low there, though tundra fires do happen",
+    "Nearly the same map as Variant B (rank correlation 0.98)",
+    "A typical season's peak, not the extreme years: a 30-year average smooths out bad seasons",
+    "About 25 km cells: no detail below that",
+    "SSP5-8.5 only (high emissions): doesn't match Variant A or the permafrost index (RCP 4.5)"
+  ],
+  "sources": [
+    "SNAP CMIP6 CFFDRS fire weather, data release v2 (local cmip6_fwi_combined.nc; = Rasdaman cmip6_fwi)",
+    "Young, A.M., Littell, J., and Rupp, S., 2025, USGS data release, doi:10.5066/P1AAMRUF",
+    "SNAP data API fire_weather route (ua-snap/data-api routes/fire_weather.py)"
+  ],
+  "status": "candidate",
+  "author": "Joshdpaul",
+  "created": "2026-11-10"
+}

@@ -1,9 +1,9 @@
 {
   "letter": "A",
   "label": "Ground temperature at 1 m, mid-century",
-  "description": "GIPL 2.0 mean annual ground temperature at 1 m",
-  "details": "2040–2069 · 5-model average · RCP 4.5",
-  "method": "Mean annual ground temperature at 1 m depth from GIPL 2.0 (SNAP, 1 km EPSG:3338), 5-model average, RCP 4.5, averaged over climate years 2040–2069. The GIPL files are labelled 20 years late (file year = climate year + 20). Cells with stuck GIPL values, and a 2 km border around them, are removed (no value).",
+  "description": "GIPL 2.0 mean annual ground temperature at 1 m, where ESA shows permafrost",
+  "details": "2040–2069 · 5-model average · RCP 4.5 · outside the ESA permafrost zone counts as Low",
+  "method": "Mean annual ground temperature at 1 m depth from GIPL 2.0 (SNAP, 1 km EPSG:3338), 5-model average, RCP 4.5, averaged over climate years 2040–2069. The GIPL files are labelled 20 years late (file year = climate year + 20). Only cells where ESA CCI Permafrost v5 shows permafrost in 2023 (permafrost fraction above 0) get a value; everywhere else there is no permafrost to thaw and the class is always Low. Inside that zone, cells with stuck GIPL values, and a 2 km border around them, are removed (no value).",
   "unit": "°C",
   "digits": 2,
   "offset": 30,
@@ -16,11 +16,22 @@
     -1.0,
     0.0
   ],
+  "pros": [
+    "Simple to explain: how warm the ground at 1 m will be",
+    "GIPL's 0 °C line at 1 m matches field sites well (best split −0.2 °C, CUSP)"
+  ],
+  "cons": [
+    "Level only: says nothing about how fast things change",
+    "Stuck GIPL cells have no value (14 % of the Interior)"
+  ],
   "sources": [
     "GIPL 2.0 magt1m local GeoTIFFs (gipl_file_year)",
-    "stuck-cell mask D17"
+    "stuck-cell mask D17",
+    "ESA CCI Permafrost v5 PFR 2023 (features_1km.nc pfr_2023)"
   ],
   "status": "candidate",
   "author": "Joshdpaul",
-  "created": "2026-10-27"
+  "created": "2026-10-27",
+  "na_label": "outside the permafrost zone",
+  "na_class": 0
 }

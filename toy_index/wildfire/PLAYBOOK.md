@@ -8,8 +8,9 @@ first session needs no server requests.
 **Key terms**
 - **Relative flammability:** the share of ALFRESCO's simulation runs in which a pixel burns, per year (0.004 = 0.4 %
   a year, roughly once in 250 years).
-- **Fire Weather Index (FWI):** a daily rating of how weather (heat, dryness, wind) favors fire spread, regardless
-  of what fuel is there.
+- **Fire Weather Index (FWI):** a daily rating of fire intensity from the Canadian Forest Fire Danger Rating System.
+  Noon weather (heat, humidity, wind, rain) drives three fuel moisture codes (fine litter, duff, deep organic
+  layers), which combine with wind into the FWI.
 - **HUC-12:** the smallest standard US watershed unit (typically 40–160 km²).
 
 Catalog IDs in brackets (F1, F4, ...) refer to the Arctic-EDS Candidate Data Catalog. It lists the wildfire hazards
@@ -23,8 +24,9 @@ equipment and land/air travel.
 - The answer picks the map scale and whether a change or a level variant leads.
 
 ## 2. Where we start
-`flam-future` (2040–2069 level) and `flam-change` (since 1980–2008). Both use pixels on the map and the watershed
-average at the point.
+A `flam-future` (2040–2069 level; pixels on the map, watershed average at the point) and, since 2026-11-10,
+B–D fire weather (`fwi-future` season mean, `fwi-peak-week`, `fwi-high-days`; local CMIP6 release; outside the boreal area = Low). `flam-change` retired 2026-11-10 (a place that
+burns often before and after shows no change).
 
 ## 3. Variant backlog
 Priority 1 = local or cached data, no new requests · 2 = needs server requests (ask first; sizes from the earlier
@@ -35,11 +37,13 @@ statewide flammability request, 19 MB each) or a metadata check · 3 = needs new
 | `flam-area-10km` | flammability averaged over a 10 km radius (map and point agree; follows SNAP's advice) | cached 2040–2069 grid | local | 1 |
 | `flam-area-25km` | same, 25 km ("fire nearby") | cached | local | 1 |
 | `fire-interval` | years between fires (1 / flammability, capped at e.g. 1000 yr): easier to explain | cached | local | 1 |
-| `flam-change-area-10km` | change, area-averaged (raw change is noisy: a third of pixels are 0 either way) | cached | local | 1 |
+| `flam-change-area-10km` | change, area-averaged (retired with `flam-change` 2026-11-10: change is not the question) | cached | local | dropped |
 | `flam-models-agree` | how many of the 5 models put the cell in High (0–5) | ALFRESCO era 3, models 2–6, RCP 4.5 | 5 requests, ~95 MB | 2 |
 | `flam-rcp85` | 2040–2069 under RCP 8.5 | ALFRESCO scenario 3 | 1 request | 2 |
 | `flam-late-century` | 2070–2099 | ALFRESCO era 4 | 1 request | 2 |
-| `fwi-change` | change in days with high fire weather (CMIP6; ~25 km, coarser than the others) | [F4] CMIP6 CFFDRS fire weather indices (Rasdaman `cmip6_fwi` and parts) | metadata check, then a few requests | 2 |
+| `fwi-future` | mean fire-season FWI 2040–2069 | [F4] local CMIP6 CFFDRS release (= Rasdaman `cmip6_fwi`) | local | done 2026-11-10 (Variant B) |
+| `fwi-peak-week` | highest 7-day rolling mean FWI 2040–2069 | local summary | local | done 2026-11-10 (Variant C) |
+| `fwi-high-days` | June–August days with FWI ≥ 18 (High or worse) 2040–2069 | local summary | local | done 2026-11-10 (Variant D) |
 | `veg-shift` | share of forest projected to change type (fuel change) | [F3] Rasdaman `alfresco_vegetation_type_percentage` | metadata check, then requests | 3 |
 | `recent-burn` | lower near-term hazard where fire burned recently | [F1] AICC fire perimeters 1940–2021 (SNAP-owned; the API is point-only, so statewide needs the file) | ask SNAP for the file | 3 |
 | `smoke-days` | days with heavy smoke (historical only, ~60 km; not SNAP) | [F6] PM2.5 GEOS-Chem 2003–2020 | new download | 3 |
@@ -58,7 +62,7 @@ statewide flammability request, 19 MB each) or a metadata check · 3 = needs new
 3. Whether fire weather (CMIP6) can sit beside ALFRESCO (CMIP5-era models) in one index.
 
 ## 6. First session
-1. Build `flam-area-10km`, `flam-area-25km`, `fire-interval`, `flam-change-area-10km` (local, about an hour).
+1. Build `flam-area-10km`, `flam-area-25km`, `fire-interval` (local, about an hour).
 2. Publish; compare with the current variants in the app at the preset places.
 3. Ask: OK for the 5-model and RCP 8.5 requests (~115 MB, 6 requests)? Metadata check of `cmip6_fwi`? Can SNAP
    share the AICC perimeter file [F1]?

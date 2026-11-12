@@ -1,0 +1,38 @@
+{
+  "letter": "C",
+  "label": "Surface temperature in the permafrost zone, mid-century",
+  "description": "Ground surface temperature at mid-century = today's observed level (ESA) + projected warming (GIPL), where ESA shows permafrost (°C)",
+  "details": "ESA CCI 2014–2023 + GIPL 2.0 warming to 2040–2069 · 5-model average · RCP 4.5 · outside the ESA permafrost zone counts as Low",
+  "method": "Today's mean annual ground surface temperature from ESA CCI Permafrost v5 (observation-based, averaged over 2014–2023), plus the warming GIPL 2.0 projects at the ground surface from 2014–2023 to 2040–2069 (5-model average, RCP 4.5; GIPL 2.0 surface temperature averaged over each period, files read 20 years later than labelled). This is the delta change method used by the Permafrost Thaw Index (V2): ESA supplies the level, GIPL only the change, so GIPL's own temperature level and its 0 °C line are never used. Only cells where ESA shows permafrost in 2023 (permafrost fraction above 0) get a value; everywhere else there is no permafrost to thaw and the class is always Low. GIPL's stuck cells and a 2 km border around them have no value. Note: a surface temperature above 0 °C does not mean the permafrost has thawed (about half of ESA's permafrost cells already have a surface above 0 °C).",
+  "unit": "°C",
+  "digits": 2,
+  "offset": 15,
+  "scale": 1000,
+  "range_q": [
+    0.005,
+    0.995
+  ],
+  "breaks": "thirds",
+  "na_label": "outside the permafrost zone",
+  "na_class": 0,
+  "pros": [
+    "Today's level is observation-based (ESA); GIPL only supplies the change, as GIPL_ISSUE_2 recommends",
+    "Not tied to GIPL's 0 °C line",
+    "Puts the Interior and the West (Seward Peninsula) higher than the Arctic, as field knowledge suggests"
+  ],
+  "cons": [
+    "Mostly a map of today's ESA level: the level varies by about 8 °C, warming by about 1 °C",
+    "At the surface, 0 °C is not the frozen/thawed line (field sites split at +1.7 to +2.3 °C)",
+    "GIPL's surface warms only 0.8–0.9 times as fast as the air, so warming may be understated",
+    "Stuck GIPL cells have no value"
+  ],
+  "sources": [
+    "ESA CCI Permafrost v5 GST 2014–2023 (features_1km.nc esa_gst_recent)",
+    "GIPL 2.0 magtsurface local GeoTIFFs (gipl_file_year)",
+    "ESA CCI Permafrost v5 PFR 2023 (features_1km.nc pfr_2023)",
+    "stuck-cell mask D17"
+  ],
+  "status": "candidate",
+  "author": "Joshdpaul",
+  "created": "2026-11-09"
+}

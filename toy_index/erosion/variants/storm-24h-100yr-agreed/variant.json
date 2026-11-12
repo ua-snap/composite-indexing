@@ -1,0 +1,36 @@
+{
+  "letter": "E",
+  "label": "24-hour, 100-year storm, change × model agreement",
+  "description": "Change in rain in the 24-hour, 100-year storm, counted in full where both climate models agree on the direction, halved where they disagree",
+  "details": "NOAA Atlas 14 (model’s 1979–2005) → 2050–2079 · GFDL-CM3 and NCAR-CCSM4 · RCP 8.5 · × agreement on direction",
+  "method": "Each model's percent change in the 24-hour, 100-year storm from NOAA Atlas 14 to 2050–2079 (as Variant B, but kept per model: GFDL-CM3 and NCAR-CCSM4), then average change × agreement, where agreement = 1 if both models change in the same direction (both increase, or both decrease: an agreed decrease stays negative) and 0.5 if they disagree. The result stays in %: where the models agree on the direction it equals Variant B; where they disagree it is halved. Atlas 14 grid: annual maximum series.",
+  "unit": "%",
+  "digits": 0,
+  "offset": 100,
+  "scale": 100,
+  "range_q": [
+    0.005,
+    0.995
+  ],
+  "breaks": "thirds",
+  "signed": true,
+  "pros": [
+    "Counts the change in full where both models agree on the direction (up or down); halves it on the 23 % of land where they split",
+    "Draws on both models about equally (rank correlation about 0.7 with each), unlike the plain average, which follows GFDL-CM3",
+    "Same units as the plain change (%), so boundaries stay readable"
+  ],
+  "cons": [
+    "A modest correction: the same class as Variant B on 84–88 % of land, and 90–95 % of its High cells were High in B",
+    "Still two models only: agreement between two is a weak test",
+    "Where both models agree on an increase, the size of it is still their average, which leans on GFDL-CM3"
+  ],
+  "sources": [
+    "Rasdaman dot_precip (as storm-24h-100yr-future)",
+    "NOAA Atlas 14 Vol. 7 ak100yr24ha_ams",
+    "Bieniek et al. 2022, JAMC 61(2), doi:10.1175/JAMC-D-21-0106.1"
+  ],
+  "status": "retired",
+  "author": "Joshdpaul",
+  "created": "2026-11-09",
+  "retired": "2026-11-10 (Joshdpaul): the agreement multiplier was not intuitive to the team; we accept that the two-model average sometimes mixes models that disagree on direction (noted as a con on A–C). Letter E given to a 10-year storm variant (never chosen as a team decision)."
+}

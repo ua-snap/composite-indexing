@@ -133,6 +133,24 @@ canvas.hist { width: 100%; height: 72px; display: block; }
 .bar { display: flex; height: 12px; border-radius: 3px; overflow: hidden; gap: 2px; background: var(--surface); }
 .bar div { height: 100%; }
 
+/* pros and cons on each variant card: repo starting points + the team's own (db "notes") */
+.pc { border-top: 1px solid var(--line); padding-top: 10px; display: grid; gap: 8px; }
+.pc h3 { font-size: 14px; }
+.pclab { font-family: var(--font-display); font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+.pclab.pro { color: var(--accent); }
+.pclab.con { color: var(--warn); }
+.pc ul { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 4px; }
+.pc li { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 6px; align-items: start; font-size: 13.5px; line-height: 1.4; }
+.pc li .mk { font-weight: 700; text-align: center; }
+.pc ul.pros .mk { color: var(--accent); }
+.pc ul.cons .mk { color: var(--warn); }
+.pc li.empty { display: block; color: var(--muted); font-style: italic; }
+.pcwho { color: var(--muted); font-size: 12px; }
+.pcdel { border: none; background: none; padding: 0 4px; font-size: 16px; line-height: 1.2; color: var(--muted); }
+.pcdel:hover:not(:disabled) { color: var(--ink); background: var(--sunk); }
+.pcadd { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px; }
+.pcadd input[type=text] { width: 100%; }
+
 /* main sections of the index and hazard pages: generous space between them, tight inside */
 .tab.idx, .tab.hz { gap: 56px; }
 .block { display: grid; gap: 14px; }
@@ -141,7 +159,14 @@ canvas.hist { width: 100%; height: 72px; display: block; }
 .reasoning h2 { font-size: 26px; }
 .reasoning h2 label { cursor: text; }
 .reasoning p { color: var(--ink-2); max-width: 75ch; }
-.reasoning textarea { font-size: 16px; line-height: 1.5; padding: 12px 14px; min-height: 120px; border-color: var(--accent); }
+.reasoning textarea { font-size: 16px; line-height: 1.5; padding: 12px 14px; min-height: 96px; border-color: var(--accent); }
+.reasoning textarea.mean { min-height: 64px; }
+.fieldlab { font-family: var(--font-display); font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; margin-bottom: -6px; }
+.meanings { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 12px 16px; }
+.meanings > div { display: grid; gap: 10px; align-content: start; }
+.defs { display: grid; gap: 6px; font-size: 14px; }
+.defs p { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: baseline; }
+.defs .lim { display: block; color: var(--muted); font-size: 12.5px; font-family: var(--font-data); }
 
 /* panels + tables */
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px;
@@ -360,9 +385,11 @@ a.btn:hover { filter: brightness(1.08); }
       </div>
     </section>
     <section class="reasoning" aria-labelledby="whyH">
-      <div><h2 id="whyH"><label for="note-hazard">Reasoning</label></h2>
-        <p>Why the team chose this rule. Saved with the team decision and shown on the Summary.</p></div>
-      <textarea id="note-hazard" rows="4" placeholder="For example: worst of three, because one serious hazard is enough for a community to plan around."></textarea>
+      <div><h2 id="whyH">Reasoning</h2>
+        <p>What the Environmental Hazard classes mean, and why the team chose this rule. Saved with the team decision and shown on the Summary.</p></div>
+      <div id="meaning-hazard"></div>
+      <label class="fieldlab" for="note-hazard">Notes</label>
+      <textarea id="note-hazard" rows="3" placeholder="Anything else, for example: worst of three, because one serious hazard is enough for a community to plan around."></textarea>
       <div class="row"><button class="primary" id="hzSave">Save rule as team decision</button>
         <button id="hzDiscard">Discard my changes</button><span class="small" id="hzMsg" role="status"></span></div>
     </section>
@@ -480,7 +507,7 @@ function teamIdx(k) {
   const t = TEAM[k], src = t || META.decisions[k], breaks = {};
   for (const id of VIDS(k)) { const b = (src.breaks || {})[id]; breaks[id] = Array.isArray(b) && b.length === 2 ? b.map(Number) : VM(k, id).breaks.slice(); }
   return { variant: src.variant && VARS(k)[src.variant] ? src.variant : null, breaks, note: src.note || "",
-    by: t ? t.by : null, at: t ? t.at : null, from: t ? "team" : "repo" };
+    high: src.high || "", low: src.low || "", by: t ? t.by : null, at: t ? t.at : null, from: t ? "team" : "repo" };
 }
 function workIdx(k) {
   const t = teamIdx(k), d = DRAFT.idx[k];
@@ -488,30 +515,32 @@ function workIdx(k) {
   const breaks = { ...t.breaks };
   for (const id of VIDS(k)) if (Array.isArray((d.breaks || {})[id])) breaks[id] = d.breaks[id];
   return { ...t, variant: d.variant !== undefined && (d.variant === null || VARS(k)[d.variant]) ? d.variant : t.variant,
-    breaks, note: d.note ?? t.note, from: "draft" };
+    breaks, note: d.note ?? t.note, high: d.high ?? t.high, low: d.low ?? t.low, from: "draft" };
 }
-const coreIdx = (k, s) => JSON.stringify([s.variant, VIDS(k).map(id => s.breaks[id]), (s.note || "").trim()]);
+const TEXTS = ["note", "high", "low"];  // free-form notes + "what does High / Low mean?"
+const texts = s => Object.fromEntries(TEXTS.map(f => [f, (s[f] || "").trim()]));
+const coreIdx = (k, s) => JSON.stringify([s.variant, VIDS(k).map(id => s.breaks[id]), ...TEXTS.map(f => (s[f] || "").trim())]);
 const dirtyIdx = k => !!DRAFT.idx[k] && coreIdx(k, workIdx(k)) !== coreIdx(k, teamIdx(k));
 function editIdx(k, fn) {
   const w = clone(workIdx(k)); fn(w);
-  DRAFT.idx[k] = { variant: w.variant, breaks: w.breaks, note: w.note };
+  DRAFT.idx[k] = { variant: w.variant, breaks: w.breaks, note: w.note, high: w.high, low: w.low };
   if (!dirtyIdx(k)) delete DRAFT.idx[k];
   saveLocal();
 }
 function ruleDefaults() { return { rule: "worst", weights: { wildfire: 1, erosion: 1, permafrost: 1 }, avgCuts: [1.5, 2.5],
-  prodCuts: [4, 12], countHigh: 2, countMed: 1, custom: worstTable(), missing: "low", note: "" }; }
+  prodCuts: [4, 12], countHigh: 2, countMed: 1, custom: worstTable(), missing: "low", note: "", high: "", low: "" }; }
 function teamRule() {
   const t = TEAM.hazard, src = t || META.decisions.hazard, R = ruleDefaults();
-  for (const key of [...RULE_KEYS, "note"]) if (src[key] != null) R[key] = clone(src[key]);
+  for (const key of [...RULE_KEYS, ...TEXTS]) if (src[key] != null) R[key] = clone(src[key]);
   if (!Array.isArray(R.custom) || R.custom.length !== 27) R.custom = worstTable();
   return { ...R, by: t ? t.by : null, at: t ? t.at : null, from: t ? "team" : "repo" };
 }
 function workRule() { const t = teamRule(); return DRAFT.hazard ? { ...t, ...clone(DRAFT.hazard), from: "draft" } : t; }
-const coreRule = R => JSON.stringify([...RULE_KEYS.map(k => k === "custom" && R.rule !== "custom" ? null : R[k]), (R.note || "").trim()]);
+const coreRule = R => JSON.stringify([...RULE_KEYS.map(k => k === "custom" && R.rule !== "custom" ? null : R[k]), ...TEXTS.map(f => (R[f] || "").trim())]);
 const dirtyRule = () => !!DRAFT.hazard && coreRule(workRule()) !== coreRule(teamRule());
 function editRule(fn) {
   const w = workRule(); fn(w);
-  DRAFT.hazard = Object.fromEntries([...RULE_KEYS, "note"].map(k => [k, w[k]]));
+  DRAFT.hazard = Object.fromEntries([...RULE_KEYS, ...TEXTS].map(k => [k, w[k]]));
   if (!dirtyRule()) DRAFT.hazard = null;
   saveLocal();
 }
@@ -525,6 +554,7 @@ function hazardInputs(useDrafts) {
 
 // ---------- team record: db + user capabilities ----------
 let db = null, user = null, uid = null, writeOK = null, mode = "connecting";
+let NOTES = {};  // db "notes": the team's pros/cons (and hidden repo points), by doc id
 const NAMES = {};
 async function connect() {
   const c = window.claude;
@@ -537,12 +567,17 @@ async function connect() {
     const t = {}; for (const d of snap.docs) t[d.id] = d.data();
     TEAM = t; teamChanged();
   }, e => { setMode("local"); $("loadErr").textContent = "Lost the connection to the team decisions. Reload the page to reconnect."; });
+  db.collection("notes").onSnapshot(snap => {
+    const t = {}; for (const d of snap.docs) t[d.id] = d.data();
+    NOTES = t; resolveNames(); renderAllNotes();
+  }, e => { $("loadErr").textContent = "Lost the connection to the team's pros and cons. Reload the page to reconnect."; });
 }
 function setMode(m) {
   mode = m;
   $("conn").textContent = m === "team" ? "Team decisions: live" : m === "readonly" ? "Team decisions: view only"
     : m === "local" ? "Team decisions unavailable here: showing the repo's starting point" : "Connecting…";
   refreshSaveButtons();
+  renderAllNotes();
 }
 function whoWhen(by, at) {
   const name = by ? (NAMES[by] || "a teammate") : "someone";
@@ -551,12 +586,12 @@ function whoWhen(by, at) {
 }
 async function resolveNames() {
   if (!user) return;
-  const ids = [...new Set(Object.values(TEAM).map(d => d && d.by).filter(Boolean))].filter(id => !(id in NAMES));
+  const ids = [...new Set([...Object.values(TEAM), ...Object.values(NOTES)].map(d => d && d.by).filter(Boolean))].filter(id => !(id in NAMES));
   if (!ids.length) return;
   const ps = await user.profiles(ids);
   let changed = false;
   for (const id of ids) { NAMES[id] = (ps[id] && ps[id].name) || "a teammate"; changed = true; }
-  if (changed) renderStatuses();
+  if (changed) { renderStatuses(); renderAllNotes(); }
 }
 async function saveTeam(key, body) {
   const doc = { ...body, by: uid, at: new Date().toISOString() };
@@ -821,6 +856,19 @@ function refreshSaveButtons() {
   $("hzDiscard").disabled = !DRAFT.hazard;
 }
 
+// ---------- "what does High / Low mean?" ----------
+function meaningFields(k, name) {
+  const one = (f, c) => `<div><label class="fieldlab" for="${f}-${k}"><span class="chip c${c}">${CLS[c]}</span> What does ${CLS[c]} mean?</label>
+    <textarea class="mean" id="${f}-${k}" rows="2" maxlength="600" placeholder="In plain words: what is true of a place where ${esc(name)} is ${CLS[c]}?"></textarea></div>`;
+  return `<div class="meanings">${one("high", 2)}${one("low", 0)}</div>`;
+}
+// High / Low definitions with the numeric limits beside them (limits: [high text, low text] or null)
+function defsHTML(s, limits) {
+  const row = (f, c, lim) => `<p><span class="chip c${c}">${CLS[c]}</span><span>${s[f] ? esc(s[f]) : `<span class="muted">Not defined yet.</span>`}`
+    + (lim ? ` <span class="lim">${esc(lim)}</span>` : "") + `</span></p>`;
+  return `<div class="defs">${row("high", 2, limits && limits[0])}${row("low", 0, limits && limits[1])}</div>`;
+}
+
 // ---------- index pages ----------
 const IT = {};  // per index: DOM refs
 function buildIndexTab(k) {
@@ -836,9 +884,11 @@ function buildIndexTab(k) {
       <div class="cards" data-r="cards"></div>
     </section>
     <section class="reasoning" aria-labelledby="why-${k}">
-      <div><h2 id="why-${k}"><label for="note-${k}">Reasoning</label></h2>
-        <p>Why the team chose this variant and these boundaries. Saved with the team decision and shown on the Summary.</p></div>
-      <textarea id="note-${k}" rows="4" placeholder="For example: Variant B, because the team cares about where the hazard is rising. High above +54 % keeps the wet south coast from dominating."></textarea>
+      <div><h2 id="why-${k}">Reasoning</h2>
+        <p>What the classes mean, and why the team chose this variant and these boundaries. Saved with the team decision and shown on the Summary.</p></div>
+      ${meaningFields(k, I.name)}
+      <label class="fieldlab" for="note-${k}">Notes</label>
+      <textarea id="note-${k}" rows="3" placeholder="Anything else, for example: Variant B, because the team cares about where the hazard is rising. High above +54 % keeps the wet south coast from dominating."></textarea>
       <div class="row"><button class="primary" data-r="save">Save as team decision</button>
         <button data-r="discard">Discard my changes</button><span class="small" data-r="msg" role="status"></span></div>
     </section>
@@ -872,11 +922,27 @@ function buildIndexTab(k) {
       <div class="row" style="justify-content:space-between"><button data-r="reset" class="small">Reset to defaults</button>
         <span class="small num" data-r="defaults">default ${esc(m.breaks.map(x => fmt(m, x)).join(", "))}</span></div>
       <div data-r="bar"></div>
-      <div class="small num" data-r="sharetxt"></div>`;
+      <div class="small num" data-r="sharetxt"></div>
+      <section class="pc" aria-label="Variant ${esc(m.letter)}: pros and cons">
+        <h3>Pros and cons</h3>
+        <div><div class="pclab pro">Pros</div><ul class="pros" data-r="pro"></ul></div>
+        <div><div class="pclab con">Cons</div><ul class="cons" data-r="con"></ul></div>
+        <form class="pcadd" data-r="pcadd" hidden>
+          <select data-r="pckind" aria-label="Pro or con"><option value="pro">Pro</option><option value="con">Con</option></select>
+          <input type="text" data-r="pctext" maxlength="300" placeholder="Add a thought for the team…" aria-label="New pro or con for Variant ${esc(m.letter)}">
+          <button type="submit">Add</button>
+        </form>
+        <span class="small" data-r="pcmsg" role="status"></span>
+      </section>`;
     q('[data-r="cards"]').appendChild(card);
     const c = s => card.querySelector(s);
     const C = R.cards[id] = { card, pick: c('[data-r="pick"]'), state: c('[data-r="state"]'), map: c('[data-r="map"]'), hist: c('[data-r="hist"]'),
-      ranges: [c('[data-b="0"]'), c('[data-b="1"]')], nums: [c('[data-n="0"]'), c('[data-n="1"]')], bar: c('[data-r="bar"]'), sharetxt: c('[data-r="sharetxt"]') };
+      ranges: [c('[data-b="0"]'), c('[data-b="1"]')], nums: [c('[data-n="0"]'), c('[data-n="1"]')], bar: c('[data-r="bar"]'), sharetxt: c('[data-r="sharetxt"]'),
+      pc: { pro: c('[data-r="pro"]'), con: c('[data-r="con"]'), add: c('[data-r="pcadd"]'), kind: c('[data-r="pckind"]'), text: c('[data-r="pctext"]'), msg: c('[data-r="pcmsg"]') } };
+    C.pc.add.addEventListener("submit", ev => { ev.preventDefault(); addNote(k, id); });
+    for (const kind of ["pro", "con"]) C.pc[kind].addEventListener("click", ev => {
+      const b = ev.target.closest("button.pcdel"); if (b) removeNote(k, id, kind, b.dataset.key);
+    });
     C.pick.onchange = () => { editIdx(k, w => { w.variant = C.pick.checked ? id : (w.variant === id ? null : w.variant); }); renderIndex(k); };
     for (const j of [0, 1]) {
       const set = v => { if (!Number.isFinite(v)) return;
@@ -890,9 +956,11 @@ function buildIndexTab(k) {
     C.map.addEventListener("mouseleave", hideTip);
   }
   R.note.addEventListener("input", () => { editIdx(k, w => { w.note = R.note.value; }); renderStatuses(); });
+  for (const f of ["high", "low"]) { const el = $(`${f}-${k}`); R[f] = el;
+    el.addEventListener("input", () => { editIdx(k, w => { w[f] = el.value; }); renderStatuses(); }); }
   R.save.onclick = async () => {
     const w = workIdx(k); R.save.disabled = true; R.msg.textContent = "Saving…";
-    try { await saveTeam(k, { variant: w.variant, breaks: w.breaks, note: (w.note || "").trim() }); delete DRAFT.idx[k]; saveLocal();
+    try { await saveTeam(k, { variant: w.variant, breaks: w.breaks, ...texts(w) }); delete DRAFT.idx[k]; saveLocal();
       R.msg.textContent = "Saved for the team."; renderIndex(k); }
     catch (e) { R.msg.textContent = saveError(e); refreshSaveButtons(); }
   };
@@ -926,9 +994,64 @@ function renderCard(k, id) {
 function renderIndex(k) {
   if (!IT[k]) buildIndexTab(k);
   const R = IT[k], w = workIdx(k);
-  if (document.activeElement !== R.note) R.note.value = w.note || "";
-  for (const id of VIDS(k)) renderCard(k, id);
+  for (const f of TEXTS) if (document.activeElement !== R[f]) R[f].value = w[f] || "";
+  for (const id of VIDS(k)) { renderCard(k, id); renderNotes(k, id); }
   renderStatuses();
+}
+
+// ---------- pros and cons: repo starting points (variant.json pros/cons) + team notes (db "notes") ----------
+// A team note: notes/<auto id> {index, variant, kind: "pro"|"con", text, by, at}. Removing a repo point writes
+// notes/<seed key> {index, variant, kind, text, hidden: true, by, at}; removing a team note deletes its doc.
+function hashText(s) { let h = 5381; for (const ch of s) h = ((h * 33) ^ ch.codePointAt(0)) >>> 0; return h.toString(36); }
+const seedKey = (k, id, kind, text) => `seed--${k}--${id}--${kind}--${hashText(text)}`;
+function notesFor(k, id, kind) {
+  const m = VM(k, id);
+  const seeds = (m[kind + "s"] || []).map(text => ({ key: seedKey(k, id, kind, text), text, seed: true }))
+    .filter(s => !(NOTES[s.key] && NOTES[s.key].hidden));
+  const team = Object.entries(NOTES).filter(([, d]) => d && d.index === k && d.variant === id && d.kind === kind && !d.hidden && d.text)
+    .sort((a, b) => String(a[1].at).localeCompare(String(b[1].at)))
+    .map(([key, d]) => ({ key, text: String(d.text).replace(/\s+/g, " ").trim(), by: d.by, at: d.at }));
+  return [...seeds, ...team];
+}
+function renderNotes(k, id) {
+  const C = IT[k] && IT[k].cards[id]; if (!C) return;
+  const can = mode === "team";
+  for (const kind of ["pro", "con"]) {
+    const items = notesFor(k, id, kind);
+    C.pc[kind].innerHTML = items.length ? items.map(n => `<li><span class="mk" aria-hidden="true">${kind === "pro" ? "+" : "−"}</span>`
+      + `<span>${esc(n.text)}${n.seed ? "" : ` <span class="pcwho">· ${whoWhen(n.by, n.at)}</span>`}</span>`
+      + (can ? `<button type="button" class="pcdel" data-key="${esc(n.key)}" aria-label="Remove this ${kind}" title="Remove">×</button>` : "<span></span>")
+      + "</li>").join("") : `<li class="empty">None yet.</li>`;
+  }
+  C.pc.add.hidden = !can;
+  if (!C.pc.msg.dataset.busy) C.pc.msg.textContent = can ? "" : mode === "readonly"
+    ? "View only: ask the owner for Contributor access to add thoughts."
+    : mode === "local" ? "Adding thoughts needs the team connection (open the shared link)." : "";
+}
+function renderAllNotes() { for (const k of Object.keys(IT)) for (const id of Object.keys(IT[k].cards)) renderNotes(k, id); }
+async function addNote(k, id) {
+  const C = IT[k].cards[id], text = C.pc.text.value.replace(/\s+/g, " ").trim().slice(0, 300), kind = C.pc.kind.value;
+  if (!text || !db) return;
+  const doc = { index: k, variant: id, kind, text, by: uid, at: new Date().toISOString() };
+  C.pc.msg.dataset.busy = "1"; C.pc.msg.textContent = "Adding…";
+  try {
+    await db.collection("notes").add(doc);
+    try { await db.collection("history").add({ key: "note", value: doc, by: uid, at: doc.at }); } catch (e) {}
+    C.pc.text.value = ""; C.pc.msg.textContent = "Added for the team.";
+  } catch (e) { C.pc.msg.textContent = saveError(e).replace("save team decisions", "add thoughts"); }
+  delete C.pc.msg.dataset.busy;
+}
+async function removeNote(k, id, kind, key) {
+  const C = IT[k].cards[id], d = NOTES[key], at = new Date().toISOString();
+  const seed = key.startsWith("seed--") ? notesFor(k, id, kind).find(n => n.key === key) : null;
+  C.pc.msg.dataset.busy = "1"; C.pc.msg.textContent = "Removing…";
+  try {
+    if (seed) await db.doc("notes/" + key).set({ index: k, variant: id, kind, text: seed.text, hidden: true, by: uid, at });
+    else await db.doc("notes/" + key).delete();
+    try { await db.collection("history").add({ key: "note-removed", value: { index: k, variant: id, kind, text: seed ? seed.text : d && d.text }, by: uid, at }); } catch (e) {}
+    C.pc.msg.textContent = "Removed.";
+  } catch (e) { C.pc.msg.textContent = saveError(e).replace("save team decisions", "change the list"); }
+  delete C.pc.msg.dataset.busy;
 }
 
 // ---------- hazard page ----------
@@ -1042,7 +1165,7 @@ function renderHazard(ruleOnly) {
       .map(([k, l]) => `<button data-layer="${k}" aria-pressed="${UI.layer === k}">${esc(l)}</button>`).join("");
   }
   $("rule").value = R.rule; $("missing").value = R.missing;
-  if (document.activeElement !== $("note-hazard")) $("note-hazard").value = R.note || "";
+  for (const f of TEXTS) { const el = $(`${f}-hazard`); if (document.activeElement !== el) el.value = R[f] || ""; }
   if (!ruleOnly) renderRuleCtl();
   $("sentence").textContent = ruleSentence(R) + " " + missingText(R);
   drawHazardMaps(); renderPoint(); renderStatuses();
@@ -1063,7 +1186,9 @@ function initHazardUI() {
   for (const key of ["regionKm", "localKm"]) { const el = $(key); el.value = String(UI[key]); el.onchange = () => { UI[key] = +el.value; saveLocal(); drawHazardMaps(); }; }
   $("rule").onchange = () => { editRule(R => { R.rule = $("rule").value; }); ruleChanged(true); };
   $("missing").onchange = () => { editRule(R => { R.missing = $("missing").value; }); ruleChanged(false); };
-  $("note-hazard").addEventListener("input", () => { editRule(R => { R.note = $("note-hazard").value; }); renderStatuses(); });
+  $("meaning-hazard").outerHTML = meaningFields("hazard", "Environmental Hazard");
+  for (const f of TEXTS) { const el = $(`${f}-hazard`);
+    el.addEventListener("input", () => { editRule(R => { R[f] = el.value; }); renderStatuses(); }); }
   $("hzPreview").onchange = () => { UI.preview = $("hzPreview").checked; saveLocal(); renderTab("hazard"); };
   $("layers").onclick = e => { const b = e.target.closest("button"); if (!b) return; UI.layer = b.dataset.layer; saveLocal();
     $("layers").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x.dataset.layer === UI.layer)); drawHazardMaps(); };
@@ -1076,7 +1201,7 @@ function initHazardUI() {
   });
   $("hzSave").onclick = async () => {
     const R = workRule(); $("hzSave").disabled = true; $("hzMsg").textContent = "Saving…";
-    try { await saveTeam("hazard", Object.fromEntries([...RULE_KEYS.map(k => [k, R[k]]), ["note", (R.note || "").trim()]]));
+    try { await saveTeam("hazard", { ...Object.fromEntries(RULE_KEYS.map(k => [k, R[k]])), ...texts(R) });
       DRAFT.hazard = null; saveLocal(); $("hzMsg").textContent = "Saved for the team."; renderHazard(); }
     catch (e) { $("hzMsg").textContent = saveError(e); refreshSaveButtons(); }
   };
@@ -1127,15 +1252,17 @@ function renderSummary() {
       <canvas class="map" data-sum="${x.k}" aria-label="${esc(IDX(x.k).name)} class map"></canvas>
       <div><b>Variant ${esc(m.letter)}: ${esc(m.label)}</b></div>
       <p class="small">${esc(m.description)} (${esc(m.details)}).</p>
-      <p class="means"><span class="chip c2">High</span> above ${esc(fmt(m, x.b[1]))} · <span class="chip c0">Low</span> at or below ${esc(fmt(m, x.b[0]))}.${naTxt}</p>
-      ${t.note && x.from === "team" ? `<p class="why">${esc(t.note)}</p>` : `<p class="small muted">No reasoning recorded yet.</p>`}
+      ${defsHTML(x.from === "team" ? t : {}, [`(above ${fmt(m, x.b[1])})`, `(at or below ${fmt(m, x.b[0])})`])}
+      ${naTxt ? `<p class="small">${naTxt.trim()}</p>` : ""}
+      ${t.note && x.from === "team" ? `<p class="why">${esc(t.note)}</p>` : `<p class="small muted">No notes yet.</p>`}
       ${editRow(x.k, draft)}</div>`; });
   const rst = TEAM.hazard ? `<span class="pill team">Team decision</span>` : `<span class="pill start">Not decided yet</span>`;
   const ruleName = document.querySelector(`#rule option[value="${R.rule}"]`).textContent;
   $("sumFlow").innerHTML = tiles.join("") + `<div class="arrow">${ARROW}</div>` +
     `<div class="ftile ruletile${dirtyRule() ? " drafted" : ""}"><div class="row" style="justify-content:space-between"><h3>Combining rule</h3>${rst}</div>
       <div><b>${esc(ruleName)}</b></div><p>${esc(ruleSentence(R))} ${esc(missingText(R))}</p>
-      ${R.note && TEAM.hazard ? `<p class="why">${esc(R.note)}</p>` : `<p class="small muted">No reasoning recorded yet.</p>`}
+      ${defsHTML(TEAM.hazard ? R : {}, null)}
+      ${R.note && TEAM.hazard ? `<p class="why">${esc(R.note)}</p>` : `<p class="small muted">No notes yet.</p>`}
       <div class="small">Result: ${[2, 1, 0].map(c => `${CLS[c]} ${pct(n[c] / tot)}`).join(" · ")} of Alaska's land.</div>
       ${editRow("hazard", dirtyRule())}</div>`;
   for (const x of inputs) drawGrid(document.querySelector(`[data-sum="${x.k}"]`), classes(x.k, x.id, x.b), BBOX, PAL.cls);
@@ -1264,14 +1391,18 @@ async function buildPdf() {
     w.text(`${m.description} (${m.details}).`, { size: 9.5, x: tx, width: tw });
     w.text(`High above ${fmt(m, x.b[1])}; Low at or below ${fmt(m, x.b[0])}; Medium between.` + (m.na_label ? ` Places ${m.na_label} count as ${CLS[m.na_class]}.` : ""), { size: 9.5, style: "bold", x: tx, width: tw });
     w.text(`Share of land: ${sharesLine(areaCounts(arr)[0])}.`, { size: 9, color: P_INK2, x: tx, width: tw });
-    w.text(x.from === "team" && t.note ? `Reasoning: ${t.note}` : "Reasoning: none recorded yet.", { size: 9.5, style: "italic", x: tx, width: tw, after: 2 });
+    w.text(`High means: ${x.from === "team" && t.high ? t.high : "not defined yet."}`, { size: 9.5, x: tx, width: tw });
+    w.text(`Low means: ${x.from === "team" && t.low ? t.low : "not defined yet."}`, { size: 9.5, x: tx, width: tw });
+    w.text(x.from === "team" && t.note ? `Notes: ${t.note}` : "Notes: none yet.", { size: 9.5, style: "italic", x: tx, width: tw, after: 2 });
     if (x.from === "team" && t.at) w.text(`Saved by ${nameOf(t.by)}, ${dateOf(t.at)}.`, { size: 8.5, color: P_INK2, x: tx, width: tw });
     w.y = Math.max(w.y, y0 + ih) + 14;
   }
   w.h3(`Combining rule: ${ruleName}`, { keep: 190 });
   w.text(`Status: ${TEAM.hazard ? "team decision" : "not decided yet (repo starting point)"}`, { size: 8.5, color: P_ACCENT, style: "bold", after: 3 });
   w.text(`${ruleSentence(R)} ${missingText(R)}`, { size: 9.5 });
-  w.text(R.note && TEAM.hazard ? `Reasoning: ${R.note}` : "Reasoning: none recorded yet.", { size: 9.5, style: "italic", after: 2 });
+  w.text(`High means: ${TEAM.hazard && R.high ? R.high : "not defined yet."}`, { size: 9.5 });
+  w.text(`Low means: ${TEAM.hazard && R.low ? R.low : "not defined yet."}`, { size: 9.5 });
+  w.text(R.note && TEAM.hazard ? `Notes: ${R.note}` : "Notes: none yet.", { size: 9.5, style: "italic", after: 2 });
   if (TEAM.hazard && R.at) w.text(`Saved by ${nameOf(R.by)}, ${dateOf(R.at)}.`, { size: 8.5, color: P_INK2 });
   w.text("Every combination (rows: Wildfire, columns: Erosion, one table per Permafrost class):", { size: 9, color: P_INK2, after: 6 });
   w.need(84); const gy = w.y;
@@ -1302,6 +1433,9 @@ async function buildPdf() {
     w.text(`Units: ${m.unit}. Boundaries: Low <= ${x.b[0]} ${m.unit} < Medium <= ${x.b[1]} ${m.unit} < High.`
       + (m.na_label ? ` Cells flagged "${m.na_label}" have no value and are classed ${CLS[m.na_class]}.` : "")
       + " Cells without a value (and not flagged) count as missing.", { size: 9.5 });
+    const pros = notesFor(x.k, x.id, "pro").map(n => n.text), cons = notesFor(x.k, x.id, "con").map(n => n.text);
+    if (pros.length) w.text(`Pros: ${pros.join("; ")}.`, { size: 9.5 });
+    if (cons.length) w.text(`Cons: ${cons.join("; ")}.`, { size: 9.5 });
     w.text(`Sources: ${(m.sources || []).join("; ")}.`, { size: 9, color: P_INK2, after: 10 });
   }
   w.h3(`Combining rule: ${ruleName}`, { keep: 80 });
@@ -1312,8 +1446,8 @@ async function buildPdf() {
   w.text(`All 27 combinations (Wildfire, Erosion, Permafrost -> Hazard): ${combos.join("  ")}`, { size: 9, face: "courier", after: 12 });
   w.h3("Decision record (JSON, same shape as toy_index/composite/decisions.json)", { keep: 60 });
   const rec = { exported: new Date().toISOString(), data_built: META.built };
-  for (const x of inputs) { const t = teamIdx(x.k); rec[x.k] = { variant: x.id, letter: VM(x.k, x.id).letter, breaks: { [x.id]: x.b }, note: x.from === "team" ? t.note : "", decided: x.decided && x.from === "team" }; }
-  rec.hazard = { ...Object.fromEntries(RULE_KEYS.map(k => [k, R[k]])), note: TEAM.hazard ? R.note : "", decided: !!TEAM.hazard };
+  for (const x of inputs) { const t = teamIdx(x.k); rec[x.k] = { variant: x.id, letter: VM(x.k, x.id).letter, breaks: { [x.id]: x.b }, ...texts(x.from === "team" ? t : {}), decided: x.decided && x.from === "team" }; }
+  rec.hazard = { ...Object.fromEntries(RULE_KEYS.map(k => [k, R[k]])), ...texts(TEAM.hazard ? R : {}), decided: !!TEAM.hazard };
   w.text(JSON.stringify(rec, null, 1).replace(/\n\s*(-?[\d.]+,?)(?=\n)/g, " $1").replace(/\[\s+/g, "[").replace(/\s+\]/g, "]"), { size: 7.5, face: "courier", lh: 1.25 });
 
   const pages = doc.getNumberOfPages();

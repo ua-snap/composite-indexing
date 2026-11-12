@@ -1,0 +1,28 @@
+{
+  "letter": "C",
+  "label": "Surface warming in the permafrost zone",
+  "description": "How much the ground surface warms from today to mid-century, where ESA shows permafrost (°C)",
+  "details": "2014–2023 → 2040–2069 · GIPL 2.0 ground surface · 5-model average · RCP 4.5 · outside the ESA permafrost zone counts as Low",
+  "method": "Warming of the mean annual ground surface temperature: GIPL 2.0 surface temperature averaged over climate years 2040–2069 minus its average over 2014–2023 (the same \"today\" as the Permafrost Thaw Index), 5-model average, RCP 4.5. Only the change is used, never GIPL's temperature level, so no 0 °C threshold is involved. The GIPL files are labelled 20 years late (file year = climate year + 20). Only cells where ESA CCI Permafrost v5 shows permafrost in 2023 (permafrost fraction above 0) get a value; everywhere else there is no permafrost to thaw and the class is always Low. Inside the permafrost zone, GIPL's stuck cells and a 2 km border around them have no value. The surface is used rather than 1 m because thawing ground holds near 0 °C at depth while its ice melts, which hides the warming exactly where permafrost is closest to thawing.",
+  "unit": "°C",
+  "digits": 2,
+  "offset": 5,
+  "scale": 1000,
+  "range_q": [
+    0.005,
+    0.995
+  ],
+  "breaks": "thirds",
+  "signed": true,
+  "na_label": "outside the permafrost zone",
+  "na_class": 0,
+  "sources": [
+    "GIPL 2.0 magtsurface local GeoTIFFs (gipl_file_year)",
+    "ESA CCI Permafrost v5 PFR 2023 (features_1km.nc pfr_2023)",
+    "stuck-cell mask D17"
+  ],
+  "status": "retired",
+  "author": "Joshdpaul",
+  "created": "2026-11-09",
+  "retired": "2026-11-09 (Joshdpaul): wrong pattern. Surface warming is largest in the Arctic (Arctic amplification), which does not mean the permafrost there is thawing; the Interior and Seward Peninsula are known to have the highest thaw hazard. Its letter C was given to esa-plus-warming (never chosen as a team decision)."
+}

@@ -1,0 +1,36 @@
+{
+  "letter": "B",
+  "label": "Fire weather, season mean",
+  "description": "Fire Weather Index: fire intensity rating from weather-driven fuel moisture and wind, averaged over the fire season",
+  "details": "April–October 2040–2069 · mean of 4 CMIP6 models · SSP5-8.5",
+  "method": "Canadian Fire Weather Index (FWI), a daily rating of fire intensity from the Canadian Forest Fire Danger Rating System: noon temperature, humidity, wind and rain drive three fuel moisture codes (fine surface litter, duff, deep organic layers), which combine with wind into spread and fuel build-up indices. Mean of every April–October day in 2040–2069, then the mean of four bias-corrected CMIP6 models (CNRM-CM6-1-HR, EC-Earth3-Veg, MPI-ESM1-2-HR, MRI-ESM2-0) under SSP5-8.5. Source: SNAP's CMIP6 fire weather data release (Young, Littell & Rupp 2025, doi:10.5066/P1AAMRUF; the same data as Rasdaman cmip6_fwi), local file cmip6_fwi_combined.nc, 0.25° (about 25 km) cells, interpolated (bilinear) to the 1 km grid. The release covers only the boreal region (Olson et al. 2001 boreal ecoregions); land outside it has no fire weather data and counts as Low.",
+  "unit": "",
+  "digits": 1,
+  "offset": 0,
+  "scale": 1000,
+  "range_q": [
+    0.005,
+    0.995
+  ],
+  "breaks": "thirds",
+  "na_label": "outside the boreal area (no fire weather data)",
+  "na_class": 0,
+  "pros": [
+    "Fire weather in its own right: a high value is fire-prone weather however much has burned before",
+    "The four models agree closely on where fire weather is worst (rank correlation 0.90–0.99)",
+    "Newer climate models (CMIP6) than ALFRESCO (CMIP5)",
+    "Smooth map: no single-pixel noise"
+  ],
+  "cons": [
+    "No fire weather data outside the boreal region (about 60 % of Alaska's land: most of the Arctic, the South and much of the West), so it counts as Low there, though tundra fires do happen",
+    "About 25 km cells: no detail below that",
+    "SSP5-8.5 only (high emissions): doesn't match Variant A or the permafrost index (RCP 4.5)"
+  ],
+  "sources": [
+    "SNAP CMIP6 CFFDRS fire weather, data release v2 (local cmip6_fwi_combined.nc; = Rasdaman cmip6_fwi)",
+    "Young, A.M., Littell, J., and Rupp, S., 2025, USGS data release, doi:10.5066/P1AAMRUF"
+  ],
+  "status": "candidate",
+  "author": "Joshdpaul",
+  "created": "2026-11-10"
+}

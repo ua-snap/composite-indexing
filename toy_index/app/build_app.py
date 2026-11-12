@@ -66,7 +66,7 @@ def main():
     meta = dict(nx=C.GIPL_NX, ny=C.GIPL_NY, x0=C.GIPL_X0, ytop=G.TOP, res=C.GIPL_RES, built=time.strftime("%Y-%m-%d"),
                 regions=["Arctic", "Interior", "West", "South"], hazard=V.index_info("composite"), decisions=dec,
                 indices={k: dict(V.index_info(k), variants={}) for k in V.INDICES}, places=[])
-    pngs, grids = {}, {}
+    pngs, grids, nas = {}, {}, {}
     for v in V.registry():
         m, key = v["meta"], f"{v['index']}/{v['id']}"
         if m.get("status") == "retired":
@@ -76,7 +76,7 @@ def main():
         a[~land] = np.nan
         if m.get("clip"):
             a = np.clip(a, *m["clip"])
-        grids[key] = a
+        grids[key], nas[key] = a, na
         vals = a[land & np.isfinite(a)]
         pngs[key], maxcode = png_bytes(a, m["offset"], m["scale"], na)
         lo, hi = np.quantile(vals, m["range_q"])
@@ -91,8 +91,12 @@ def main():
         assert dec[k]["variant"] in d["variants"], f"decisions.json: unknown {k} variant {dec[k]['variant']}"
         d["variants"] = dict(sorted(d["variants"].items(), key=lambda kv: kv[1]["letter"]))
 
-    # Places snap to the nearest cell with values in the repo's chosen erosion and permafrost variants.
-    ok = np.isfinite(grids[f"erosion/{dec['erosion']['variant']}"]) & np.isfinite(grids[f"permafrost/{dec['permafrost']['variant']}"])
+    # Places snap to the nearest cell with values (or a fixed na class, e.g. outside the permafrost zone) in the repo's
+    # chosen erosion and permafrost variants.
+    ok = land.copy()
+    for k in ("erosion", "permafrost"):
+        key = f"{k}/{dec[k]['variant']}"
+        ok &= np.isfinite(grids[key]) | (nas[key] if nas[key] is not None else False)
     for p in P.snapped(ok):
         apiv = {f"{i}/{vid}": P.point_api_value(vm["point_api"], p["lat"], p["lon"])
                 for i, d in meta["indices"].items() for vid, vm in d["variants"].items() if vm.get("point_api")}

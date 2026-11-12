@@ -23,6 +23,16 @@
       "rcp45"
     ]
   },
+  "pros": [
+    "Direct model estimate of how likely a place is to burn at mid-century",
+    "Same 1 km grid, period and scenario (5-model average, RCP 4.5) as the permafrost index"
+  ],
+  "cons": [
+    "SNAP advises against reading single ALFRESCO pixels: the map is noisy",
+    "26 % of land is exactly 0: a quarter of the state ties at the bottom of the scale",
+    "About 20 % of land is not burnable and has no value",
+    "Which fire-management version Rasdaman serves is not documented"
+  ],
   "sources": [
     "Rasdaman alfresco_relative_flammability_30yr era 3, model 1, scenario 1",
     "point: earthmaps.io HUC-12 average"
